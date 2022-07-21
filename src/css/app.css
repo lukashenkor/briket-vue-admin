@@ -9,3 +9,7 @@
 .router-link:hover {
   color: #b4b4b4;
 }
+
+.router-link-active {
+  color: #b4b4b4;
+}

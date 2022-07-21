@@ -3,12 +3,14 @@
     <q-header reveal class="bg-blue">
       <q-toolbar>
         <q-btn flat @click="drawer = !drawer" round dense icon="menu" />
-        <q-toolbar-title>{{ currentRoute }}</q-toolbar-title>
-        <user-bar/>
+        <q-toolbar-title>{{ currentPageName }}</q-toolbar-title>
+        <UserBar :username="user.username"/>
       </q-toolbar>
     </q-header>
     <q-page-container class="flex">
-      <router-view />
+      <q-page class="page">
+        <router-view />
+      </q-page>
     </q-page-container>
 
     <q-drawer
@@ -20,12 +22,21 @@
     >
       <q-scroll-area class="fit">
         <div class="drawer-list">
-          <div v-for="page in pages" :key="page.label" class="drawer-list__element">
+          <div
+            v-for="page in pages"
+            :key="page.label"
+            class="drawer-list__element"
+          >
             <router-link
-              class="router-link"
               :to="page.path"
+              v-if="!page.requiredRole ||
+              user.roles.indexOf(page.requiredRole) >
+               -1"
+              class="router-link"
+              exact-active-class="router-link-active"
+              exact
             >
-              {{ page.label }}
+              {{ pagesName[page.label] }}
             </router-link>
           </div>
         </div>
@@ -39,29 +50,37 @@
 <script>
 import { computed, defineComponent, ref } from 'vue'
 import { useRoute } from 'vue-router/dist/vue-router';
+import UserBar from 'components/UserBar'
+import { pagesName } from "src/utils/variables";
 
 export default defineComponent({
   name: 'MainLayout',
+  components: {
+    UserBar,
+  },
 
   setup () {
     const drawer = ref(false)
-    const currentRoute = computed(() => {
-      return useRoute().name
-    }).value
+    const currentPageName = computed(() => {
+      return pagesName[useRoute().name]
+    });
 
     const pages = [
-
       { label: 'Home', path: '/' },
-      { label: 'Login', path: '/login' },
-      { label: 'Create', path: '/create' },
-      { label: 'Update', path: '/update' },
-      { label: 'Delete', path: '/delete' },
+      { label: 'Admin Manage', path: '/admin-manage', requiredRole: 'superadmin' },
     ];
+
+    const user = {
+      username: 'Roman',
+      roles: ['admin', 'superadmin'],
+    }
 
     return {
       drawer,
-      currentRoute,
+      currentPageName,
       pages,
+      user,
+      pagesName,
     }
   }
 })
@@ -88,5 +107,12 @@ export default defineComponent({
   bottom: 0;
   right: 0;
   border: 1px solid #fff;
+}
+
+.page {
+  max-width: 1000px;
+  width: 100%;
+  margin: auto;
+  border-radius: 5px;
 }
 </style>

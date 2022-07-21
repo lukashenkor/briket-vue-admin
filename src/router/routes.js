@@ -4,8 +4,9 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { name: 'Home', path: '', component: () => import('pages/HomePage.vue') },
-      { name: 'Login', path: '/login', component: () => import('pages/LoginPage.vue') }
+      { name: 'Home', path: '', component: () => import('pages/HomePage.vue'), title: "Домашняя страница", },
+      { path: '/login', component: () => import('pages/LoginPage.vue'), title: "Логин", name: 'Login', },
+      { name: 'Admin Manage', path: '/admin-manage', component: () => import('pages/AdminManagePage.vue'), title: "Управление администраторами", },
     ]
   },
   /* {
