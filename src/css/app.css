@@ -1,0 +1,11 @@
+/* app global css */
+.router-link {
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.router-link:hover {
+  color: #b4b4b4;
+}
