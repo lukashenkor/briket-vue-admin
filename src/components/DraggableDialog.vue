@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="myDialog" no-backdrop-dismiss no-esc-dismiss @show="onShow" @hide="onHide">
-    <q-card :style="{minWidth: minWidth + 'px', minHeight: minHeight + 'px'}">
+    <q-card :style="{minWidth: minWidth + 'px', minHeight: minHeight ? minHeight + 'px' : ''}">
       <q-bar
         class="bg-primary text-white"
         :class="draggable ? 'cursor-move' : ''"
@@ -27,7 +27,6 @@ const props = defineProps({
   },
   minHeight: {
     type: String,
-    default: "400"
   },
   draggable: {
     type: Boolean,
