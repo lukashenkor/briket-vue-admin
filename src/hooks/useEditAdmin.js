@@ -6,8 +6,6 @@ export function useEditAdmin(init = {}) {
   const object = reactive({});
 
   for (const [ key, value ] of Object.entries(init)) {
-    console.log('key', key);
-    console.log('value', value);
     object[key] = useField(value);
   }
 

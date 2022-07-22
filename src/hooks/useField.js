@@ -4,10 +4,14 @@ import { reactive, ref, watch } from "vue";
 export function useField(field) {
   const valid = ref(true);
   const value = ref(field.value);
+  const prevValue = ref(field.prevValue);
   const errors = reactive({});
+  const edited = ref(false);
+  const blurred = ref(field.blurred);
 
   const reassign = val => {
     valid.value = true;
+    edited.value = val !== prevValue.value;
     Object.keys(field.validators ?? {}).forEach(validator => {
       const isValid = field.validators[validator](val);
       errors[validator] = !isValid;
@@ -23,7 +27,10 @@ export function useField(field) {
 
   return {
     value,
+    prevValue,
     valid,
-    errors
+    errors,
+    edited,
+    blurred
   }
 }
