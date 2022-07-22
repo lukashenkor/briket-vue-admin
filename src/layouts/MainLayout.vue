@@ -8,9 +8,9 @@
       </q-toolbar>
     </q-header>
     <q-page-container class="flex">
-      <q-page class="page">
+      <div class="page">
         <router-view />
-      </q-page>
+      </div>
     </q-page-container>
 
     <q-drawer
@@ -24,7 +24,7 @@
         <div class="drawer-list">
           <div
             v-for="page in pages"
-            :key="page.label"
+            :key="page.name"
             class="drawer-list__element"
           >
             <router-link
@@ -36,7 +36,7 @@
               exact-active-class="router-link-active"
               exact
             >
-              {{ pagesName[page.label] }}
+              {{ page.title }}
             </router-link>
           </div>
         </div>
@@ -52,6 +52,7 @@ import { computed, defineComponent, ref } from 'vue'
 import { useRoute } from 'vue-router/dist/vue-router';
 import UserBar from 'components/UserBar'
 import { pagesName } from "src/utils/variables";
+import Routes from "src/router/routes";
 
 export default defineComponent({
   name: 'MainLayout',
@@ -65,10 +66,10 @@ export default defineComponent({
       return pagesName[useRoute().name]
     });
 
-    const pages = [
-      { label: 'Home', path: '/' },
-      { label: 'Admin Manage', path: '/admin-manage', requiredRole: 'superadmin' },
-    ];
+    console.log(Routes);
+
+    const pages = Routes[0].children.map(item => item);
+    console.log('pages', pages);
 
     const user = {
       username: 'Roman',
@@ -112,7 +113,7 @@ export default defineComponent({
 .page {
   max-width: 1000px;
   width: 100%;
-  margin: auto;
+  margin: 20px auto;
   border-radius: 5px;
 }
 </style>
