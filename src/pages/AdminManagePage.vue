@@ -330,14 +330,4 @@ const onHideDialog = (object) => {
 .table-actions i:hover {
   transform: scale(1.3);
 }
-
-.delete-admin-dialog {
-  min-width: 600px;
-  height: 400px;
-  background-color: #ffffff;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  flex-direction: column;
-}
 </style>

@@ -8,7 +8,7 @@
       </q-toolbar>
     </q-header>
     <q-page-container class="flex">
-      <div class="page">
+      <div class="my-page-layout">
         <router-view />
       </div>
     </q-page-container>
@@ -108,8 +108,8 @@ export default defineComponent({
   border: 1px solid #fff;
 }
 
-.page {
-  width: 100%;
+.my-page-layout {
+  width: 90%;
   margin: 20px auto;
   border-radius: 5px;
 }

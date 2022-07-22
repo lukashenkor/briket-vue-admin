@@ -119,5 +119,14 @@ const onGrab = () => {
   width: 50%;
   display: flex;
   justify-content: space-between;
+  margin-top: 20px;
+}
+
+.paragraph-text {
+  padding: 5px 10px 20px;
+  border-radius: 4px;
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #e4e4e4;
 }
 </style>
