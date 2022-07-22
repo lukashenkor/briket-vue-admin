@@ -5,6 +5,11 @@
   padding: 0;
 }
 
+.page .q-table__container {
+  max-width: 1200px;
+  margin: auto;
+}
+
 .router-link {
   text-decoration: none;
   color: #ffffff;
@@ -18,4 +23,9 @@
 
 .router-link-active {
   color: #b4b4b4;
+}
+
+.dialog-input {
+  min-width: 300px;
+  margin-bottom: 30px;
 }

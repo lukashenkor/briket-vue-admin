@@ -61,14 +61,12 @@ export default defineComponent({
   },
 
   setup () {
-    const drawer = ref(false)
+    const drawer = ref(false);
+    const pages = Routes[0].children.map(item => item);
     const currentPageName = computed(() => {
-      return pagesName[useRoute().name]
+      return pages.find(page => page.name === useRoute().name).title;
     });
 
-    console.log(Routes);
-
-    const pages = Routes[0].children.map(item => item);
     console.log('pages', pages);
 
     const user = {
@@ -111,7 +109,6 @@ export default defineComponent({
 }
 
 .page {
-  max-width: 1000px;
   width: 100%;
   margin: 20px auto;
   border-radius: 5px;
