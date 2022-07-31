@@ -4,7 +4,6 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { name: 'Home', path: '', component: () => import('pages/HomePage.vue'), title: "Домашняя страница", },
       { path: '/login', component: () => import('pages/LoginPage.vue'), title: "Логин", name: 'Login', },
       { name: 'Admin Manage', path: '/admin-manage', component: () => import('pages/AdminManagePage.vue'), title: "Управление администраторами", },
       { path: '/clients', component: () => import('pages/ClientsPage.vue'), title: "Клиенты", name: 'Clients', },
@@ -13,6 +12,7 @@ const routes = [
       { path: '/useful', component: () => import('pages/UsefulPage.vue'), title: "Полезное", name: 'Useful', },
       { path: '/duty-manager', component: () => import('pages/DutyManagerPage.vue'), title: "Дежурный менеджер", name: 'Duty manager', },
       { path: '/feedback', component: () => import('pages/FeedbackPage.vue'), title: "Обратная связь", name: 'Feedback', },
+      { path: '/profile', component: () => import('pages/ProfilePage.vue'), title: "Профиль", name: 'Profile', hidden: true },
     ]
   },
 

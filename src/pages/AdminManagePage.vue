@@ -26,8 +26,8 @@
           </q-td>
 
           <q-td key="actions" :props="props" class="table-actions">
-            <q-icon name="edit" color="yellow-7" size="sm" @click="showEditDialog(props.row)" />
-            <q-icon name="delete" color="red-7" size="sm" @click="showDeleteDialog(props.row)" />
+            <q-icon name="edit" color="warning" size="sm" @click="showEditDialog(props.row)" />
+            <q-icon name="delete" color="negative" size="sm" @click="showDeleteDialog(props.row)" />
           </q-td>
         </q-tr>
       </template>
@@ -110,13 +110,13 @@
 import { computed, onBeforeMount, reactive, ref } from "vue";
 import DraggableDialog from "components/DraggableDialog";
 import { isEmailValid, isUsernameValid } from "src/utils/validate";
-import { useEditAdmin } from "src/hooks/useEditAdmin";
+import { useEditField } from "src/hooks/useEditField";
 
 
 const columns = [
   { name: 'username', label: 'Username', field: 'username', sortable: true, align: "center", editable: true, readonly: false, },
   { name: 'email', label: 'Email', field: 'email', sortable: true, align: "center", readonly: false, },
-  { name: 'actions', label: 'Actions', field: 'actions', align: "center", readonly: true, },
+  { name: 'actions', label: 'Действия', field: 'actions', align: "center", readonly: true, },
 ];
 
 const data = reactive({});
@@ -170,15 +170,10 @@ onBeforeMount(() => {
   ];
 });
 
-const validators = reactive({
-  email: isEmailValid,
-  username: isUsernameValid,
-});
-
 const required = val => !!val;
 const minLength = num => val => val.length >= num;
 
-const selectedAdmin = useEditAdmin({
+const selectedAdmin = useEditField({
   username: {
     value: '',
     prevValue: '',
@@ -198,7 +193,7 @@ const selectedAdmin = useEditAdmin({
   },
 });
 
-const createAdmin = useEditAdmin({
+const createAdmin = useEditField({
   username: {
     value: '',
     prevValue: '',

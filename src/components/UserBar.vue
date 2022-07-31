@@ -8,10 +8,9 @@
 import { computed, ref } from "vue";
 
 
-const props = defineProps(['username'])
-const username = ref(props.username)
+const props = defineProps(['modelValue']);
 const nameFirstLetter = computed(() => {
-  return username.value[0].toUpperCase();
+  return props.modelValue?.username ? props.modelValue.username[0].toUpperCase() : '?';
 })
 </script>
 

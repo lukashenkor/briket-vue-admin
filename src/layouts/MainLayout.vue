@@ -4,10 +4,10 @@
       <q-toolbar>
         <q-btn flat @click="drawer = !drawer" round dense icon="menu" />
         <q-toolbar-title>{{ currentPageName }}</q-toolbar-title>
-        <UserBar :username="user.username"/>
+        <UserBar v-model="user" @click="goToProfile" v-if="user.username"/>
       </q-toolbar>
     </q-header>
-    <q-page-container class="flex">
+    <q-page-container>
       <div class="my-page-layout">
         <router-view />
       </div>
@@ -17,8 +17,7 @@
       v-model="drawer"
       :width="200"
       :breakpoint="700"
-      bordered
-      class="bg-dark"
+      class="bg-grey-9"
     >
       <q-scroll-area class="fit">
         <div class="drawer-list">
@@ -29,9 +28,7 @@
           >
             <router-link
               :to="page.path"
-              v-if="!page.requiredRole ||
-              user.roles.indexOf(page.requiredRole) >
-               -1"
+              v-if="!page.requiredRole || user.roles.indexOf(page.requiredRole) > -1"
               class="router-link"
               exact-active-class="router-link-active"
               exact
@@ -49,10 +46,10 @@
 
 <script>
 import { computed, defineComponent, ref } from 'vue'
-import { useRoute } from 'vue-router/dist/vue-router';
-import UserBar from 'components/UserBar'
-import { pagesName } from "src/utils/variables";
+import { useRouter, useRoute } from "vue-router";
 import Routes from "src/router/routes";
+import UserBar from 'components/UserBar'
+
 
 export default defineComponent({
   name: 'MainLayout',
@@ -61,25 +58,25 @@ export default defineComponent({
   },
 
   setup () {
-    const drawer = ref(false);
-    const pages = Routes[0].children.map(item => item);
+    const router = useRouter();
+    const drawer = ref(true);
+    const pages = Routes[0].children.filter(page => !page.hidden);
     const currentPageName = computed(() => {
-      return pages.find(page => page.name === useRoute().name).title;
+      return pages.find(page => page.name === useRoute().name)?.title || 'Домашняя страница';
     });
 
-    console.log('pages', pages);
+    const user = JSON.parse(localStorage.getItem('user'));
 
-    const user = {
-      username: 'Roman',
-      roles: ['admin', 'superadmin'],
-    }
+    const goToProfile = () => {
+      router.push('/profile');
+    };
 
     return {
       drawer,
       currentPageName,
       pages,
       user,
-      pagesName,
+      goToProfile,
     }
   }
 })
@@ -109,8 +106,10 @@ export default defineComponent({
 }
 
 .my-page-layout {
+  padding: 10px;
   width: 90%;
   margin: 20px auto;
   border-radius: 5px;
+  overflow-y: auto;
 }
 </style>

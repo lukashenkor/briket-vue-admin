@@ -8,10 +8,13 @@ export function useField(field) {
   const errors = reactive({});
   const edited = ref(false);
   const blurred = ref(field.blurred);
+  const isDate = ref(field.isDate);
+
 
   const reassign = val => {
     valid.value = true;
     edited.value = val !== prevValue.value;
+    console.log('prevValue.value', prevValue.value);
     Object.keys(field.validators ?? {}).forEach(validator => {
       const isValid = field.validators[validator](val);
       errors[validator] = !isValid;
@@ -31,6 +34,8 @@ export function useField(field) {
     valid,
     errors,
     edited,
-    blurred
+    blurred,
+    isDate,
+    type: field.type,
   }
 }

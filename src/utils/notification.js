@@ -1,11 +1,26 @@
 import { Notify } from 'quasar'
 
 
-export default function useNotify({ message, position, color, icon = '' }) {
+export function notify(options) {
+  Notify.create(options);
+}
+
+
+export function notifyError(message = 'Ошибка') {
   Notify.create({
-    message,
-    position,
-    color,
-    icon
-  })
+    message: message,
+    position: "top",
+    color: "negative",
+    icon: "error",
+  });
+}
+
+
+export function notifySuccess(message = 'Успешно') {
+  Notify.create({
+    message: message,
+    position: 'top',
+    color: 'positive',
+    icon: 'check_circle',
+  });
 }
