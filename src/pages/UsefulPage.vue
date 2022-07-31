@@ -4,7 +4,7 @@
     v-if="!fetching"
     :items="items"
     v-model="tab"
-    @addItemClick="addItemDialog = true"
+    @addItemClick="addItemClick"
     @listItemClick="listItemClick"
     @editItemClick="editItemClick"
     @deleteItemClick="deleteItemClick"
@@ -115,7 +115,7 @@ const items = reactive({
         {"label": "Превью", "name": "preview", "type": "text"},
         {"label": "Текст", "name": "text", "type": "textarea"},
       ],
-      uploader: {label: "Выберите изображение", name: "img", outlined: true, clearable: true},
+      uploader: {label: "Выберите изображение", name: "img", outlined: true, clearable: true, accept: ".jpg, .jpeg, .png"},
     },
   },
   "guides": {
@@ -199,37 +199,61 @@ const listItemClick = item => {
   console.log('listItemClick - item', item);
 };
 
+const addItemClick = () => {
+  for (const key of Object.keys(newItem)) {
+    newItem[key] = null;
+  }
+  addItemDialog.value = true;
+};
+
 const newItem = reactive({});
 const addNewItem = async (evt) => {
   console.log('addNewItem');
   const formData = new FormData(evt.target);
-  const response = await requestForm({
-    url: apiRoutes[tab.value],
-    formData: formData,
-  });
-
-  console.log('response', response);
+  try {
+    waitingResponse.value = true;
+    await requestForm({
+      url: apiRoutes[tab.value],
+      formData: formData,
+    });
+  //  TODO: Принимать ответ от сервера с новыми данными и добавлять их на странице
+  } finally {
+    addItemDialog.value = false;
+    waitingResponse.value = false;
+  }
 };
 
 
 const editItemClick = item => {
   console.log('editItemClick', item);
   selectedItem.value = Object.assign({}, item);
-  console.log('Object.values(selectedItem.files)', selectedItem.value.files);
+  if (item.hasOwnProperty('img')) {
+    selectedItem.value.img = null;
+  } else {
+    selectedItem.value.files = null;
+  }
   editItemDialog.value = true;
 };
 
 const editConfirm = async (evt) => {
   console.log('editConfirm');
   const formData = new FormData(evt.target);
+  if (!formData.get("files")?.__key) {
+    formData.delete("files");
+  }
   const url = `${apiRoutes[tab.value]}/${selectedItem.value.id}`;
-  const file = new File()
-  const response = await requestForm({
-    url,
-    formData,
-    method: "PUT",
-  });
-  console.log('response', response);
+  try {
+    waitingResponse.value = true;
+    await requestForm({
+      url,
+      formData,
+      method: "PUT",
+    });
+
+  } finally {
+    editItemDialog.value = false;
+    waitingResponse.value = false;
+  }
 };
 
 
@@ -247,11 +271,11 @@ const deleteConfirm = async () => {
       url,
       method: "DELETE",
     });
-    deleteItemDialog.value = false;
     if (response.success) {
       items[tab.value].data = items[tab.value].data.filter(item => item.id !== selectedItem.value.id);
     }
   } finally {
+    deleteItemDialog.value = false;
     waitingResponse.value = false;
   }
 
