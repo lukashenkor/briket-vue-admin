@@ -9,47 +9,6 @@
     @editItemClick="editItemClick"
     @deleteItemClick="deleteItemClick"
   />
-<!--  <q-card bordered class="my-card bg-white">
-    <q-card-section class="bg-grey my-card-section">
-      <q-tabs
-        v-model="tab"
-        narrow-indicator
-        dense
-        align="justify"
-        class="bg-grey text-white fit"
-      >
-        <q-tab :ripple="false" name="promotions" icon="campaign" label="Акции">
-          <q-badge color="blue-7" text-color="white" floating>{{ promotionsCount }}</q-badge>
-        </q-tab>
-        <q-tab :ripple="false" name="guides" icon="menu_book" label="Гайды">
-          <q-badge color="blue-7" text-color="white" floating>{{ guidesCount }}</q-badge>
-        </q-tab>
-        <q-tab :ripple="false" name="knowledge" icon="school" label="База знаний" >
-          <q-badge color="blue-7" text-color="white" floating>{{ knowledgeBaseCount }}</q-badge>
-        </q-tab>
-      </q-tabs>
-    </q-card-section>
-
-    <q-card-section>
-      <h3>{{ tabTitles[tab] }}</h3>
-      <q-btn
-        class="q-my-md"
-        label="Добавить"
-        color="positive"
-        @click="addItemDialog = true"
-      />
-      <q-separator/>
-      <div class="promotions" v-show="tab && tab === 'promotions'">
-        <ListComponent :items="promotions"  editable deletable @listItemClick="listItemClick" @editItemClick="editItemClick" @deleteItemClick="deleteItemClick"/>
-      </div>
-      <div class="guides" v-show="tab && tab === 'guides'">
-        <ListComponent :items="guides" editable deletable @listItemClick="listItemClick" @editItemClick="editItemClick" @deleteItemClick="deleteItemClick"/>
-      </div>
-      <div class="knowledge" v-show="tab && tab === 'knowledge'">
-        <ListComponent :items="knowledgeBase" editable deletable @listItemClick="listItemClick" @editItemClick="editItemClick" @deleteItemClick="deleteItemClick"/>
-      </div>
-    </q-card-section>-->
-
   <DraggableDialog v-model="editItemDialog" title="Редактирование">
     <q-form @submit.prevent="editConfirm" class="q-gutter-md fit" >
       <div class="add-item-body">
@@ -59,34 +18,6 @@
             <q-icon name="attach_file" />
           </template>
         </q-file>
-<!--        <q-input
-          name="title"
-          maxlength="200"
-          v-model="selectedItem.value.title"
-          label="Заголовок"
-          type="text"
-        />
-        <br />
-        <q-input
-          v-if="tab !== 'promo'"
-          name="text"
-          v-model="selectedItem.value.text"
-          label="Текст"
-          type="textarea"
-        />
-        <br />
-        <q-file
-          v-model="selectedItem.value.files"
-          label="Выберите файлы"
-          multiple
-          name="files"
-          outlined
-          clearable
-        >
-          <template v-slot:prepend>
-            <q-icon name="attach_file" />
-          </template>
-        </q-file>-->
       </div>
 
       <div class="dialog-buttons">
@@ -136,34 +67,6 @@
             <q-icon name="attach_file" />
           </template>
         </q-file>
-<!--        <q-input
-          name="title"
-          maxlength="200"
-          v-model="newItem.title"
-          label="Заголовок"
-          type="text"
-        />
-        <br />
-        <q-input
-          v-if="tab !== 'promo'"
-          name="text"
-          v-model="newItem.text"
-          label="Текст"
-          type="textarea"
-        />
-        <br />
-        <q-file
-          v-model="newItem.files"
-          label="Выберите файл"
-          :name="tab !== 'promo' ? 'files' : 'img'"
-          :multiple="tab !== 'promo'"
-          outlined
-          clearable
-        >
-          <template v-slot:prepend>
-            <q-icon name="attach_file" />
-          </template>
-        </q-file>-->
       </div>
 
       <div class="dialog-buttons">
