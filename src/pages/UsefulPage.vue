@@ -280,10 +280,6 @@ const deleteConfirm = async () => {
   }
 
 };
-
-/* const promoCount = computed(() => promo.value.length);
-const guidesCount = computed(() => guides.value.length);
-const knowledgeBaseCount = computed(() => knowledgeBase.value.length); */
 </script>
 
 <style scoped>

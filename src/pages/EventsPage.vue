@@ -4,7 +4,7 @@
     v-if="!fetching"
     :items="items"
     v-model="tab"
-    @addItemClick="addItemDialog = true"
+    @addItemClick="addItemClick"
     @listItemClick="listItemClick"
     @editItemClick="editItemClick"
     @deleteItemClick="deleteItemClick"
@@ -12,29 +12,8 @@
     <DraggableDialog v-model="editItemDialog" title="Редактирование">
       <q-form @submit.prevent="editConfirm" class="q-gutter-md fit">
         <div class="add-item-body">
-          <q-input
-            name="title"
-            maxlength="200"
-            v-model="selectedItem.value.title"
-            label="Заголовок"
-            type="text"
-          />
-          <br />
-          <q-input
-            name="text"
-            v-model="selectedItem.value.text"
-            label="Текст"
-            type="textarea"
-          />
-          <br />
-          <q-file
-            v-model="selectedItem.value.img"
-            label="Выберите файл"
-            accept=".jpg, .jpeg, .png"
-            name="img"
-            outlined
-            clearable
-          >
+          <q-input v-for="item in items[tab].fields.inputs" :key="item.name" v-bind="item" v-model="selectedItem.value[item.name]" />
+          <q-file v-bind="items[tab].fields.uploader" v-model="selectedItem.value[items[tab].fields.uploader.name]" >
             <template v-slot:prepend>
               <q-icon name="attach_file" />
             </template>
@@ -90,41 +69,6 @@
             type="text"
             v-show="false"
           />
-<!--          <q-input
-            name="title"
-            maxlength="200"
-            v-model="newItem.title"
-            label="Заголовок"
-            type="text"
-          />
-          <br />
-          <q-input
-            name="text"
-            v-model="newItem.text"
-            label="Текст"
-            type="textarea"
-          />
-          <br />
-          <q-input
-            name="date"
-            v-model="newItem.date"
-            label="Дата"
-            type="text"
-            v-show="false"
-          />
-          <br />
-          <q-file
-            v-model="newItem.img"
-            label="Выберите изображение"
-            accept=".jpg, .jpeg, .png"
-            name="img"
-            outlined
-            clearable
-          >
-            <template v-slot:prepend>
-              <q-icon name="attach_file" />
-            </template>
-          </q-file>-->
         </div>
 
         <div class="dialog-buttons">
@@ -249,6 +193,7 @@ const editConfirm = async (evt) => {
       formData,
       method: "PUT",
     });
+  //  TODO: Получать ответ от сервера и на основе его добавлять изменения на странице
   } finally {
     waitingResponse.value = false;
     editItemDialog.value = false;
@@ -279,11 +224,17 @@ const deleteConfirm = async () => {
   }
 };
 
-const newItem = reactive({
-  date: "2021-09-23T16:00:00+03:00",
-});
+const addItemClick = () => {
+  for (const key of Object.keys(newItem)) {
+    newItem[key] = null;
+  }
+  addItemDialog.value = true;
+};
+
+const newItem = reactive({});
 const addNewItem = async (evt) => {
   const formData = new FormData(evt.target);
+  formData.append("date", "2021-09-23T16:00:00+03:00");
   const url = apiRoutes[tab.value];
   try {
     waitingResponse.value = true;
@@ -320,6 +271,6 @@ const deleteItemDialog = ref(false);
 
 .add-item-body > * {
   width: 100%;
-  margin: auto;
+  margin: 15px auto auto;
 }
 </style>

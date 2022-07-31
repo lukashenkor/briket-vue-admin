@@ -67,9 +67,6 @@ const login = async () => {
   } finally {
     waitingResponse.value = false;
   }
-
-
-  // console.log('response', response);
 };
 
 
