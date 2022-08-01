@@ -78,15 +78,24 @@
 
     <DraggableDialog v-model="createDialog" title="Добавление администратора" @onHide="onHideDialog(createAdmin)">
       <q-input
-        v-for="column in columns.filter(el => !el.readonly)"
-        :key="column.name"
-        v-model="createAdmin[column.name].value"
-        :label="column.name"
-        :error="!createAdmin[column.name].valid && createAdmin[column.name].blurred"
-        :error-message="createAdmin[column.name].errors.required ? 'Поле не может быть пустым' : ''"
+        v-for="field in createAdmin"
+        :key="field.input.name"
+        v-model="field.value"
+        v-bind="field.input"
         class="dialog-input"
-        @blur="blurred(createAdmin, column.name)"
-      />
+        @blur="blurred(createAdmin, field.input.name)"
+        :error="!field.valid && field.blurred"
+        :error-message="field.errors.required ? 'Поле не может быть пустым' : field.errors.minLength ? `Минимальная длина ${passwordMinLength} символов` : ''"
+      >
+        <template v-slot:append>
+          <q-icon
+            v-if="field.name.indexOf('password') > -1"
+            :name="isPwd ? 'visibility_off' : 'visibility'"
+            class="cursor-pointer"
+            @click="isPwd = !isPwd"
+          />
+        </template>
+      </q-input>
 
       <div class="dialog-buttons">
         <q-btn
@@ -94,7 +103,6 @@
           color="positive"
           @click="addAdmin"
           :disable="isInvalidCreatingAdmin"
-          v-close-popup
         />
         <q-btn
           label="Отмена"
@@ -102,6 +110,10 @@
           v-close-popup
         />
       </div>
+      <p
+        v-show="createAdminError"
+        class="text-negative"
+      >{{ createAdminError }}</p>
     </DraggableDialog>
   </div>
 </template>
@@ -111,6 +123,7 @@ import { computed, onBeforeMount, reactive, ref } from "vue";
 import DraggableDialog from "components/DraggableDialog";
 import { isEmailValid, isUsernameValid } from "src/utils/validate";
 import { useEditField } from "src/hooks/useEditField";
+import { apiRoutes, requestJson } from "src/api";
 
 
 const columns = [
@@ -121,57 +134,62 @@ const columns = [
 
 const data = reactive({});
 
-onBeforeMount(() => {
-  // TODO: get all admins request
-  console.log("Отправлен запрос на список всех администраторов");
+onBeforeMount(async () => {
+  const request = await requestJson({
+    url: apiRoutes.admins
+  });
+  console.log('request', request);
   data.admins = [
-    {username: "Roman", email: "qwerty@qwerty.com", id: 1 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 2 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 3 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 4 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 5 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 6 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 7 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 1 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 2 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 3 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 4 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 5 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 6 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 7 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 1 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 2 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 3 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 4 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 5 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 6 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 7 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 1 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 2 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 3 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 4 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 5 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 6 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 7 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 1 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 2 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 3 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 4 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 5 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 6 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 7 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 1 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 2 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 3 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 4 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 5 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 6 },
-    {username: "Roman", email: "qwerty@qwerty.com", id: 7 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 1 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 2 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 3 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 4 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 5 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 6 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 7 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 1 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 2 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 3 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 4 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 5 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 6 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 7 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 1 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 2 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 3 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 4 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 5 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 6 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 7 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 1 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 2 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 3 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 4 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 5 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 6 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 7 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 1 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 2 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 3 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 4 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 5 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 6 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 7 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 1 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 2 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 3 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 4 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 5 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 6 },
+    { username: "Roman", email: "qwerty@qwerty.com", id: 7 },
   ];
 });
 
 const required = val => !!val;
 const minLength = num => val => val.length >= num;
+const passwordMinLength = 8;
+const isPwd = ref(true);
+const passwordInputType = computed(() => isPwd.value ? "password" : "text");
 
 const selectedAdmin = useEditField({
   username: {
@@ -193,25 +211,65 @@ const selectedAdmin = useEditField({
   },
 });
 
+
 const createAdmin = useEditField({
+  login: {
+    value: '',
+    prevValue: '',
+    validators: {
+      required
+    },
+    blurred: false,
+    input: {
+      label: "Login",
+      name: "login",
+      type: "text",
+    },
+  },
+  password: {
+    value: '',
+    prevValue: '',
+    validators: {
+      required,
+      minLength: minLength(passwordMinLength),
+    },
+    blurred: false,
+    input: {
+      name: "password",
+      label: "Password",
+      type: passwordInputType,
+    },
+  },
+  password_confirm: {
+    value: '',
+    prevValue: '',
+    validators: {
+      required,
+      minLength: minLength(passwordMinLength),
+    },
+    blurred: false,
+    input: {
+      name: "password_confirm",
+      label: "Password Confirm",
+      type: passwordInputType,
+    },
+  },
   username: {
     value: '',
     prevValue: '',
     validators: {
-      required,
-      minLength: minLength(2),
+      required
     },
     blurred: false,
-  },
-  email: {
-    value: '',
-    prevValue: '',
-    validators: {
-      required,
+    input: {
+      name: "username",
+      label: "Username",
+      type: "text",
     },
-    blurred: false,
   },
 });
+
+const createAdminError = ref('');
 
 const setAdminFields = (row, object) => {
   Object.entries(row).forEach(entry => {
@@ -244,6 +302,9 @@ const showDeleteDialog = (row) => {
 
 const addAdmin = () => {
   //  TODO: send post request to add new admin
+  if (createAdmin.password !== createAdmin.password_confirm) {
+    return createAdminError.value = "Пароли не совпадают"
+  }
   data.admins.push({
     username: createAdmin.username.value,
     email: createAdmin.email.value,

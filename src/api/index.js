@@ -20,6 +20,7 @@ export const apiRoutes = {
   invoice: "/api/finance/invoices",
   goals: "/api/corners/[id]/goal",
   corners: "/api/corners",
+  admins: "/api/admins",
 };
 
 axios.defaults.baseURL = 'https://admin.omegapartners.ru';
