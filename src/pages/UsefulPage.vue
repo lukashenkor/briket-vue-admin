@@ -177,15 +177,15 @@ onMounted(() => {
       params: defaultGetParams,
     }),
   ])
-    .then(([promoRequest, guidesRequest, knowledgeRequest]) => {
+    .then(([promoResponse, guidesResponse, knowledgeResponse]) => {
       fetching.value = false;
-      console.log('promoRequest', promoRequest);
-      console.log('guidesRequest', guidesRequest);
-      console.log('knowledgeRequest', knowledgeRequest);
+      console.log('promoResponse', promoResponse);
+      console.log('guidesResponse', guidesResponse);
+      console.log('knowledgeResponse', knowledgeResponse);
 
-      promoRequest.success && (items.promo.data = promoRequest.data);
-      guidesRequest.success && (items.guides.data = guidesRequest.data);
-      knowledgeRequest.success && (items.knowledge.data = knowledgeRequest.data);
+      promoResponse.success && (items.promo.data = promoResponse.data);
+      guidesResponse.success && (items.guides.data = guidesResponse.data);
+      knowledgeResponse.success && (items.knowledge.data = knowledgeResponse.data);
 
     });
 });

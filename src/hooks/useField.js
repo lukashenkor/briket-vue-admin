@@ -38,5 +38,6 @@ export function useField(field) {
     isDate,
     type: field.type,
     input: field.input,
+    hidden: field.hidden,
   }
 }

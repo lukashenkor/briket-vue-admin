@@ -17,12 +17,16 @@
       </template>
       <template v-slot:body="props">
         <q-tr :props="props">
-          <q-td key="username" :props="props">
-            {{ props.row.username }}
+          <q-td key="id" :props="props">
+            {{ props.row.id }}
           </q-td>
 
-          <q-td key="email" :props="props">
-            {{ props.row.email }}
+          <q-td key="login" :props="props">
+            {{ props.row.login }}
+          </q-td>
+
+          <q-td key="name" :props="props">
+            {{ props.row.name }}
           </q-td>
 
           <q-td key="actions" :props="props" class="table-actions">
@@ -39,8 +43,8 @@
         <q-btn
           label="Удалить"
           color="negative"
+          :disable="waitingResponse"
           @click="deleteAdmin"
-          v-close-popup
         />
         <q-btn
           label="Отмена"
@@ -52,21 +56,30 @@
 
     <DraggableDialog v-model="editDialog" title="Редактирование администратора" @onHide="onHideDialog(selectedAdmin)">
       <q-input
-        v-for="column in columns.filter(el => !el.readonly)"
-        :key="column.name"
-        v-model="selectedAdmin[column.name].value"
-        :label="column.name"
-        :error="!selectedAdmin[column.name].valid"
-        :error-message="selectedAdmin[column.name].errors.required ? 'Поле не может быть пустым' : ''"
+        v-for="field in Object.values(selectedAdmin).filter(item => !item.hidden)"
+        :key="field.input?.name"
+        v-model="field.value"
+        v-bind="field.input"
         class="dialog-input"
-      />
+        @blur="blurred(selectedAdmin, field.input.name)"
+        :error="!field.valid && field.blurred"
+        :error-message="field.errors.required ? 'Поле не может быть пустым' : field.errors.minLength ? `Минимальная длина ${passwordMinLength} символов` : ''"
+      >
+        <template v-slot:append>
+          <q-icon
+            v-if="field.name.indexOf('password') > -1"
+            :name="isPwd ? 'visibility_off' : 'visibility'"
+            class="cursor-pointer"
+            @click="isPwd = !isPwd"
+          />
+        </template>
+      </q-input>
       <div class="dialog-buttons">
         <q-btn
           label="Сохранить"
           color="positive"
           @click="confirmEdit"
-          :disable="isInvalidEditingAdmin"
-          v-close-popup
+          :disable="isInvalidEditingAdmin || waitingResponse"
         />
         <q-btn
           label="Отмена"
@@ -74,6 +87,10 @@
           v-close-popup
         />
       </div>
+      <p
+        v-show="editAdminError"
+        class="text-negative"
+      >{{ editAdminError }}</p>
     </DraggableDialog>
 
     <DraggableDialog v-model="createDialog" title="Добавление администратора" @onHide="onHideDialog(createAdmin)">
@@ -102,7 +119,7 @@
           label="Сохранить"
           color="positive"
           @click="addAdmin"
-          :disable="isInvalidCreatingAdmin"
+          :disable="isInvalidCreatingAdmin || waitingResponse"
         />
         <q-btn
           label="Отмена"
@@ -127,62 +144,21 @@ import { apiRoutes, requestJson } from "src/api";
 
 
 const columns = [
-  { name: 'username', label: 'Username', field: 'username', sortable: true, align: "center", editable: true, readonly: false, },
-  { name: 'email', label: 'Email', field: 'email', sortable: true, align: "center", readonly: false, },
-  { name: 'actions', label: 'Действия', field: 'actions', align: "center", readonly: true, },
+  { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'login', label: 'Login', field: 'login', sortable: true, align: "left", readonly: false, },
+  { name: 'name', label: 'Name', field: 'name', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'actions', label: 'Действия', field: 'actions', align: "left", readonly: true, },
 ];
 
 const data = reactive({});
 
 onBeforeMount(async () => {
-  const request = await requestJson({
+  const response = await requestJson({
     url: apiRoutes.admins
   });
-  console.log('request', request);
-  data.admins = [
-    { username: "Roman", email: "qwerty@qwerty.com", id: 1 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 2 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 3 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 4 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 5 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 6 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 7 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 1 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 2 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 3 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 4 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 5 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 6 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 7 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 1 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 2 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 3 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 4 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 5 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 6 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 7 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 1 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 2 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 3 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 4 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 5 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 6 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 7 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 1 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 2 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 3 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 4 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 5 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 6 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 7 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 1 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 2 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 3 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 4 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 5 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 6 },
-    { username: "Roman", email: "qwerty@qwerty.com", id: 7 },
-  ];
+  if (response.success) {
+    data.admins = response.data;
+  }
 });
 
 const required = val => !!val;
@@ -190,24 +166,68 @@ const minLength = num => val => val.length >= num;
 const passwordMinLength = 8;
 const isPwd = ref(true);
 const passwordInputType = computed(() => isPwd.value ? "password" : "text");
+const waitingResponse = ref(false);
 
 const selectedAdmin = useEditField({
-  username: {
-    value: '',
-    prevValue: '',
-    validators: {
-      required,
-      minLength: minLength(2),
-    },
-    blurred: false,
+  id: {
+    value: null,
+    hidden: true,
   },
-  email: {
+  login: {
+    value: '',
+    prevValue: '',
+    validators: {
+      required
+    },
+    blurred: false,
+    input: {
+      name: "login",
+      label: "Login",
+      type: "text",
+    },
+  },
+  password: {
     value: '',
     prevValue: '',
     validators: {
       required,
+      minLength: minLength(passwordMinLength),
     },
     blurred: false,
+    input: {
+      name: "password",
+      label: "Password",
+      type: passwordInputType,
+      maxlength: 36,
+    },
+  },
+  password_confirm: {
+    value: '',
+    prevValue: '',
+    validators: {
+      required,
+      minLength: minLength(passwordMinLength),
+    },
+    blurred: false,
+    input: {
+      name: "password_confirm",
+      label: "Password Confirm",
+      type: passwordInputType,
+      maxlength: 36,
+    },
+  },
+  name: {
+    value: '',
+    prevValue: '',
+    validators: {
+      required
+    },
+    blurred: false,
+    input: {
+      name: "name",
+      label: "Name",
+      type: "text",
+    },
   },
 });
 
@@ -238,6 +258,7 @@ const createAdmin = useEditField({
       name: "password",
       label: "Password",
       type: passwordInputType,
+      maxlength: 36,
     },
   },
   password_confirm: {
@@ -252,9 +273,10 @@ const createAdmin = useEditField({
       name: "password_confirm",
       label: "Password Confirm",
       type: passwordInputType,
+      maxlength: 36,
     },
   },
-  username: {
+  name: {
     value: '',
     prevValue: '',
     validators: {
@@ -262,8 +284,8 @@ const createAdmin = useEditField({
     },
     blurred: false,
     input: {
-      name: "username",
-      label: "Username",
+      name: "name",
+      label: "Name",
       type: "text",
     },
   },
@@ -274,16 +296,11 @@ const createAdminError = ref('');
 const setAdminFields = (row, object) => {
   Object.entries(row).forEach(entry => {
     const [key, value] = entry;
-    if (!object.hasOwnProperty(key)) {
-      object[key] = {
-        value: value,
-      };
-    } else {
+    if (object.hasOwnProperty(key)) {
       object[key].value = value;
+      object[key].prevValue = value;
+      object[key].blurred = false;
     }
-
-    object[key].prevValue = value;
-    object[key].blurred = false;
   });
 };
 
@@ -300,36 +317,81 @@ const showDeleteDialog = (row) => {
   deleteDialog.value = true;
 };
 
-const addAdmin = () => {
-  //  TODO: send post request to add new admin
-  if (createAdmin.password !== createAdmin.password_confirm) {
+const addAdmin = async () => {
+  if (createAdmin.password.value !== createAdmin.password_confirm.value) {
     return createAdminError.value = "Пароли не совпадают"
   }
-  data.admins.push({
-    username: createAdmin.username.value,
-    email: createAdmin.email.value,
-    id: 1000,
+  const body = {
+    login: createAdmin.login.value,
+    password: createAdmin.password.value,
+    name: createAdmin.name.value,
+  };
+  try {
+    waitingResponse.value = true;
+    const response = await requestJson({
+      url: apiRoutes.admins,
+      method: "POST",
+      body,
+    });
+    if (response.success) {
+      // TODO: Получать объект созданного администратора и добавление в общий массив
+      /* data.admins.push({
+        name: createAdmin.name.value,
+        login: createAdmin.login.value,
+        id: createAdmin.id.value,
+      }); */
+    }
+  } finally {
+    waitingResponse.value = false;
+    createDialog.value = false;
+  }
+};
+
+const editAdminError = ref(null);
+
+const confirmEdit = async () => {
+  // TODO: send put request to update admin data
+  // const adminIndex = data.admins.findIndex(item => item.id === selectedAdmin.id.value);
+  if (selectedAdmin.password.edited && selectedAdmin.password.value !== selectedAdmin.password_confirm.value) {
+    return editAdminError.value = "Пароли не совпадают"
+  }
+  const body = {}
+  for (const [ key, innerObject ] of Object.entries(selectedAdmin)) {
+    if (innerObject.edited) {
+      if (key.indexOf('confirm') + 1) continue;
+      body[key] = innerObject.value;
+      // data.admins[adminIndex][key] = innerObject.value;
+    }
+  }
+  const url = `${ apiRoutes.admins }/${ selectedAdmin.id.value }`;
+  const response = await requestJson({
+    url,
+    body,
+    method: "PUT",
   });
 };
 
-const confirmEdit = () => {
-  // TODO: send put request to update admin data
-  const adminIndex = data.admins.findIndex(item => item.id === selectedAdmin.id.value);
-  for (const [ key, innerObject ] of Object.entries(selectedAdmin)) {
-    if (innerObject.edited) {
-      data.admins[adminIndex][key] = innerObject.value;
+const deleteAdmin = async () => {
+  const url = `${ apiRoutes.admins }/${ selectedAdmin.id.value }`;
+  try {
+    waitingResponse.value = true;
+    const response = await requestJson({
+      url,
+      method: "DELETE",
+    });
+    if (response.success) {
+      data.admins = data.admins.filter(el => el.id !== selectedAdmin.id.value);
     }
+  } finally {
+    deleteDialog.value = false;
+    waitingResponse.value = false;
   }
 };
 
-const deleteAdmin = () => {
-  // TODO: send delete request to delete admin
-  data.admins = data.admins.filter(el => el.email !== selectedAdmin.email.value);
-};
-
 const isInvalidEditingAdmin = computed(() => {
-  for (const value of Object.values(selectedAdmin)) {
+  for (const [ key, value ] of Object.entries(selectedAdmin)) {
     if (value.hasOwnProperty('valid') && !value.valid) {
+      if (key.indexOf('password') + 1 && !value.blurred) continue
       return true
     }
   }
