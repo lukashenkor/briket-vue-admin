@@ -1,5 +1,6 @@
 <template>
-  <div class="duty-manager flex justify-center">
+  <FetchSpinnerComponent :fetching="fetching"/>
+  <div class="duty-manager flex justify-center" v-if="!fetching">
 <!--    <div class="q-pa-md flex column duty-manager__datepicker">
       <q-date v-model="dateRange" range first-day-of-week="1" />
       <q-btn
@@ -105,8 +106,9 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import dayjs from "dayjs";
-import { useEditField } from "src/hooks/useEditField";
+import { useObject } from "src/hooks/useObject";
 import DraggableDialog from "src/components/DraggableDialog";
+import FetchSpinnerComponent from "src/components/FetchSpinnerComponent";
 import DateTimePicker from "components/DateTimePicker";
 import { apiRoutes, requestJson } from "src/api";
 
@@ -231,7 +233,7 @@ const editingError = ref(null);
 
 const editDialog = ref(false);
 const required = val => !!val;
-const selectedRow = useEditField({
+const selectedRow = useObject({
   name: {
     value: "",
     prevValue: "",

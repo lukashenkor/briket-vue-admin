@@ -1,9 +1,10 @@
 <template>
-  <div class="admin-manage">
+  <FetchSpinnerComponent :fetching="fetching"/>
+  <div class="admin-manage" v-if="!fetching">
     <q-table
       :columns="columns"
       :rows="data.admins"
-      row-key="email"
+      row-key="id"
       no-data-label="Список администраторов пуст"
       :rows-per-page-options="[10, 20, 0]"
     >
@@ -38,13 +39,13 @@
     </q-table>
 
     <DraggableDialog v-model="deleteDialog" min-height="300" title="Удаление администратора" @onHide="onHideDialog(selectedAdmin)">
-      <h3>Удалить администратора <span style="color: #374bc9">{{ selectedAdmin.username.value }}</span>?</h3>
+      <h3>Удалить администратора <span style="color: #374bc9">{{ selectedAdmin.name.value }}</span>?</h3>
       <div class="dialog-buttons">
         <q-btn
           label="Удалить"
           color="negative"
           :disable="waitingResponse"
-          @click="deleteAdmin"
+          @click="confirmDelete"
         />
         <q-btn
           label="Отмена"
@@ -57,11 +58,11 @@
     <DraggableDialog v-model="editDialog" title="Редактирование администратора" @onHide="onHideDialog(selectedAdmin)">
       <q-input
         v-for="field in Object.values(selectedAdmin).filter(item => !item.hidden)"
-        :key="field.input?.name"
+        :key="field.attributes?.name"
         v-model="field.value"
-        v-bind="field.input"
+        v-bind="field.attributes"
         class="dialog-input"
-        @blur="blurred(selectedAdmin, field.input.name)"
+        @blur="blurred(selectedAdmin, field.attributes.name)"
         :error="!field.valid && field.blurred"
         :error-message="field.errors.required ? 'Поле не может быть пустым' : field.errors.minLength ? `Минимальная длина ${passwordMinLength} символов` : ''"
       >
@@ -96,11 +97,11 @@
     <DraggableDialog v-model="createDialog" title="Добавление администратора" @onHide="onHideDialog(createAdmin)">
       <q-input
         v-for="field in createAdmin"
-        :key="field.input.name"
+        :key="field.attributes.name"
         v-model="field.value"
-        v-bind="field.input"
+        v-bind="field.attributes"
         class="dialog-input"
-        @blur="blurred(createAdmin, field.input.name)"
+        @blur="blurred(createAdmin, field.attributes.name)"
         :error="!field.valid && field.blurred"
         :error-message="field.errors.required ? 'Поле не может быть пустым' : field.errors.minLength ? `Минимальная длина ${passwordMinLength} символов` : ''"
       >
@@ -138,11 +139,13 @@
 <script setup>
 import { computed, onBeforeMount, reactive, ref } from "vue";
 import DraggableDialog from "components/DraggableDialog";
+import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import { isEmailValid, isUsernameValid } from "src/utils/validate";
-import { useEditField } from "src/hooks/useEditField";
+import { useObject } from "src/hooks/useObject";
 import { apiRoutes, requestJson } from "src/api";
 
 
+const fetching = ref(false);
 const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'login', label: 'Login', field: 'login', sortable: true, align: "left", readonly: false, },
@@ -153,11 +156,16 @@ const columns = [
 const data = reactive({});
 
 onBeforeMount(async () => {
-  const response = await requestJson({
-    url: apiRoutes.admins
-  });
-  if (response.success) {
-    data.admins = response.data;
+  fetching.value = true;
+  try {
+    const response = await requestJson({
+      url: apiRoutes.admins
+    });
+    if (response.success) {
+      data.admins = response.data;
+    }
+  } finally {
+    fetching.value = false;
   }
 });
 
@@ -168,7 +176,7 @@ const isPwd = ref(true);
 const passwordInputType = computed(() => isPwd.value ? "password" : "text");
 const waitingResponse = ref(false);
 
-const selectedAdmin = useEditField({
+const selectedAdmin = useObject({
   id: {
     value: null,
     hidden: true,
@@ -180,7 +188,7 @@ const selectedAdmin = useEditField({
       required
     },
     blurred: false,
-    input: {
+    attributes: {
       name: "login",
       label: "Login",
       type: "text",
@@ -194,7 +202,7 @@ const selectedAdmin = useEditField({
       minLength: minLength(passwordMinLength),
     },
     blurred: false,
-    input: {
+    attributes: {
       name: "password",
       label: "Password",
       type: passwordInputType,
@@ -209,7 +217,7 @@ const selectedAdmin = useEditField({
       minLength: minLength(passwordMinLength),
     },
     blurred: false,
-    input: {
+    attributes: {
       name: "password_confirm",
       label: "Password Confirm",
       type: passwordInputType,
@@ -223,7 +231,7 @@ const selectedAdmin = useEditField({
       required
     },
     blurred: false,
-    input: {
+    attributes: {
       name: "name",
       label: "Name",
       type: "text",
@@ -232,7 +240,7 @@ const selectedAdmin = useEditField({
 });
 
 
-const createAdmin = useEditField({
+const createAdmin = useObject({
   login: {
     value: '',
     prevValue: '',
@@ -240,7 +248,7 @@ const createAdmin = useEditField({
       required
     },
     blurred: false,
-    input: {
+    attributes: {
       label: "Login",
       name: "login",
       type: "text",
@@ -254,7 +262,7 @@ const createAdmin = useEditField({
       minLength: minLength(passwordMinLength),
     },
     blurred: false,
-    input: {
+    attributes: {
       name: "password",
       label: "Password",
       type: passwordInputType,
@@ -269,7 +277,7 @@ const createAdmin = useEditField({
       minLength: minLength(passwordMinLength),
     },
     blurred: false,
-    input: {
+    attributes: {
       name: "password_confirm",
       label: "Password Confirm",
       type: passwordInputType,
@@ -283,7 +291,7 @@ const createAdmin = useEditField({
       required
     },
     blurred: false,
-    input: {
+    attributes: {
       name: "name",
       label: "Name",
       type: "text",
@@ -303,10 +311,6 @@ const setAdminFields = (row, object) => {
     }
   });
 };
-
-const blurred = (object, field) => {
-  object[field].blurred = true;
-}
 
 const deleteDialog = ref(false);
 const editDialog = ref(false);
@@ -371,7 +375,7 @@ const confirmEdit = async () => {
   });
 };
 
-const deleteAdmin = async () => {
+const confirmDelete = async () => {
   const url = `${ apiRoutes.admins }/${ selectedAdmin.id.value }`;
   try {
     waitingResponse.value = true;
@@ -411,6 +415,10 @@ const showCreateDialog = () => {
   createDialog.value = true;
 };
 
+const blurred = (object, field) => {
+  object[field].blurred = true;
+};
+
 const showEditDialog = (row) => {
   setAdminFields(row, selectedAdmin);
   editDialog.value = true;
@@ -432,20 +440,5 @@ const onHideDialog = (object) => {
 </script>
 
 <style scoped>
-.table-actions > * {
-  margin-right: 20px;
-}
 
-.table-actions > *:last-child {
-  margin-right: 0;
-}
-
-.table-actions i {
-  transition: all 0.3s;
-  cursor: pointer;
-}
-
-.table-actions i:hover {
-  transform: scale(1.3);
-}
 </style>

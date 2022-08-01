@@ -6,6 +6,7 @@ const routes = [
     children: [
       { path: '/login', component: () => import('pages/LoginPage.vue'), title: "Логин", name: 'Login', },
       { name: 'Admin Manage', path: '/admin-manage', component: () => import('pages/AdminManagePage.vue'), title: "Управление администраторами", },
+      { path: '/groups', component: () => import('pages/GroupsPage.vue'), title: "Управление группами администраторов", name: 'Groups', },
       { path: '/clients', component: () => import('pages/ClientsPage.vue'), title: "Клиенты", name: 'Clients', },
       { path: '/ratings', component: () => import('pages/RatingsPage.vue'), title: "Рейтинг", name: 'Ratings', },
       { path: '/events', component: () => import('pages/EventsPage.vue'), title: "События", name: 'Events', },

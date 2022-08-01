@@ -3,7 +3,7 @@ import { useField } from "src/hooks/useField";
 import dayjs from "dayjs";
 
 
-export function useEditField(init = {}) {
+export function useObject(init = {}) {
   const object = reactive({});
 
   for (const [ key, value ] of Object.entries(init)) {

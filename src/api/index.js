@@ -21,6 +21,9 @@ export const apiRoutes = {
   goals: "/api/corners/[id]/goal",
   corners: "/api/corners",
   admins: "/api/admins",
+  groups: "/api/admingroups",
+  roles: "/api/adminroles",
+  adminRoles: "/api/admingrouprole",
 };
 
 axios.defaults.baseURL = 'https://admin.omegapartners.ru';

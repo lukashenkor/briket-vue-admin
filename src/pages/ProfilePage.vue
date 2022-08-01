@@ -42,7 +42,7 @@
 
 <script setup>
 import { onBeforeMount, ref } from "vue";
-import { useEditField } from "src/hooks/useEditField";
+import { useObject } from "src/hooks/useObject";
 import { useRouter } from "vue-router";
 
 
@@ -51,7 +51,7 @@ const waitingResponse = ref(false);
 const required = val => !!val;
 const isPwd = ref(true);
 const minLength = num => val => val.length >= num;
-const user = useEditField({
+const user = useObject({
   name: {
     value: '',
     prevValue: '',

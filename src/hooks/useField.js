@@ -37,7 +37,7 @@ export function useField(field) {
     blurred,
     isDate,
     type: field.type,
-    input: field.input,
+    attributes: field.attributes,
     hidden: field.hidden,
   }
 }
