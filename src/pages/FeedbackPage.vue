@@ -3,7 +3,7 @@
   <CardTabsComponent v-if="!fetching" :items="items" v-model="tab" @listItemClick="listItemClick" />
 
   <DraggableDialog v-model="dialog" :title="selectedItem?.value?.title" @onHide="onHideDialog">
-    <h6>Текст обращения</h6>
+    <h6>{{ selectedItem.value.title }}</h6>
     <p class="paragraph-text">{{ selectedItem.value.text }}</p>
     <q-input
       type="textarea"

@@ -1,17 +1,6 @@
 <template>
   <FetchSpinnerComponent :fetching="fetching"/>
   <div class="duty-manager flex justify-center" v-if="!fetching">
-<!--    <div class="q-pa-md flex column duty-manager__datepicker">
-      <q-date v-model="dateRange" range first-day-of-week="1" />
-      <q-btn
-        label="Выбрать"
-        color="positive"
-        class="q-mt-lg"
-        size="lg"
-        @click="pickDateRange"
-      />
-      &lt;!&ndash;      <DateTimePicker label="Дата начала" v-model="dt" />&ndash;&gt;
-    </div>-->
     <div class="q-pa-md duty-manager__content">
       <q-table
         :columns="columns"
@@ -75,11 +64,13 @@
         label="Дата начала"
         v-model="selectedRow.date_start.value"
         @blur="blurred(selectedRow, 'date_start')"
+        :with-time="true"
       />
       <DateTimePicker
         label="Дата окончания"
         v-model="selectedRow.date_end.value"
         @blur="blurred(selectedRow, 'date_end')"
+        :with-time="true"
       />
       <div class="dialog-buttons">
         <q-btn

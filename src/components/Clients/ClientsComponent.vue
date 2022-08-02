@@ -28,7 +28,7 @@
 
 <script setup>
 import { computed, onBeforeMount, reactive, ref } from "vue";
-import ClientInfoComponent from 'components/ClientInfoComponent'
+import ClientInfoComponent from 'components/Clients/ClientInfoComponent'
 import FetchSpinnerComponent from 'components/FetchSpinnerComponent'
 import { apiRoutes, requestJson } from "src/api";
 

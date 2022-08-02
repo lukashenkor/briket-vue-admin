@@ -17,11 +17,14 @@
         <q-card-section>
           <p v-for="item in clientInfo" :key="item.name" class="info-block__item">
             <span>{{ item[0] }}:</span> {{ item[1] }}
-
-<!--            <q-separator inset spaced />-->
           </p>
 
         </q-card-section>
+        <q-btn
+          class="q-ma-md"
+          label="Изменить рейтинг"
+          color="primary"
+        />
       </q-card>
     </div>
 
@@ -41,112 +44,21 @@
         </q-tabs>
       </q-card-section>
 
-      <q-table
-        :rows="items.invoice.data"
-        key="id"
-        :columns="invoiceColumns"
-        v-show="tab === items.invoice.name"
-      >
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="id" :props="props">
-              {{ props.row.id }}
-            </q-td>
-            <q-td key="date" :props="props">
-              {{ props.row.date }}
-            </q-td>
-            <q-td key="date_start" :props="props">
-              {{ props.row.date_start }}
-            </q-td>
-            <q-td key="date_end" :props="props">
-              {{ props.row.date_end }}
-            </q-td>
-            <q-td key="summ" :props="props">
-              {{ props.row.summ }}
-            </q-td>
-            <q-td key="payed" :props="props">
-              {{ props.row.payed }}
-            </q-td>
-            <q-td key="number" :props="props">
-              {{ props.row.number }}
-            </q-td>
-            <q-td key="type" :props="props">
-              {{ props.row.type }}
-            </q-td>
-            <q-td key="file" :props="props">
-              <q-chip
-                square
-                icon="description"
-                clickable
-                @click.stop="fileClickHandler(props.row.file)"
-              >
-                {{ props.row.file.name }}
-              </q-chip>
-            </q-td>
-          </q-tr>
-        </template>
-      </q-table>
-      <q-table
-        :rows="items.goals.data"
-        key="id"
-        :columns="goalsColumns"
-        v-show="tab === items.goals.name"
-      >
-        <template v-slot:top-left>
-          <q-btn
-            label="Добавить"
-            color="positive"
-            size="md"
-            @click="null"
-          />
-        </template>
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="id" :props="props">
-              {{ props.row.id }}
-            </q-td>
-            <q-td key="date_start" :props="props">
-              {{ props.row.date_start }}
-            </q-td>
-            <q-td key="date_end" :props="props">
-              {{ props.row.date_end }}
-            </q-td>
-            <q-td key="goal" :props="props">
-              {{ props.row.goal }}
-            </q-td>
-          </q-tr>
-        </template>
-      </q-table>
+      <ClientInfoInvoiceComponent :tab="tab" :client="client" :items="items.invoice?.data || []" />
+      <ClientInfoGoalsComponent :tab="tab" :client="client" :items="items.goals?.data || []"/>
     </q-card>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
-import CardTabsComponent from "components/CardTabsComponent";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import { apiRoutes, requestJson } from "src/api";
+import ClientInfoInvoiceComponent from "components/Clients/ClientInfoInvoiceComponent";
+import ClientInfoGoalsComponent from "components/Clients/ClientInfoGoalsComponent";
 
 
-const invoiceColumns = [
-  { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'date', label: 'Дата', field: 'date', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'date_start', label: 'Дата начала', field: 'date_start', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'date_end', label: 'Дата окончания', field: 'date_end', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'summ', label: 'Сумма', field: 'summ', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'payed', label: 'Выплачено', field: 'payed', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'number', label: 'Number', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'type', label: 'Тип', field: 'type', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'file', label: 'Файл', field: 'file', sortable: false, align: "center", editable: false, readonly: true, },
-  // { name: 'phoneNumber', label: 'Номер телефона', field: 'phoneNumber', sortable: true, align: "center", readonly: false, },
-];
 
-const goalsColumns = [
-  { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'date_start', label: 'Дата начала', field: 'date_start', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'date_end', label: 'Дата окончания', field: 'date_end', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'goal', label: 'Цель', field: 'goal', sortable: true, align: "left", editable: true, readonly: false, },
-]
 
 const emits = defineEmits(['update:modelValue', 'goBackClick']);
 const fetching = ref(false);
@@ -222,7 +134,7 @@ onMounted(() => {
       console.log('invoiceResponse', invoiceResponse);
       console.log('goalsResponse', goalsResponse);
 
-      items.invoice.data = invoiceResponse.data;
+      items.invoice.data = invoiceResponse.data.filter(item => item.corner === client.value.id);
       items.goals.data = goalsResponse.data;
       items.deviation.data = [];
     })
