@@ -30,6 +30,10 @@
             {{ props.row.name }}
           </q-td>
 
+          <q-td key="usergroup" :props="props">
+            {{ data.groups[props.row.usergroup]?.label }}
+          </q-td>
+
           <q-td key="actions" :props="props" class="table-actions">
             <q-icon name="edit" color="warning" size="sm" @click="showEditDialog(props.row)" />
             <q-icon name="delete" color="negative" size="sm" @click="showDeleteDialog(props.row)" />
@@ -57,7 +61,7 @@
 
     <DraggableDialog v-model="editDialog" title="Редактирование администратора" @onHide="onHideDialog(selectedAdmin)">
       <q-input
-        v-for="field in Object.values(selectedAdmin).filter(item => !item.hidden)"
+        v-for="field in Object.values(selectedAdmin).filter(item => item.input)"
         :key="field.attributes?.name"
         v-model="field.value"
         v-bind="field.attributes"
@@ -75,6 +79,13 @@
           />
         </template>
       </q-input>
+      <q-select
+        v-model="selectedAdmin.usergroup.value"
+        v-bind="selectedAdmin.usergroup.attributes"
+        class="dialog-input"
+        :options="Object.values(data.groups)"
+      >
+      </q-select>
       <div class="dialog-buttons">
         <q-btn
           label="Сохранить"
@@ -140,7 +151,6 @@
 import { computed, onBeforeMount, reactive, ref } from "vue";
 import DraggableDialog from "components/DraggableDialog";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
-import { isEmailValid, isUsernameValid } from "src/utils/validate";
 import { useObject } from "src/hooks/useObject";
 import { apiRoutes, requestJson } from "src/api";
 
@@ -150,6 +160,7 @@ const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'login', label: 'Login', field: 'login', sortable: true, align: "left", readonly: false, },
   { name: 'name', label: 'Name', field: 'name', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'usergroup', label: 'Группа', field: 'usergroup', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'actions', label: 'Действия', field: 'actions', align: "left", readonly: true, },
 ];
 
@@ -157,16 +168,23 @@ const data = reactive({});
 
 onBeforeMount(async () => {
   fetching.value = true;
-  try {
-    const response = await requestJson({
-      url: apiRoutes.admins
+  Promise.all([
+    requestJson({url: apiRoutes.admins}),
+    requestJson({url: apiRoutes.groups}),
+  ])
+    .then(([adminsResponse, groupsResponse]) => {
+      if (adminsResponse.success) {
+        data.admins = adminsResponse.data;
+      }
+      if (groupsResponse.success) {
+        data.groups = groupsResponse.data.reduce((acc, item) => {
+          const {id, name} = item;
+          return {...acc, [id]: {label: name, value: id}}
+        }, {});
+        console.log('data.groups', data.groups);
+      }
+      fetching.value = false;
     });
-    if (response.success) {
-      data.admins = response.data;
-    }
-  } finally {
-    fetching.value = false;
-  }
 });
 
 const required = val => !!val;
@@ -193,6 +211,7 @@ const selectedAdmin = useObject({
       label: "Login",
       type: "text",
     },
+    input: true,
   },
   password: {
     value: '',
@@ -208,6 +227,7 @@ const selectedAdmin = useObject({
       type: passwordInputType,
       maxlength: 36,
     },
+    input: true,
   },
   password_confirm: {
     value: '',
@@ -223,6 +243,7 @@ const selectedAdmin = useObject({
       type: passwordInputType,
       maxlength: 36,
     },
+    input: true,
   },
   name: {
     value: '',
@@ -235,6 +256,18 @@ const selectedAdmin = useObject({
       name: "name",
       label: "Name",
       type: "text",
+    },
+    input: true,
+  },
+  usergroup: {
+    value: '',
+    prevValue: '',
+    blurred: false,
+    attributes: {
+      name: "usergroup",
+      label: "Группа",
+      multiple: false,
+      "stack-label": false,
     },
   },
 });
@@ -305,9 +338,14 @@ const setAdminFields = (row, object) => {
   Object.entries(row).forEach(entry => {
     const [key, value] = entry;
     if (object.hasOwnProperty(key)) {
-      object[key].value = value;
-      object[key].prevValue = value;
-      object[key].blurred = false;
+      if (key === "usergroup") {
+        object[key].value = data.groups[row.usergroup]
+        object[key].prevValue = data.groups[row.usergroup]
+      } else {
+        object[key].value = value;
+        object[key].prevValue = value;
+      }
+        object[key].blurred = false;
     }
   });
 };
@@ -362,17 +400,29 @@ const confirmEdit = async () => {
   const body = {}
   for (const [ key, innerObject ] of Object.entries(selectedAdmin)) {
     if (innerObject.edited) {
-      if (key.indexOf('confirm') + 1) continue;
-      body[key] = innerObject.value;
-      // data.admins[adminIndex][key] = innerObject.value;
+      if (key.indexOf('password_confirm') + 1) continue;
+      body[key] = typeof innerObject.value === "object"
+        ? innerObject.value.value
+        : innerObject.value;
     }
   }
   const url = `${ apiRoutes.admins }/${ selectedAdmin.id.value }`;
-  const response = await requestJson({
-    url,
-    body,
-    method: "PUT",
-  });
+  waitingResponse.value = true;
+  try {
+
+    const response = await requestJson({
+      url,
+      body,
+      method: "PUT",
+    });
+    if (response.success) {
+      // TODO: Принимать с сервера измененный объект и изменять его в общем списке
+      console.log("Успешно отредактировано");
+    }
+  } finally {
+    waitingResponse.value = false;
+    editDialog.value = false;
+  }
 };
 
 const confirmDelete = async () => {
@@ -390,6 +440,28 @@ const confirmDelete = async () => {
     deleteDialog.value = false;
     waitingResponse.value = false;
   }
+};
+
+const lazyLoadGroups = async (val, update, abort) => {
+  if (selectedAdmin.roles.value !== null && selectedAdmin.roles.value.length) {
+    // already loaded
+    update()
+    return
+  }
+  const response = await requestJson({
+    url: apiRoutes.adminRoles,
+    params: {
+      group: selectedAdmin.id.value,
+    }
+  });
+  if (response.success) {
+    selectedGroup.roles.value = response.data.reduce((acc, item) => {
+      const role = roles?.data?.find(i => i.value === item.role)
+      return [ ...acc, role ];
+    }, []);
+  }
+  update()
+
 };
 
 const isInvalidEditingAdmin = computed(() => {
