@@ -199,7 +199,7 @@ const selectedGroup = useObject({
     prevValue: [],
     attributes: {
       name: "roles",
-      label: "Роли",
+      label: "Выберите роли",
       multiple: true,
       "stack-label": false,
       "hide-selected": true,

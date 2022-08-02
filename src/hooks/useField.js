@@ -13,7 +13,11 @@ export function useField(field) {
 
   const reassign = val => {
     valid.value = true;
-    edited.value = val !== prevValue.value;
+    if (typeof val === "object" && !Array.isArray(val)) {
+      edited.value = val?.value !== prevValue?.value?.value;
+    } else {
+      edited.value = val !== prevValue.value;
+    }
     Object.keys(field.validators ?? {}).forEach(validator => {
       const isValid = field.validators[validator](val);
       errors[validator] = !isValid;
@@ -38,5 +42,6 @@ export function useField(field) {
     type: field.type,
     attributes: field.attributes,
     hidden: field.hidden,
+    input: field.input,
   };
 }
