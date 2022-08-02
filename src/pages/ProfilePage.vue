@@ -84,7 +84,6 @@ const user = useObject({
 
 onBeforeMount(() => {
   console.log('Получаем данные о пользователе');
-  user.name.value = "Roman";
 
   console.log('Object.keys(user)[0]', Object.keys(user)[0]);
 });

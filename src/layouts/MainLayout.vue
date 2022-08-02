@@ -4,7 +4,7 @@
       <q-toolbar>
         <q-btn flat @click="drawer = !drawer" round dense icon="menu" />
         <q-toolbar-title>{{ currentPageName }}</q-toolbar-title>
-        <UserBar v-model="user" @click="goToProfile" v-if="user?.username"/>
+        <UserBar v-model="user" v-if="user?.username"/>
       </q-toolbar>
     </q-header>
     <q-page-container>
@@ -67,16 +67,12 @@ export default defineComponent({
 
     const user = JSON.parse(localStorage.getItem('user'));
 
-    const goToProfile = () => {
-      router.push('/profile');
-    };
 
     return {
       drawer,
       currentPageName,
       pages,
       user,
-      goToProfile,
     }
   }
 })
