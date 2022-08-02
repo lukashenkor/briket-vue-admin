@@ -4,7 +4,7 @@
       <q-toolbar>
         <q-btn flat @click="drawer = !drawer" round dense icon="menu" />
         <q-toolbar-title>{{ currentPageName }}</q-toolbar-title>
-        <UserBar v-model="user" v-if="user?.username"/>
+        <UserBar v-model="username" v-if="username"/>
       </q-toolbar>
     </q-header>
     <q-page-container>
@@ -29,7 +29,7 @@
           >
             <router-link
               :to="page.path"
-              v-if="!page.requiredRole || user.roles.indexOf(page.requiredRole) > -1"
+              v-if="!page.requiredRole"
               class="router-link"
               exact-active-class="router-link-active"
               exact
@@ -50,6 +50,7 @@ import { computed, defineComponent, onBeforeMount, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import Routes from "src/router/routes";
 import UserBar from 'components/UserBar'
+import { useUserStore } from "stores/user";
 
 
 export default defineComponent({
@@ -59,6 +60,7 @@ export default defineComponent({
   },
 
   setup () {
+    const store = useUserStore();
     const router = useRouter();
     const route = useRoute();
     const drawer = ref(true);
@@ -69,16 +71,16 @@ export default defineComponent({
 
     const isLoginPage = computed(() => currentPageName.value.toLowerCase().indexOf('логин') > -1)
 
-    const user = ref(null);
-    onBeforeMount(() => {
-      user.value = JSON.parse(localStorage.getItem('user'));
-    })
+    const username = computed(() => store.getUsername);
+    if (!username.value) {
+      store.updateUsername(JSON.parse(localStorage.getItem('user')).username);
+    }
 
     return {
       drawer,
       currentPageName,
       pages,
-      user,
+      username,
       isLoginPage
     }
   }

@@ -23,7 +23,7 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const props = defineProps(['modelValue']);
 const nameFirstLetter = computed(() => {
-  return props.modelValue?.username ? props.modelValue.username[0].toUpperCase() : '?';
+  return props.modelValue ? props.modelValue[0].toUpperCase() : '?';
 })
 
 const goToProfile = () => {
