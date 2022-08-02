@@ -29,16 +29,18 @@ export default route(function(/* { store, ssrContext } */) {
   });
 
   Router.beforeEach((to, from, next) => {
-    const accessToken = JSON.parse(localStorage.getItem('access_token'))
-    axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
-    const isAuth = true;
+    const accessToken = JSON.parse(localStorage.getItem('access_token'));
     if (
-      to.name !== 'login' &&
-      !isAuth
+      to.name !== 'Login' &&
+      (!accessToken)
     ) {
       next('/login')
+    } else if (to.name === 'Login' && accessToken) {
+      next('/')
+    } else {
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
+      next()
     }
-    next()
   })
 
   return Router

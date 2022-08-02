@@ -32,6 +32,7 @@ const goToProfile = () => {
 
 const logout = () => {
   // TODO: Доделать функцию выхода из аккаунта
+  localStorage.removeItem("access_token");
   console.log('Logout');
 };
 </script>

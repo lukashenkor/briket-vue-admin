@@ -4,7 +4,7 @@ const routes = [
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
     children: [
-      { path: "/login", component: () => import("pages/LoginPage.vue"), title: "Логин", name: "Login", },
+      { path: "/login", component: () => import("pages/LoginPage.vue"), title: "Логин", name: "Login", hidden: true },
       { name: "Admin Manage", path: "/admin-manage", component: () => import("pages/AdminManagePage.vue"), title: "Управление администраторами", },
       { path: "/groups", component: () => import("pages/GroupsPage.vue"), title: "Управление группами администраторов", name: "Groups", },
       { path: "/clients", component: () => import("pages/ClientsPage.vue"), title: "Клиенты", name: "Clients", },

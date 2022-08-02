@@ -62,7 +62,7 @@ const login = async () => {
       const data = response.data;
       saveUserData(data);
       notifySuccess("Успешная авторизация");
-      router.push("/");
+      await router.push("/");
     }
   } finally {
     waitingResponse.value = false;

@@ -18,6 +18,7 @@
       :width="200"
       :breakpoint="700"
       class="bg-grey-9"
+      v-if="!isLoginPage"
     >
       <q-scroll-area class="fit">
         <div class="drawer-list">
@@ -45,7 +46,7 @@
 </template>
 
 <script>
-import { computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent, onBeforeMount, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import Routes from "src/router/routes";
 import UserBar from 'components/UserBar'
@@ -59,20 +60,26 @@ export default defineComponent({
 
   setup () {
     const router = useRouter();
+    const route = useRoute();
     const drawer = ref(true);
     const pages = Routes[0].children.filter(page => !page.hidden);
     const currentPageName = computed(() => {
-      return pages.find(page => page.name === useRoute().name)?.title || 'Домашняя страница';
+      return Routes[0].children.find(page => page.name === route.name)?.title || 'Домашняя страница';
     });
 
-    const user = JSON.parse(localStorage.getItem('user'));
+    const isLoginPage = computed(() => currentPageName.value.toLowerCase().indexOf('логин') > -1)
 
+    const user = ref(null);
+    onBeforeMount(() => {
+      user.value = JSON.parse(localStorage.getItem('user'));
+    })
 
     return {
       drawer,
       currentPageName,
       pages,
       user,
+      isLoginPage
     }
   }
 })
@@ -103,9 +110,10 @@ export default defineComponent({
 
 .my-page-layout {
   padding: 10px;
-  width: 90%;
-  margin: 20px auto;
+  width: 100%;
+  margin: 0 auto;
   border-radius: 5px;
   overflow-y: auto;
+  height: 100%;
 }
 </style>
