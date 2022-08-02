@@ -34,40 +34,37 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { apiRoutes, requestJson } from "src/api";
 import { notifySuccess, notifyError } from "src/utils/notification";
 import { useUserStore } from "stores/user";
+import { useUtilsStore } from "stores/utils";
 
 
-const store = useUserStore();
+const userStore = useUserStore();
+const utilsStore = useUtilsStore();
 const loginValue = ref("");
 const passwordValue = ref("");
 const isPwd = ref(true);
-const waitingResponse = ref(false);
+const waitingResponse = computed(() => utilsStore.waitingResponse);
 const router = useRouter();
 
 const login = async () => {
-  waitingResponse.value = true;
-  try {
-    const response = await requestJson({
-      url: apiRoutes.auth,
-      method: "POST",
-      body: {
-        username: loginValue.value,
-        password: passwordValue.value
-      }
-    });
-
-    if (response.success) {
-      const data = response.data;
-      saveUserData(data);
-      notifySuccess("Успешная авторизация");
-      await router.push("/");
+  const response = await requestJson({
+    url: apiRoutes.auth,
+    method: "POST",
+    body: {
+      username: loginValue.value,
+      password: passwordValue.value
     }
-  } finally {
-    waitingResponse.value = false;
+  });
+
+  if (response.success) {
+    const data = response.data;
+    saveUserData(data);
+    notifySuccess("Успешная авторизация");
+    await router.push("/");
   }
 };
 
@@ -77,7 +74,7 @@ const saveUserData = (data) => {
     const [ key, value ] = entry;
     localStorage.setItem(key, JSON.stringify(value));
     if (key === "user") {
-      store.updateUsername(value?.username);
+      userStore.updateUsername(value?.username);
     }
   });
   // TODO: Remove hardcode below when access_token problem is solved

@@ -153,6 +153,7 @@ import DraggableDialog from "components/DraggableDialog";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import { useObject } from "src/hooks/useObject";
 import { apiRoutes, requestJson } from "src/api";
+import { useUtilsStore } from "stores/utils";
 
 
 const fetching = ref(false);
@@ -186,12 +187,13 @@ onBeforeMount(async () => {
     });
 });
 
+const utilsStore = useUtilsStore();
 const required = val => !!val;
 const minLength = num => val => val.length >= num;
 const passwordMinLength = 8;
 const isPwd = ref(true);
 const passwordInputType = computed(() => isPwd.value ? "password" : "text");
-const waitingResponse = ref(false);
+const waitingResponse = computed(() => utilsStore.waitingResponse);
 
 const selectedAdmin = useObject({
   id: {
@@ -369,7 +371,6 @@ const addAdmin = async () => {
     name: createAdmin.name.value,
   };
   try {
-    waitingResponse.value = true;
     const response = await requestJson({
       url: apiRoutes.admins,
       method: "POST",
@@ -384,7 +385,6 @@ const addAdmin = async () => {
       }); */
     }
   } finally {
-    waitingResponse.value = false;
     createDialog.value = false;
   }
 };
@@ -407,7 +407,6 @@ const confirmEdit = async () => {
     }
   }
   const url = `${ apiRoutes.admins }/${ selectedAdmin.id.value }`;
-  waitingResponse.value = true;
   try {
 
     const response = await requestJson({
@@ -420,7 +419,6 @@ const confirmEdit = async () => {
       console.log("Успешно отредактировано");
     }
   } finally {
-    waitingResponse.value = false;
     editDialog.value = false;
   }
 };
@@ -428,7 +426,6 @@ const confirmEdit = async () => {
 const confirmDelete = async () => {
   const url = `${ apiRoutes.admins }/${ selectedAdmin.id.value }`;
   try {
-    waitingResponse.value = true;
     const response = await requestJson({
       url,
       method: "DELETE",
@@ -438,7 +435,6 @@ const confirmDelete = async () => {
     }
   } finally {
     deleteDialog.value = false;
-    waitingResponse.value = false;
   }
 };
 

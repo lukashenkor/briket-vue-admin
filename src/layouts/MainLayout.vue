@@ -61,7 +61,6 @@ export default defineComponent({
 
   setup () {
     const store = useUserStore();
-    const router = useRouter();
     const route = useRoute();
     const drawer = ref(true);
     const pages = Routes[0].children.filter(page => !page.hidden);

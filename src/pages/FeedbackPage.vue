@@ -40,9 +40,11 @@ import CardTabsComponent from "components/CardTabsComponent";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import { apiRoutes, requestJson } from "src/api";
 import { notifySuccess } from "src/utils/notification";
+import { useUtilsStore } from "stores/utils";
 
 
-const waitingResponse = ref(false);
+const utilsStore = useUtilsStore();
+const waitingResponse = computed(() => utilsStore.waitingResponse);
 const fetching = ref(true);
 const dialog = ref(false);
 const tab = ref("new");
@@ -85,7 +87,6 @@ onMounted( async () => {
     }
 
   } finally {
-    waitingResponse.value = false;
     fetching.value = false;
   }
 });
@@ -101,7 +102,6 @@ const onHideDialog = () => {
 };
 
 const sendAnswer = async () => {
-  waitingResponse.value = true;
   try {
     const response = await requestJson({
       url: `${apiRoutes.feedback}/${selectedItem.value.id}`,
@@ -118,7 +118,6 @@ const sendAnswer = async () => {
     }
   } finally {
     dialog.value = false;
-    waitingResponse.value = false;
   }
 };
 

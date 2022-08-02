@@ -11,7 +11,7 @@
     >
       <template v-slot:top-right>
         <q-btn
-          label="Добавить"
+          label="Добавить группу"
           color="positive"
           size="md"
           @click="showCreateDialog"
@@ -123,15 +123,17 @@
 </template>
 
 <script setup>
-import { onBeforeMount, ref } from "vue";
+import { computed, onBeforeMount, ref } from "vue";
 import { apiRoutes, requestJson } from "src/api";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import DraggableDialog from "components/DraggableDialog";
 import { useObject } from "src/hooks/useObject";
+import { useUtilsStore } from "stores/utils";
 
 
+const utilsStore = useUtilsStore();
 const fetching = ref(false);
-const waitingResponse = ref(false);
+const waitingResponse = computed(() => utilsStore.waitingResponse);
 const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: false, readonly: true, },
   { name: 'name', label: 'Название группы', field: 'name', sortable: true, align: "left", editable: true, readonly: false, },
@@ -223,7 +225,6 @@ const confirmCreate = async () => {
     body[key] = innerObject.value;
   });
   try {
-    waitingResponse.value = true;
     const response = await requestJson({
       url: apiRoutes.groups,
       method: "POST",
@@ -234,7 +235,6 @@ const confirmCreate = async () => {
     }
     console.log('response', response);
   } finally {
-    waitingResponse.value = false;
     createGroupDialog.value = false;
   }
 };
@@ -256,7 +256,6 @@ const showDeleteDialog = (row) => {
 
 const confirmDelete = async () => {
   try {
-    waitingResponse.value = true;
     const url = `${ apiRoutes.groups }/${ selectedGroup.id.value }`;
     const response = await requestJson({
       url,
@@ -267,7 +266,6 @@ const confirmDelete = async () => {
     }
     console.log('response', response);
   } finally {
-    waitingResponse.value = false;
     deleteGroupDialog.value = false;
   }
 };

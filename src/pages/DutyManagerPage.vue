@@ -86,7 +86,7 @@
           label="Сохранить"
           color="positive"
           @click="confirmEdit"
-          :disable="isInvalidEditing"
+          :disable="isInvalidEditing || waitingResponse"
         />
         <q-btn
           label="Отмена"
@@ -111,8 +111,11 @@ import DraggableDialog from "src/components/DraggableDialog";
 import FetchSpinnerComponent from "src/components/FetchSpinnerComponent";
 import DateTimePicker from "components/DateTimePicker";
 import { apiRoutes, requestJson } from "src/api";
+import { useUtilsStore } from "stores/utils";
 
 
+const utilsStore = useUtilsStore();
+const waitingResponse = computed(() => utilsStore.waitingResponse);
 const fetching = ref(false);
 const columns = [
   {
@@ -186,47 +189,7 @@ onMounted(async () => {
   } finally {
     fetching.value = false;
   }
-
-  /* rows.value = [
-    {
-      "date_end": "2021-10-02T10:00:00",
-      "date_start": "2021-10-01T10:00:00",
-      "id": 1,
-      "name": "Манагер",
-      "phone": "+79999999999"
-    },
-    {
-      "date_end": "2021-10-03T10:00:00",
-      "date_start": "2021-10-02T10:00:00",
-      "id": 2,
-      "name": "Манагер 2",
-      "phone": "+79999999998"
-    },
-    {
-      "date_end": "2021-09-30T18:00:00",
-      "date_start": "2021-09-29T18:00:00",
-      "id": 3,
-      "name": "name Имя",
-      "phone": "phone"
-    },
-    {
-      "date_end": "2021-09-30T18:00:00",
-      "date_start": "2021-09-29T18:00:00",
-      "id": 4,
-      "name": "name Имя",
-      "phone": "phone"
-    }
-  ]; */
 });
-// const dateRange = ref("");
-
-/* const pickDateRange = () => {
-  console.log("dateRange", dateRange.value);
-  const start = dayjs(dateRange.value.from, "YYYY/MM/DD").format("YYYY-MM-DD");
-  const end = dayjs(dateRange.value.to, "YYYY/MM/DD").format("YYYY-MM-DD");
-  console.log("start", start);
-  console.log("end", end);
-}; */
 
 const editingError = ref(null);
 
@@ -304,8 +267,6 @@ const confirmEdit = async () => {
     editingError.value = 'Дата начала позже даты окончания';
     return
   }
-  // TODO: Добавить запрос на изменение данных
-  console.log('Отправлен запрос на изменение данных');
   const body = {};
   for (const [ key, inner ] of Object.entries(selectedRow)) {
     if (inner.edited) {

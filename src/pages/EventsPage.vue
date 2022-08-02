@@ -62,13 +62,6 @@
               <q-icon name="attach_file" />
             </template>
           </q-file>
-          <q-input
-            name="date"
-            v-model="newItem.date"
-            label="Дата"
-            type="text"
-            v-show="false"
-          />
         </div>
 
         <div class="dialog-buttons">
@@ -91,16 +84,18 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import DraggableDialog from "components/DraggableDialog";
 import CardTabsComponent from "components/CardTabsComponent";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import { requestJson, apiRoutes, requestForm } from "src/api";
 import dayjs from "dayjs";
 import axios from "axios";
+import { useUtilsStore } from "stores/utils";
 
 
-const waitingResponse = ref(false);
+const utilsStore = useUtilsStore();
+const waitingResponse = computed(() => utilsStore.waitingResponse);
 const fetching = ref(true);
 const tab = ref('news');
 const news = reactive({});
@@ -187,7 +182,6 @@ const editConfirm = async (evt) => {
   const selId = selectedItem.value.id;
   const url = `${apiRoutes[tab.value]}/${selId}`;
   try {
-    waitingResponse.value = true;
     const response = await requestForm({
       url,
       formData,
@@ -195,7 +189,6 @@ const editConfirm = async (evt) => {
     });
   //  TODO: Получать ответ от сервера и на основе его добавлять изменения на странице
   } finally {
-    waitingResponse.value = false;
     editItemDialog.value = false;
   }
 };
@@ -208,19 +201,14 @@ const deleteItemClick = (item) => {
 };
 
 const deleteConfirm = async () => {
-  waitingResponse.value = true;
-  try {
-    const url = `${apiRoutes[tab.value]}/${selectedItem.value.id}`;
-    const response = await requestJson({
-      url,
-      method: "DELETE",
-    });
-    deleteItemDialog.value = false;
-    if (response.success) {
-      items[tab.value].data = items[tab.value].data.filter(item => item.id !== selectedItem.value.id);
-    }
-  } finally {
-    waitingResponse.value = false;
+  const url = `${apiRoutes[tab.value]}/${selectedItem.value.id}`;
+  const response = await requestJson({
+    url,
+    method: "DELETE",
+  });
+  deleteItemDialog.value = false;
+  if (response.success) {
+    items[tab.value].data = items[tab.value].data.filter(item => item.id !== selectedItem.value.id);
   }
 };
 
@@ -237,7 +225,6 @@ const addNewItem = async (evt) => {
   formData.append("date", "2021-09-23T16:00:00+03:00");
   const url = apiRoutes[tab.value];
   try {
-    waitingResponse.value = true;
     await requestForm({
       url: url,
       formData: formData,
@@ -245,7 +232,6 @@ const addNewItem = async (evt) => {
     });
 
   } finally {
-    waitingResponse.value = false;
     addItemDialog.value = false;
   }
 };

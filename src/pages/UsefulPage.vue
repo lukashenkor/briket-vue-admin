@@ -90,14 +90,16 @@
 </template>
 
 <script setup>
-import { onMounted, ref, reactive } from "vue";
+import { onMounted, ref, reactive, computed } from "vue";
 import CardTabsComponent from "components/CardTabsComponent";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import DraggableDialog from "components/DraggableDialog";
 import { apiRoutes, requestForm, requestJson } from "src/api";
+import { useUtilsStore } from "stores/utils";
 
 
-const waitingResponse = ref(false);
+const utilsStore = useUtilsStore();
+const waitingResponse = computed(() => utilsStore.waitingResponse);
 const fetching = ref(true);
 const tab = ref('promo');
 const items = reactive({
@@ -211,7 +213,6 @@ const addNewItem = async (evt) => {
   console.log('addNewItem');
   const formData = new FormData(evt.target);
   try {
-    waitingResponse.value = true;
     await requestForm({
       url: apiRoutes[tab.value],
       formData: formData,
@@ -219,7 +220,6 @@ const addNewItem = async (evt) => {
   //  TODO: Принимать ответ от сервера с новыми данными и добавлять их на странице
   } finally {
     addItemDialog.value = false;
-    waitingResponse.value = false;
   }
 };
 
@@ -243,7 +243,6 @@ const editConfirm = async (evt) => {
   }
   const url = `${apiRoutes[tab.value]}/${selectedItem.value.id}`;
   try {
-    waitingResponse.value = true;
     await requestForm({
       url,
       formData,
@@ -252,7 +251,6 @@ const editConfirm = async (evt) => {
 
   } finally {
     editItemDialog.value = false;
-    waitingResponse.value = false;
   }
 };
 
@@ -264,7 +262,6 @@ const deleteItemClick = item => {
 };
 
 const deleteConfirm = async () => {
-  waitingResponse.value = true;
   try {
     const url = `${apiRoutes[tab.value]}/${selectedItem.value.id}`;
     const response = await requestJson({
@@ -276,7 +273,6 @@ const deleteConfirm = async () => {
     }
   } finally {
     deleteItemDialog.value = false;
-    waitingResponse.value = false;
   }
 
 };
