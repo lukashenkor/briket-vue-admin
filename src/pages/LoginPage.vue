@@ -38,8 +38,10 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { apiRoutes, requestJson } from "src/api";
 import { notifySuccess, notifyError } from "src/utils/notification";
+import { useUserStore } from "stores/user";
 
 
+const store = useUserStore();
 const loginValue = ref("");
 const passwordValue = ref("");
 const isPwd = ref(true);
@@ -74,6 +76,9 @@ const saveUserData = (data) => {
   Object.entries(data).forEach(entry => {
     const [ key, value ] = entry;
     localStorage.setItem(key, JSON.stringify(value));
+    if (key === "user") {
+      store.updateUsername(value?.username);
+    }
   });
   // TODO: Remove hardcode below when access_token problem is solved
   localStorage.setItem('access_token', JSON.stringify("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NTY4NDI5ODksIm5iZiI6MTY1Njg0Mjk4OSwianRpIjoiMjI5NTRhMjYtOWZjMi00NTM1LTljNGUtMzk2MjM2ODRmZjJiIiwiZXhwIjoxNjg4Mzc4OTg5LCJpZGVudGl0eSI6InRlc3QiLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MiLCJ1c2VyX2NsYWltcyI6eyJyb2xlcyI6WyJjb3JuZXJzLXJlYWQiLCJjb3JuZXJzLWNyZWF0ZSIsImNvcm5lcnMtdXBkYXRlIiwiY29ybmVycy1kZWxldGUiLCJhZGRpdGlvbmFsX2d1aWRlcyIsImFkZGl0aW9uYWxfa25vd2xlZGdlIiwiYWRkaXRpb25hbF9wcm9tbyIsImFkZGl0aW9uYWxfcmVwb3J0cyIsImFkbWlucyIsImFkbWluLXJvbGVzIiwiYWxlcnRzIiwiY29ybmVycy1nb2FsIiwiY29ybmVycy1zdW1tIiwiZHV0eW1hbmFnZXJzIiwiZXZlbnRzIiwiZmVlZGJhY2siLCJmaW5hbmNlX2ludm9pY2VzIiwiZmluYW5jZV9yZXBvcnQiLCJsb2dzIiwiYWN0aW9uLWxvZ3MiLCJhZG1pbi1hY3Rpb24tbG9ncyIsIm5ld3MiLCJyZXF1ZXN0cy1yZWFkIiwicmVxdWVzdHMtdXBkYXRlIiwicmVxdWVzdHMtZGVsZXRlIiwidXNlcnMiLCJ1c2VyLXJvbGVzIiwiZmluYW5jZV9zdGF0Il19fQ.5xJdMXfLJwdFQXpkpPniwt8_PBrWfTIaJ-s0EqLlueA"));

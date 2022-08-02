@@ -73,7 +73,7 @@ export default defineComponent({
 
     const username = computed(() => store.getUsername);
     if (!username.value) {
-      store.updateUsername(JSON.parse(localStorage.getItem('user')).username);
+      store.updateUsername(JSON.parse(localStorage.getItem('user'))?.username);
     }
 
     return {

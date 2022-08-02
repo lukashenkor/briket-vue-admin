@@ -18,8 +18,10 @@
 <script setup>
 import { computed } from "vue";
 import { useRouter } from "vue-router";
+import { useUserStore } from "stores/user";
 
 
+const store = useUserStore();
 const router = useRouter();
 const props = defineProps(['modelValue']);
 const nameFirstLetter = computed(() => {
@@ -30,9 +32,11 @@ const goToProfile = () => {
   router.push("/profile");
 };
 
-const logout = () => {
+const logout = async () => {
   // TODO: Доделать функцию выхода из аккаунта
-  localStorage.removeItem("access_token");
+  localStorage.clear();
+  store.updateUsername("");
+  await router.push('/login')
   console.log('Logout');
 };
 </script>
