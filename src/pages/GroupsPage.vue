@@ -104,6 +104,7 @@
     </DraggableDialog>
 
     <DraggableDialog v-model="deleteGroupDialog" title="Удаление группы" @onHide="onHideDialog(selectedGroup)">
+      <h3>Удалить группу <span style="color: #374bc9">{{ selectedGroup.name.value }}</span>?</h3>
       <div class="dialog-buttons">
         <q-btn
           label="Удалить"
@@ -146,7 +147,6 @@ onBeforeMount( async () => {
     requestJson({url: apiRoutes.roles}),
   ])
     .then(([groupsResponse, rolesResponse]) => {
-      console.log('fetched');
       if (groupsResponse.success) {
         rows.value = groupsResponse.data;
       }
@@ -154,7 +154,6 @@ onBeforeMount( async () => {
         roles.data = rolesResponse.data.reduce((acc, item) => {
           return [...acc, {label: item.name, value: item.id}];
         }, []);
-        console.log('roles formed');
       }
       fetching.value = false;
     });
@@ -251,11 +250,26 @@ const confirmEdit = () => {
 }
 
 const showDeleteDialog = (row) => {
+  setGroupFields(row, selectedGroup);
   deleteGroupDialog.value = true;
 };
 
-const confirmDelete = () => {
-
+const confirmDelete = async () => {
+  try {
+    waitingResponse.value = true;
+    const url = `${ apiRoutes.groups }/${ selectedGroup.id.value }`;
+    const response = await requestJson({
+      url,
+      method: "DELETE",
+    });
+    if (response.success) {
+      rows.value = rows.value.filter(row => row.id !== selectedGroup.id.value);
+    }
+    console.log('response', response);
+  } finally {
+    waitingResponse.value = false;
+    deleteGroupDialog.value = false;
+  }
 };
 
 const lazyLoadRoles = async (val, update, abort) => {
