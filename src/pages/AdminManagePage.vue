@@ -181,7 +181,6 @@ onBeforeMount(async () => {
           const {id, name} = item;
           return {...acc, [id]: {label: name, value: id}}
         }, {});
-        console.log('data.groups', data.groups);
       }
       fetching.value = false;
     });
@@ -360,6 +359,7 @@ const showDeleteDialog = (row) => {
 };
 
 const addAdmin = async () => {
+  createAdminError.value = '';
   if (createAdmin.password.value !== createAdmin.password_confirm.value) {
     return createAdminError.value = "Пароли не совпадают"
   }

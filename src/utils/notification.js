@@ -9,7 +9,7 @@ export function notify(options) {
 export function notifyError(message = "Ошибка") {
   Notify.create({
     message: message,
-    position: "top",
+    position: "bottom",
     color: "negative",
     icon: "error",
     actions: [ { icon: "close", color: "white" } ],
@@ -20,7 +20,7 @@ export function notifyError(message = "Ошибка") {
 export function notifySuccess(message = "Успешно") {
   Notify.create({
     message: message,
-    position: "top",
+    position: "bottom",
     color: "positive",
     icon: "check_circle",
     actions: [ { icon: "close", color: "white" } ],

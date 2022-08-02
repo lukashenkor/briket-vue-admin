@@ -171,10 +171,12 @@ console.log('clientInfo', clientInfo);
 }
 
 .info-block > .info-block__go-back {
+  text-align: center;
   min-width: initial;
   width: 80px;
   cursor: pointer;
   transition: background-color .2s;
+  border-radius: 4px;
 }
 
 .info-block > .info-block__go-back:hover {
