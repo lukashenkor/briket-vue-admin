@@ -6,7 +6,10 @@
     <div class="info-block__text">
       <q-card bordered class="my-card">
         <q-card-section class="bg-grey text-white my-card-section">
-          <div class="text-h6"><h5 class="text-center">Информация о клиенте <span class="text-amber-4">{{ client?.label }}</span></h5></div>
+          <div class="text-h6">
+            <h5 class="text-center">Информация о клиенте:</h5>
+            <p class="text-amber-4 text-center">{{ client?.label }}</p>
+          </div>
         </q-card-section>
 
         <q-separator dark inset />
@@ -23,35 +26,98 @@
     </div>
 
     <FetchSpinnerComponent :fetching="fetching"/>
-    <CardTabsComponent
-      v-model="tab"
-      :items="items"
-      v-if="!fetching"
-    />
+    <q-card bordered class="my-card bg-white" v-if="!fetching">
+      <q-card-section class="bg-grey my-card-section">
+        <q-tabs
+          v-model="tab"
+          narrow-indicator
+          dense
+          align="justify"
+          class="bg-grey text-white fit"
+        >
+          <q-tab v-for="item in items" :key="item.name" :name="item.name" :icon="item.icon" :label="item.label">
+            <q-badge color="blue-7" text-color="white" floating v-if="item?.data?.length">{{ item?.data?.length }}</q-badge>
+          </q-tab>
+        </q-tabs>
+      </q-card-section>
 
-
-<!--    <div class="info-block__tabs">
-      <q-card bordered class="my-card bg-white">
-        <q-card-section class="bg-grey my-card-section">
-          <q-tabs
-            v-model="tab"
-            narrow-indicator
-            dense
-            align="justify"
-            class="bg-grey text-white fit"
-          >
-            <q-tab :ripple="false" name="bills" icon="receipt" label="Счета" />
-            <q-tab :ripple="false" name="goals" icon="emoji_flags" label="Цели" />
-            <q-tab :ripple="false" name="change" icon="dangerous" label="Отхождение" />
-          </q-tabs>
-        </q-card-section>
-
-
-        <q-card-section>
-
-        </q-card-section>
-      </q-card>
-    </div>-->
+      <q-table
+        :rows="items.invoice.data"
+        key="id"
+        :columns="invoiceColumns"
+        v-show="tab === items.invoice.name"
+      >
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td key="id" :props="props">
+              {{ props.row.id }}
+            </q-td>
+            <q-td key="date" :props="props">
+              {{ props.row.date }}
+            </q-td>
+            <q-td key="date_start" :props="props">
+              {{ props.row.date_start }}
+            </q-td>
+            <q-td key="date_end" :props="props">
+              {{ props.row.date_end }}
+            </q-td>
+            <q-td key="summ" :props="props">
+              {{ props.row.summ }}
+            </q-td>
+            <q-td key="payed" :props="props">
+              {{ props.row.payed }}
+            </q-td>
+            <q-td key="number" :props="props">
+              {{ props.row.number }}
+            </q-td>
+            <q-td key="type" :props="props">
+              {{ props.row.type }}
+            </q-td>
+            <q-td key="file" :props="props">
+              <q-chip
+                square
+                icon="description"
+                clickable
+                @click.stop="fileClickHandler(props.row.file)"
+              >
+                {{ props.row.file.name }}
+              </q-chip>
+            </q-td>
+          </q-tr>
+        </template>
+      </q-table>
+      <q-table
+        :rows="items.goals.data"
+        key="id"
+        :columns="goalsColumns"
+        v-show="tab === items.goals.name"
+      >
+        <template v-slot:top-left>
+          <q-btn
+            label="Добавить"
+            color="positive"
+            size="md"
+            @click="null"
+          />
+        </template>
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td key="id" :props="props">
+              {{ props.row.id }}
+            </q-td>
+            <q-td key="date_start" :props="props">
+              {{ props.row.date_start }}
+            </q-td>
+            <q-td key="date_end" :props="props">
+              {{ props.row.date_end }}
+            </q-td>
+            <q-td key="goal" :props="props">
+              {{ props.row.goal }}
+            </q-td>
+          </q-tr>
+        </template>
+      </q-table>
+    </q-card>
   </div>
 </template>
 
@@ -61,6 +127,26 @@ import CardTabsComponent from "components/CardTabsComponent";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import { apiRoutes, requestJson } from "src/api";
 
+
+const invoiceColumns = [
+  { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'date', label: 'Дата', field: 'date', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'date_start', label: 'Дата начала', field: 'date_start', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'date_end', label: 'Дата окончания', field: 'date_end', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'summ', label: 'Сумма', field: 'summ', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'payed', label: 'Выплачено', field: 'payed', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'number', label: 'Number', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'type', label: 'Тип', field: 'type', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'file', label: 'Файл', field: 'file', sortable: false, align: "center", editable: false, readonly: true, },
+  // { name: 'phoneNumber', label: 'Номер телефона', field: 'phoneNumber', sortable: true, align: "center", readonly: false, },
+];
+
+const goalsColumns = [
+  { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'date_start', label: 'Дата начала', field: 'date_start', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'date_end', label: 'Дата окончания', field: 'date_end', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'goal', label: 'Цель', field: 'goal', sortable: true, align: "left", editable: true, readonly: false, },
+]
 
 const emits = defineEmits(['update:modelValue', 'goBackClick']);
 const fetching = ref(false);
@@ -94,7 +180,7 @@ const items = reactive({
   goals: {
     name: "goals",
     label: "Цели",
-    icon: "goals",
+    icon: "flag",
     lines: 0,
     editable: false,
     deletable: false,
@@ -147,7 +233,11 @@ onMounted(() => {
 
 onUnmounted(() => {
   console.log('ClientInfoComponent is unmounted');
-})
+});
+
+const fileClickHandler = (file) => {
+  window.open(file.url, "_blank");
+};
 
 const clientInfo = computed(() => {
   return client?.value
@@ -162,6 +252,7 @@ console.log('clientInfo', clientInfo);
 <style scoped>
 .info-block {
   min-height: 30vh;
+  max-height: 100%;
   display: flex;
 }
 
@@ -206,5 +297,10 @@ console.log('clientInfo', clientInfo);
   left: 0;
   right: 0;
   border-bottom: 1px solid;
+}
+
+.my-card {
+  width: 100%;
+  height: 100%;
 }
 </style>
