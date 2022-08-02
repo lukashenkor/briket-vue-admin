@@ -2,7 +2,7 @@ import { Notify } from 'quasar'
 
 
 export function notify(options) {
-  Notify.create(options);
+  return Notify.create({...options, actions: [{ icon: 'close', color: 'white' }]});
 }
 
 
@@ -12,6 +12,7 @@ export function notifyError(message = 'Ошибка') {
     position: "top",
     color: "negative",
     icon: "error",
+    actions: [{ icon: 'close', color: 'white' }],
   });
 }
 
@@ -22,5 +23,6 @@ export function notifySuccess(message = 'Успешно') {
     position: 'top',
     color: 'positive',
     icon: 'check_circle',
+    actions: [{ icon: 'close', color: 'white' }]
   });
 }

@@ -1,5 +1,6 @@
 import axios from "axios";
 import useRequest from "src/hooks/useRequest";
+import { notify } from "src/utils/notification";
 
 
 const methodToMessage = {
@@ -28,6 +29,15 @@ export const apiRoutes = {
 
 axios.defaults.baseURL = 'https://admin.omegapartners.ru';
 
+function getNotify(method) {
+  return method.toUpperCase() !== "GET" ?
+    notify({
+      type: 'ongoing',
+      message: 'Ожидается ответ от сервера',
+    })
+    : null;
+}
+
 export const requestJson = async ({ url, method = "GET", body, params }) => {
   const options = {
     method,
@@ -41,9 +51,11 @@ export const requestJson = async ({ url, method = "GET", body, params }) => {
   } else {
     options.params = params;
   }
+  const notif = getNotify(method);
   return useRequest({
     promise: axios(options),
-    message: methodToMessage[method]
+    message: methodToMessage[method],
+    notif,
   });
 };
 
@@ -58,8 +70,10 @@ export const requestForm = async ({ url, method = "POST", formData }) => {
     data: formData,
     decompress: false,
   };
+  const notif = getNotify(method);
   return useRequest({
     promise: axios(options),
-    message: methodToMessage[method]
+    message: methodToMessage[method],
+    notif,
   });
 }

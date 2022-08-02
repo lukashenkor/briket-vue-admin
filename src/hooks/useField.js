@@ -14,7 +14,6 @@ export function useField(field) {
   const reassign = val => {
     valid.value = true;
     edited.value = val !== prevValue.value;
-    console.log('prevValue.value', prevValue.value);
     Object.keys(field.validators ?? {}).forEach(validator => {
       const isValid = field.validators[validator](val);
       errors[validator] = !isValid;
