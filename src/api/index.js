@@ -8,7 +8,8 @@ const methodToMessage = {
   "DELETE": "Удаление данных",
   "POST": "Добавление данных",
 };
-// old_token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NTY4NDI5ODksIm5iZiI6MTY1Njg0Mjk4OSwianRpIjoiMjI5NTRhMjYtOWZjMi00NTM1LTljNGUtMzk2MjM2ODRmZjJiIiwiZXhwIjoxNjg4Mzc4OTg5LCJpZGVudGl0eSI6InRlc3QiLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MiLCJ1c2VyX2NsYWltcyI6eyJyb2xlcyI6WyJjb3JuZXJzLXJlYWQiLCJjb3JuZXJzLWNyZWF0ZSIsImNvcm5lcnMtdXBkYXRlIiwiY29ybmVycy1kZWxldGUiLCJhZGRpdGlvbmFsX2d1aWRlcyIsImFkZGl0aW9uYWxfa25vd2xlZGdlIiwiYWRkaXRpb25hbF9wcm9tbyIsImFkZGl0aW9uYWxfcmVwb3J0cyIsImFkbWlucyIsImFkbWluLXJvbGVzIiwiYWxlcnRzIiwiY29ybmVycy1nb2FsIiwiY29ybmVycy1zdW1tIiwiZHV0eW1hbmFnZXJzIiwiZXZlbnRzIiwiZmVlZGJhY2siLCJmaW5hbmNlX2ludm9pY2VzIiwiZmluYW5jZV9yZXBvcnQiLCJsb2dzIiwiYWN0aW9uLWxvZ3MiLCJhZG1pbi1hY3Rpb24tbG9ncyIsIm5ld3MiLCJyZXF1ZXN0cy1yZWFkIiwicmVxdWVzdHMtdXBkYXRlIiwicmVxdWVzdHMtZGVsZXRlIiwidXNlcnMiLCJ1c2VyLXJvbGVzIiwiZmluYW5jZV9zdGF0Il19fQ.5xJdMXfLJwdFQXpkpPniwt8_PBrWfTIaJ-s0EqLlueA
+// old_token:
+// eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NTY4NDI5ODksIm5iZiI6MTY1Njg0Mjk4OSwianRpIjoiMjI5NTRhMjYtOWZjMi00NTM1LTljNGUtMzk2MjM2ODRmZjJiIiwiZXhwIjoxNjg4Mzc4OTg5LCJpZGVudGl0eSI6InRlc3QiLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MiLCJ1c2VyX2NsYWltcyI6eyJyb2xlcyI6WyJjb3JuZXJzLXJlYWQiLCJjb3JuZXJzLWNyZWF0ZSIsImNvcm5lcnMtdXBkYXRlIiwiY29ybmVycy1kZWxldGUiLCJhZGRpdGlvbmFsX2d1aWRlcyIsImFkZGl0aW9uYWxfa25vd2xlZGdlIiwiYWRkaXRpb25hbF9wcm9tbyIsImFkZGl0aW9uYWxfcmVwb3J0cyIsImFkbWlucyIsImFkbWluLXJvbGVzIiwiYWxlcnRzIiwiY29ybmVycy1nb2FsIiwiY29ybmVycy1zdW1tIiwiZHV0eW1hbmFnZXJzIiwiZXZlbnRzIiwiZmVlZGJhY2siLCJmaW5hbmNlX2ludm9pY2VzIiwiZmluYW5jZV9yZXBvcnQiLCJsb2dzIiwiYWN0aW9uLWxvZ3MiLCJhZG1pbi1hY3Rpb24tbG9ncyIsIm5ld3MiLCJyZXF1ZXN0cy1yZWFkIiwicmVxdWVzdHMtdXBkYXRlIiwicmVxdWVzdHMtZGVsZXRlIiwidXNlcnMiLCJ1c2VyLXJvbGVzIiwiZmluYW5jZV9zdGF0Il19fQ.5xJdMXfLJwdFQXpkpPniwt8_PBrWfTIaJ-s0EqLlueA
 export const apiRoutes = {
   auth: "/token/auth",
   events: "/api/events",
@@ -27,13 +28,13 @@ export const apiRoutes = {
   adminRoles: "/api/admingrouprole",
 };
 
-axios.defaults.baseURL = 'https://admin.omegapartners.ru';
+axios.defaults.baseURL = "https://admin.omegapartners.ru";
 
 function getNotify(method) {
   return method.toUpperCase() !== "GET" ?
     notify({
-      type: 'ongoing',
-      message: 'Ожидается ответ от сервера',
+      type: "ongoing",
+      message: "Ожидается ответ от сервера",
     })
     : null;
 }
@@ -76,4 +77,4 @@ export const requestForm = async ({ url, method = "POST", formData }) => {
     message: methodToMessage[method],
     notif,
   });
-}
+};

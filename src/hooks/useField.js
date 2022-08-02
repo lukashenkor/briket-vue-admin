@@ -21,7 +21,7 @@ export function useField(field) {
         valid.value = false;
       }
     });
-  }
+  };
 
 
   watch(value, reassign);
@@ -38,5 +38,5 @@ export function useField(field) {
     type: field.type,
     attributes: field.attributes,
     hidden: field.hidden,
-  }
+  };
 }
