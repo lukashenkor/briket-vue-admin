@@ -63,21 +63,6 @@
   height: 100%;
 }
 
-/*.sticky-header {
-  max-height: 100%;
+.q-img .q-img__image {
+  width: initial;
 }
-
-.sticky-header .q-table__top,
-.sticky-header .q-table__bottom,
-.sticky-header thead tr:first-child th {
-  background-color: #e1e1e1;
-}
-
-.sticky-header thead tr th {
-  position: sticky;
-  z-index: 5;
-}
-
-.sticky-header thead tr:first-child th {
-  top: 0;
-}*/

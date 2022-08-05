@@ -21,11 +21,13 @@
         <q-separator vertical spaced inset />
 
         <q-img
+          style="max-height: 200px;"
           v-if="item?.img?.hasOwnProperty('url')"
-          class="q-ml-xl cursor-pointer sss"
+          class="q-ml-xl cursor-pointer"
           :src="item.img.url"
           @click="imgClickHandler($event)"
           loading="lazy"
+          fit="contain"
         >
           <template v-slot:error>
             <img
@@ -112,7 +114,7 @@ const fileClickHandler = file => {
 }
 
 .q-img {
-  width: 40%;
+  /*width: 40%;*/
 }
 
 .list-item__actions {
@@ -134,4 +136,6 @@ const fileClickHandler = file => {
 .list-item__bottom {
   display: flex;
 }
+
+
 </style>
