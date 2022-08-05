@@ -212,7 +212,6 @@ const selectedAdmin = useObject({
       label: "Login",
       type: "text",
     },
-    input: true,
   },
   password: {
     value: '',
