@@ -328,7 +328,5 @@ const blurred = (object, field) => {
 </script>
 
 <style scoped>
-.edit-group {
-  max-width: 500px;
-}
+
 </style>
