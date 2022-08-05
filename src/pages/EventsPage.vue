@@ -90,7 +90,6 @@ import CardTabsComponent from "components/CardTabsComponent";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import { requestJson, apiRoutes, requestForm } from "src/api";
 import dayjs from "dayjs";
-import axios from "axios";
 import { useUtilsStore } from "stores/utils";
 
 
@@ -222,7 +221,11 @@ const addItemClick = () => {
 const newItem = reactive({});
 const addNewItem = async (evt) => {
   const formData = new FormData(evt.target);
-  formData.append("date", "2021-09-23T16:00:00+03:00");
+  // FIXME: убрать это и заполнять пользователем
+  const dateToAppend = tab.value === 'events'
+    ? "2021-09-23"
+    : "2021-09-23T16:00:00+03:00";
+  formData.append("date", dateToAppend);
   const url = apiRoutes[tab.value];
   try {
     await requestForm({
