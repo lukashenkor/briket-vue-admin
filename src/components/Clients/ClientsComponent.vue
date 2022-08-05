@@ -1,7 +1,7 @@
 <template>
   <div class="clients">
     <FetchSpinnerComponent :fetching="fetching"/>
-    <q-slide-transition :duration="800">
+    <q-slide-transition :duration="1000">
       <div v-show="!selectedClient.length" v-if="!fetching">
         <q-table
           title="Список клиентов"
@@ -10,7 +10,6 @@
           row-key="label"
           no-data-label="Список клиентов пуст"
           :rows-per-page-options="[10, 20, 0]"
-          selection="single"
           v-model:selected="selectedClient"
           @row-click="selectClient"
           :selected-rows-label="(_ => selectedRowLabel)"
@@ -18,7 +17,7 @@
       </div>
 
     </q-slide-transition>
-    <q-slide-transition :duration="600">
+    <q-slide-transition :duration="800">
       <div class="client-info" v-show="selectedClient.length" v-if="selectedClient.length">
         <ClientInfoComponent v-model="selectedClient[0]" @goBackClick="selectedClient = []"/>
       </div>
@@ -41,6 +40,7 @@ const columns = [
   { name: 'area', label: 'Area', field: 'area', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'power', label: 'Power', field: 'power', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'number', label: 'Number', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'rating', label: 'Рейтинг', field: 'rating', sortable: true, align: "left", editable: true, readonly: false, },
   // { name: 'phoneNumber', label: 'Номер телефона', field: 'phoneNumber', sortable: true, align: "center", readonly: false, },
 ];
 
@@ -71,13 +71,10 @@ const selectedRowLabel = computed(() => {
 
 const selectClient = (evt, row, index) => {
   console.log('row', row);
-  if (selectedClient.value.length && row.label === selectedClient.value[0].label) {
-    selectedClient.value = [];
-  } else {
-    selectedClient.value = [row];
+  if (!selectedClient.value || !selectedClient.value.length) {
+    selectedClient.value = [ row ];
   }
 };
-
 
 </script>
 
