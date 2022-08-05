@@ -75,7 +75,9 @@
         v-bind="selectedGroup.roles.attributes"
         class="dialog-input"
         :options="roles.data"
-        @filter="lazyLoadRoles"
+        menu-self="center middle"
+        options-dense
+        :loading="loadingRoles"
       >
         <template v-slot:option="{ itemProps, opt, selected, toggleOption }">
           <q-item v-bind="itemProps">
@@ -134,6 +136,7 @@ import { useUtilsStore } from "stores/utils";
 const utilsStore = useUtilsStore();
 const fetching = ref(false);
 const waitingResponse = computed(() => utilsStore.waitingResponse);
+const loadingRoles = ref(false);
 const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: false, readonly: true, },
   { name: 'name', label: 'Название группы', field: 'name', sortable: true, align: "left", editable: true, readonly: false, },
@@ -242,6 +245,7 @@ const confirmCreate = async () => {
 const showEditDialog = (row) => {
   setGroupFields(row, selectedGroup);
   editGroupDialog.value = true;
+  lazyLoadRoles();
 };
 
 const confirmEdit = () => {
@@ -270,25 +274,28 @@ const confirmDelete = async () => {
   }
 };
 
-const lazyLoadRoles = async (val, update, abort) => {
+const lazyLoadRoles = async () => {
+
   if (selectedGroup.roles.value !== null && selectedGroup.roles.value.length) {
-    // already loaded
-    update()
     return
   }
-  const response = await requestJson({
-    url: apiRoutes.adminRoles,
-    params: {
-      group: selectedGroup.id.value,
+  try {
+    loadingRoles.value = true;
+    const response = await requestJson({
+      url: apiRoutes.adminRoles,
+      params: {
+        group: selectedGroup.id.value,
+      }
+    });
+    if (response.success) {
+      selectedGroup.roles.value = response.data.reduce((acc, item) => {
+        const role = roles?.data?.find(i => i.value === item.role)
+        return [ ...acc, role ];
+      }, []);
     }
-  });
-  if (response.success) {
-    selectedGroup.roles.value = response.data.reduce((acc, item) => {
-      const role = roles?.data?.find(i => i.value === item.role)
-      return [ ...acc, role ];
-    }, []);
+  } finally {
+    loadingRoles.value = false;
   }
-  update()
 }
 
 const setGroupFields = (row, object) => {
@@ -321,5 +328,7 @@ const blurred = (object, field) => {
 </script>
 
 <style scoped>
-
+.edit-group {
+  max-width: 500px;
+}
 </style>
