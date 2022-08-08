@@ -1,6 +1,6 @@
 <template>
-  <div class="q-pa-none" style="max-width: 200px">
-    <q-input dense v-model="value" :label="label" :rules="[val => !!val || 'Введите дату и время']">
+  <div class="q-pa-none">
+    <q-input dense v-model="value" :label="label" :rules="[val => !!val || 'Введите дату и время']" :name="name">
       <template v-slot:prepend>
         <q-icon name="event" class="cursor-pointer">
           <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
@@ -33,7 +33,7 @@ import { computed } from "vue";
 import dayjs from "dayjs";
 
 
-const props = defineProps([ "modelValue", "label", "withoutTime" ]);
+const props = defineProps([ "modelValue", "label", "withoutTime", "name" ]);
 const emits = defineEmits([ "update:modelValue" ]);
 
 const value = computed({
