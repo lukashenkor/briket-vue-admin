@@ -6,9 +6,6 @@ export const useUtilsStore = defineStore('utils', {
   }),
 
   getters: {
-    /* doubleCount (state) {
-      return state.counter * 2
-    } */
   },
 
   actions: {
