@@ -4,7 +4,7 @@
       <template v-slot:prepend>
         <q-icon name="event" class="cursor-pointer">
           <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-            <q-date v-model="value" first-day-of-week="1" :mask="withTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD'" @update:model-value="() => $refs.qDateProxy.hide()" @input="$emit('input', $event.target.value)">
+            <q-date v-model="value" first-day-of-week="1" :mask="withoutTime ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'" @update:model-value="() => $refs.qDateProxy.hide()" @input="$emit('input', $event.target.value)">
               <div class="row items-center justify-end">
                 <q-btn v-close-popup label="Close" color="primary" flat />
               </div>
@@ -13,7 +13,7 @@
         </q-icon>
       </template>
 
-      <template v-slot:append v-if="withTime">
+      <template v-slot:append v-if="!withoutTime">
         <q-icon name="access_time" class="cursor-pointer">
           <q-popup-proxy ref="qTimeProxy" transition-show="scale" transition-hide="scale">
             <q-time v-model="value" mask="YYYY-MM-DD HH:mm:ss" format24h @update:model-value="() => $refs.qTimeProxy.hide()" @input="$emit('input', $event.target.value)">
@@ -33,7 +33,7 @@ import { computed } from "vue";
 import dayjs from "dayjs";
 
 
-const props = defineProps([ "modelValue", "label", "withTime" ]);
+const props = defineProps([ "modelValue", "label", "withoutTime" ]);
 const emits = defineEmits([ "update:modelValue" ]);
 
 const value = computed({
