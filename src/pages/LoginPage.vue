@@ -35,11 +35,12 @@
 
 <script setup>
 import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { apiRoutes, requestJson } from "src/api";
 import { notifySuccess, notifyError } from "src/utils/notification";
 import { useUserStore } from "stores/user";
 import { useUtilsStore } from "stores/utils";
+import axios from "axios";
 
 
 const userStore = useUserStore();
@@ -49,6 +50,7 @@ const passwordValue = ref("");
 const isPwd = ref(true);
 const waitingResponse = computed(() => utilsStore.waitingResponse);
 const router = useRouter();
+const route = useRoute();
 
 const login = async () => {
   const response = await requestJson({
@@ -57,14 +59,15 @@ const login = async () => {
     body: {
       username: loginValue.value,
       password: passwordValue.value
-    }
+    },
+    message: "Авторизация",
   });
 
   if (response.success) {
     const data = response.data;
     saveUserData(data);
-    notifySuccess("Успешная авторизация");
-    await router.push("/");
+    const redirect = route.query.redirect || "/";
+    await router.push(redirect);
   }
 };
 
@@ -77,8 +80,8 @@ const saveUserData = (data) => {
       userStore.updateUsername(value?.username);
     }
   });
-  // TODO: Remove hardcode below when access_token problem is solved
-  localStorage.setItem('access_token', JSON.stringify("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NTY4NDI5ODksIm5iZiI6MTY1Njg0Mjk4OSwianRpIjoiMjI5NTRhMjYtOWZjMi00NTM1LTljNGUtMzk2MjM2ODRmZjJiIiwiZXhwIjoxNjg4Mzc4OTg5LCJpZGVudGl0eSI6InRlc3QiLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MiLCJ1c2VyX2NsYWltcyI6eyJyb2xlcyI6WyJjb3JuZXJzLXJlYWQiLCJjb3JuZXJzLWNyZWF0ZSIsImNvcm5lcnMtdXBkYXRlIiwiY29ybmVycy1kZWxldGUiLCJhZGRpdGlvbmFsX2d1aWRlcyIsImFkZGl0aW9uYWxfa25vd2xlZGdlIiwiYWRkaXRpb25hbF9wcm9tbyIsImFkZGl0aW9uYWxfcmVwb3J0cyIsImFkbWlucyIsImFkbWluLXJvbGVzIiwiYWxlcnRzIiwiY29ybmVycy1nb2FsIiwiY29ybmVycy1zdW1tIiwiZHV0eW1hbmFnZXJzIiwiZXZlbnRzIiwiZmVlZGJhY2siLCJmaW5hbmNlX2ludm9pY2VzIiwiZmluYW5jZV9yZXBvcnQiLCJsb2dzIiwiYWN0aW9uLWxvZ3MiLCJhZG1pbi1hY3Rpb24tbG9ncyIsIm5ld3MiLCJyZXF1ZXN0cy1yZWFkIiwicmVxdWVzdHMtdXBkYXRlIiwicmVxdWVzdHMtZGVsZXRlIiwidXNlcnMiLCJ1c2VyLXJvbGVzIiwiZmluYW5jZV9zdGF0Il19fQ.5xJdMXfLJwdFQXpkpPniwt8_PBrWfTIaJ-s0EqLlueA"));
+  const accessToken = JSON.parse(localStorage.getItem('access_token'));
+  axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
 };
 
 </script>

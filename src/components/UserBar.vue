@@ -19,6 +19,7 @@
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "stores/user";
+import { apiRoutes, requestJson } from "src/api";
 
 
 const store = useUserStore();
@@ -36,6 +37,11 @@ const logout = async () => {
   // TODO: Доделать функцию выхода из аккаунта
   localStorage.clear();
   store.updateUsername("");
+  await requestJson({
+    url: apiRoutes.logout,
+    method: "POST",
+    message: "Выход из аккаунта",
+  });
   await router.push('/login')
   console.log('Logout');
 };
