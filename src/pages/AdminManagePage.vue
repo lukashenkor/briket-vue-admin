@@ -100,9 +100,9 @@
         />
       </div>
       <p
-        v-show="editAdminError"
+        v-show="error"
         class="text-negative"
-      >{{ editAdminError }}</p>
+      >{{ error }}</p>
     </DraggableDialog>
 
     <DraggableDialog v-model="createDialog" title="Добавление администратора" @onHide="onHideDialog(createAdmin)">
@@ -140,9 +140,9 @@
         />
       </div>
       <p
-        v-show="createAdminError"
+        v-show="error"
         class="text-negative"
-      >{{ createAdminError }}</p>
+      >{{ error }}</p>
     </DraggableDialog>
   </div>
 </template>
@@ -332,7 +332,7 @@ const createAdmin = useObject({
   },
 });
 
-const createAdminError = ref('');
+const error = ref('');
 
 const setAdminFields = (row, object) => {
   Object.entries(row).forEach(entry => {
@@ -360,9 +360,9 @@ const showDeleteDialog = (row) => {
 };
 
 const addAdmin = async () => {
-  createAdminError.value = '';
+  error.value = '';
   if (createAdmin.password.value !== createAdmin.password_confirm.value) {
-    return createAdminError.value = "Пароли не совпадают"
+    return error.value = "Пароли не совпадают"
   }
   const body = {
     login: createAdmin.login.value,
@@ -376,25 +376,17 @@ const addAdmin = async () => {
       body,
     });
     if (response.success) {
-      // TODO: Получать объект созданного администратора и добавление в общий массив
-      /* data.admins.push({
-        name: createAdmin.name.value,
-        login: createAdmin.login.value,
-        id: createAdmin.id.value,
-      }); */
+      data.admins.push(response.data);
     }
   } finally {
     createDialog.value = false;
   }
 };
 
-const editAdminError = ref(null);
-
 const confirmEdit = async () => {
-  // TODO: send put request to update admin data
-  // const adminIndex = data.admins.findIndex(item => item.id === selectedAdmin.id.value);
+  error.value = "";
   if (selectedAdmin.password.edited && selectedAdmin.password.value !== selectedAdmin.password_confirm.value) {
-    return editAdminError.value = "Пароли не совпадают"
+    return error.value = "Пароли не совпадают"
   }
   const body = {}
   for (const [ key, innerObject ] of Object.entries(selectedAdmin)) {
@@ -414,8 +406,9 @@ const confirmEdit = async () => {
       method: "PUT",
     });
     if (response.success) {
-      // TODO: Принимать с сервера измененный объект и изменять его в общем списке
-      console.log("Успешно отредактировано");
+      console.log('response.data', response.data);
+      const adminIndex = data.admins.findIndex(admin => admin.id === selectedAdmin.id.value);
+      data.admins[adminIndex] = Object.assign({}, response.data);
     }
   } finally {
     editDialog.value = false;
@@ -437,27 +430,6 @@ const confirmDelete = async () => {
   }
 };
 
-const lazyLoadGroups = async (val, update, abort) => {
-  if (selectedAdmin.roles.value !== null && selectedAdmin.roles.value.length) {
-    // already loaded
-    update()
-    return
-  }
-  const response = await requestJson({
-    url: apiRoutes.adminRoles,
-    params: {
-      group: selectedAdmin.id.value,
-    }
-  });
-  if (response.success) {
-    selectedGroup.roles.value = response.data.reduce((acc, item) => {
-      const role = roles?.data?.find(i => i.value === item.role)
-      return [ ...acc, role ];
-    }, []);
-  }
-  update()
-
-};
 
 const isInvalidEditingAdmin = computed(() => {
   for (const [ key, value ] of Object.entries(selectedAdmin)) {
@@ -502,6 +474,7 @@ const refreshAdminObject = (object) => {
 
 const onHideDialog = (object) => {
   refreshAdminObject(object);
+  error.value = "";
 };
 
 </script>
