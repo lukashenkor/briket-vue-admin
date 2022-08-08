@@ -82,7 +82,7 @@
         <template v-slot:option="{ itemProps, opt, selected, toggleOption }">
           <q-item v-bind="itemProps">
             <q-item-section>
-              <q-item-label > {{ opt.label }} </q-item-label>
+              <q-item-label > {{ opt.name }} </q-item-label>
             </q-item-section>
             <q-item-section side>
               <q-toggle :model-value="selected" @update:model-value="toggleOption(opt)" />
@@ -136,12 +136,15 @@ import { useUtilsStore } from "stores/utils";
 const utilsStore = useUtilsStore();
 const fetching = ref(false);
 const waitingResponse = computed(() => utilsStore.waitingResponse);
+// console.log('waitingResponse', waitingResponse.value);
+// waitingResponse.value = true;
+// console.log('waitingResponse.value', waitingResponse.value);
+
 const loadingRoles = ref(false);
 const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: false, readonly: true, },
   { name: 'name', label: 'Название группы', field: 'name', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'actions', label: 'Действия', field: 'actions', sortable: true, align: "left", editable: false, readonly: true, },
-
 ];
 const rows = ref([]);
 const roles = {};
@@ -156,9 +159,8 @@ onBeforeMount( async () => {
         rows.value = groupsResponse.data;
       }
       if (rolesResponse.success) {
-        roles.data = rolesResponse.data.reduce((acc, item) => {
-          return [...acc, {label: item.name, value: item.id}];
-        }, []);
+        console.log('rolesResponse', rolesResponse);
+        roles.data = rolesResponse.data;
       }
       fetching.value = false;
     });
@@ -234,9 +236,8 @@ const confirmCreate = async () => {
       body,
     });
     if (response.success) {
-      // TODO: при получении ответа с id новой группы, добавлять его в общий список
+      rows.value.push(response.data);
     }
-    console.log('response', response);
   } finally {
     createGroupDialog.value = false;
   }
@@ -248,9 +249,39 @@ const showEditDialog = (row) => {
   lazyLoadRoles();
 };
 
-const confirmEdit = () => {
+const confirmEdit = async () => {
   // TODO: Отправлять запрос на изменение с массивом ролей
-  console.log('ConfirmEdit function');
+  console.log('selectedGroup', selectedGroup);
+  const body = {
+    group: selectedGroup.id.value,
+    roles: selectedGroup.roles.value.reduce((acc, role) => [...acc, role.id], [])
+  }
+  try {
+    const rolesResponse = await requestJson({
+      url: apiRoutes.adminRoles,
+      method: "PUT",
+      body
+    });
+    console.log('response', rolesResponse);
+
+    if (selectedGroup.name.edited) {
+      const groupRequestUrl = `${ apiRoutes.groups }/${ selectedGroup.id.value }`;
+      const groupResponse = await requestJson({
+        url: groupRequestUrl,
+        method: "PUT",
+        body: {
+          name: selectedGroup.name.value,
+        }
+      });
+
+      if (groupResponse.success) {
+        const rowIndex = rows.value.findIndex(row => row.id === selectedGroup.id.value);
+        rows.value[rowIndex].name = selectedGroup.name.value;
+      }
+    }
+  } finally {
+    editGroupDialog.value = false;
+  }
 }
 
 const showDeleteDialog = (row) => {
@@ -289,7 +320,7 @@ const lazyLoadRoles = async () => {
     });
     if (response.success) {
       selectedGroup.roles.value = response.data.reduce((acc, item) => {
-        const role = roles?.data?.find(i => i.value === item.role)
+        const role = roles?.data?.find(i => i.id === item.role_id)
         return [ ...acc, role ];
       }, []);
     }
