@@ -13,15 +13,11 @@ export default async function useRequest({ promise, message, notif }) {
     if (response.status >= 200 && response.status < 300) {
       const data = response.data;
       if (data?.status?.toLowerCase() == "error") {
-        // notifyError(`${message} выполнено с ошибкой. ${data.message}`);
         console.error("Request failed. Error: ", data.message);
         result.success = false;
         result.error = data.message;
       }
       result.data = data;
-      /* if (message) {
-       notifySuccess(`${message} выполнено успешно`);
-       } */
     }
   } catch (error) {
     result.success = false;
@@ -36,9 +32,9 @@ export default async function useRequest({ promise, message, notif }) {
           : `${ message } выполнено с ошибкой. ${ JSON.stringify(result.error) }`
       });
     }
-    if (!notif && !result.success) {
+    /* if (!notif && !result.success) {
       notifyError(`${ message } выполнено с ошибкой. ${ JSON.stringify(result.error) }`);
-    }
+    } */
   }
   return result;
 }
