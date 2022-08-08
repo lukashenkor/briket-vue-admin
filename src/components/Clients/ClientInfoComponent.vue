@@ -15,8 +15,20 @@
         <q-separator dark inset />
 
         <q-card-section>
-          <p v-for="item in clientInfo" :key="item.name" class="info-block__item">
-            <span>{{ item[0] }}:</span> {{ item[1] }}
+          <p class="info-block__item">
+            <span>ID:</span> {{ client.id }}
+          </p>
+          <p class="info-block__item">
+            <span>Площадь:</span> {{ client.area }}
+          </p>
+          <p class="info-block__item">
+            <span>Number:</span> {{ client.number }}
+          </p>
+          <p class="info-block__item">
+            <span>Power:</span> {{ client.power }}
+          </p>
+          <p class="info-block__item">
+            <span>Рейтинг:</span> {{ client.rating }}
           </p>
 
         </q-card-section>
@@ -24,7 +36,23 @@
           class="q-ma-md"
           label="Изменить рейтинг"
           color="primary"
+          @click="ratingEdit = true"
+          v-show="!ratingEdit"
         />
+        <div class="save-rating" v-show="ratingEdit">
+          <q-btn
+            class="q-ma-md"
+            label="Сохранить"
+            color="positive"
+            @click="editRatingConfirm"
+          />
+          <q-btn
+            class="q-ma-md"
+            label="Отмена"
+            color="negative"
+            @click="editRatingCancel"
+          />
+        </div>
       </q-card>
     </div>
 
@@ -58,8 +86,8 @@ import ClientInfoInvoiceComponent from "components/Clients/ClientInfoInvoiceComp
 import ClientInfoGoalsComponent from "components/Clients/ClientInfoGoalsComponent";
 
 
-
-
+const ratingEdit = ref(false);
+const newRating = ref(null);
 const emits = defineEmits(['update:modelValue', 'goBackClick']);
 const fetching = ref(false);
 const tab = ref('invoice');
