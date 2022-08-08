@@ -113,10 +113,6 @@ const fileClickHandler = file => {
   font-size: 42px;
 }
 
-.q-img {
-  /*width: 40%;*/
-}
-
 .list-item__actions {
   margin-top: 5px;
   display: flex;
