@@ -1,8 +1,9 @@
 import { route } from 'quasar/wrappers'
-import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
+import { createRouter, createMemoryHistory, createWebHistory } from 'vue-router'
 import routes from './routes'
 import axios from "axios";
 import '../api/index';
+import { apiRoutes, requestJson } from "src/api";
 
 /*
  * If not building with SSR mode, you can
@@ -28,17 +29,26 @@ export default route(function(/* { store, ssrContext } */) {
     history: createHistory(process.env.MODE === 'ssr' ? void 0 : process.env.VUE_ROUTER_BASE),
   });
 
-  Router.beforeEach((to, from, next) => {
+  Router.beforeEach(async (to, from, next) => {
     const accessToken = JSON.parse(localStorage.getItem('access_token'));
+    const loginQuery = { path: "/login", query: { redirect: to.fullPath } };
     if (
       to.name !== 'Login' &&
       (!accessToken)
     ) {
-      next('/login')
+      const response = await requestJson({
+        url: apiRoutes.data,
+      });
+      console.log('response', response);
+      if (!response.success) {
+        next(loginQuery)
+      } else {
+        next()
+      }
     } else if (to.name === 'Login' && accessToken) {
       next('/')
     } else {
-      axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
+      // axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
       next()
     }
   })
