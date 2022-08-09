@@ -73,7 +73,13 @@
       </q-card-section>
 
       <ClientInfoInvoiceComponent :tab="tab" :client="client" :items="items.invoice?.data || []" />
-      <ClientInfoGoalsComponent :tab="tab" :client="client" :items="items.goals?.data || []"/>
+      <ClientInfoGoalsComponent
+        :tab="tab"
+        :client="client"
+        :items="items.goals?.data || []"
+        @onCreateGoal="onCreateGoal"
+        @onDeleteGoal="onDeleteGoal"
+      />
     </q-card>
   </div>
 </template>
@@ -174,6 +180,22 @@ onMounted(() => {
 onUnmounted(() => {
   console.log('ClientInfoComponent is unmounted');
 });
+
+const onCreateGoal = goal => {
+  items.goals.data.push(goal);
+};
+
+const onDeleteGoal = goalId => {
+  items.goals.data = items.goals.data.filter(goal => goal.id !== goalId);
+};
+
+const editRatingConfirm = () => {
+  console.log('editRatingConfirm');
+};
+
+const editRatingCancel = () => {
+  console.log('editRatingCancel');
+}
 
 const fileClickHandler = (file) => {
   window.open(file.url, "_blank");
