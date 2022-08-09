@@ -102,6 +102,7 @@ import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import { requestJson, apiRoutes, requestForm } from "src/api";
 import dayjs from "dayjs";
 import { useUtilsStore } from "stores/utils";
+import { required } from "src/utils/validators";
 import DateTimePicker from "components/DateTimePicker";
 
 
@@ -111,7 +112,6 @@ const fetching = ref(true);
 const tab = ref('news');
 const news = reactive({});
 const events = reactive({});
-const required = val => !!val || 'Обязательное поле';
 const items = reactive({
   "news": {
     name: 'news',

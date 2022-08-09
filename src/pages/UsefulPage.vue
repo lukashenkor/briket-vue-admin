@@ -5,7 +5,6 @@
     :items="items"
     v-model="tab"
     @addItemClick="addItemClick"
-    @listItemClick="listItemClick"
     @editItemClick="editItemClick"
     @deleteItemClick="deleteItemClick"
   />
@@ -196,10 +195,6 @@ const selectedItem = reactive({});
 const addItemDialog = ref(false);
 const editItemDialog = ref(false);
 const deleteItemDialog = ref(false);
-
-const listItemClick = item => {
-  console.log('listItemClick - item', item);
-};
 
 const addItemClick = () => {
   for (const key of Object.keys(newItem)) {

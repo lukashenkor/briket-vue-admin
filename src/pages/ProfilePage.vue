@@ -44,13 +44,12 @@
 import { onBeforeMount, ref } from "vue";
 import { useObject } from "src/hooks/useObject";
 import { useRouter } from "vue-router";
+import { minLength, required } from "src/utils/validators";
 
 
 const router = useRouter();
 const waitingResponse = ref(false);
-const required = val => !!val;
 const isPwd = ref(true);
-const minLength = num => val => val.length >= num;
 const user = useObject({
   name: {
     value: '',
@@ -80,12 +79,6 @@ const user = useObject({
     blurred: false,
     type: "password"
   },
-});
-
-onBeforeMount(() => {
-  console.log('Получаем данные о пользователе');
-
-  console.log('Object.keys(user)[0]', Object.keys(user)[0]);
 });
 
 const goBack = () => {

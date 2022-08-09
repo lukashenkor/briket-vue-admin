@@ -133,6 +133,7 @@ import DraggableDialog from "components/DraggableDialog";
 import { useObject } from "src/hooks/useObject";
 import { useUtilsStore } from "stores/utils";
 import { refreshFields, blurred } from "src/utils/object";
+import { required } from "src/utils/validators";
 
 
 const utilsStore = useUtilsStore();
@@ -165,7 +166,6 @@ onBeforeMount( async () => {
     });
 });
 
-const required = val => !!val;
 const createGroup = useObject({
   name: {
     value: '',

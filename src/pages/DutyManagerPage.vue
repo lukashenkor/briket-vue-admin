@@ -105,6 +105,7 @@ import DateTimePicker from "components/DateTimePicker";
 import { apiRoutes, requestJson } from "src/api";
 import { useUtilsStore } from "stores/utils";
 import { blurred } from "src/utils/object";
+import { required } from "src/utils/validators";
 
 
 const utilsStore = useUtilsStore();
@@ -188,7 +189,6 @@ const editingError = ref(null);
 
 
 const editDialog = ref(false);
-const required = val => !!val;
 const selectedRow = useObject({
   name: {
     value: "",
