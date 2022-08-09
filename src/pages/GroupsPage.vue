@@ -8,6 +8,7 @@
       no-data-label="Список групп пуст"
       :rows-per-page-options="[10, 20, 0]"
       v-if="!fetching"
+      :pagination="{sortBy: 'id'}"
     >
       <template v-slot:top-right>
         <q-btn
@@ -257,12 +258,11 @@ const confirmEdit = async () => {
     roles: selectedGroup.roles.value.reduce((acc, role) => [...acc, role.id], [])
   }
   try {
-    const rolesResponse = await requestJson({
+    await requestJson({
       url: apiRoutes.adminRoles,
       method: "PUT",
       body
     });
-    console.log('response', rolesResponse);
 
     if (selectedGroup.name.edited) {
       const groupRequestUrl = `${ apiRoutes.groups }/${ selectedGroup.id.value }`;
@@ -299,7 +299,6 @@ const confirmDelete = async () => {
     if (response.success) {
       rows.value = rows.value.filter(row => row.id !== selectedGroup.id.value);
     }
-    console.log('response', response);
   } finally {
     deleteGroupDialog.value = false;
   }

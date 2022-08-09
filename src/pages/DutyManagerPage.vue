@@ -6,6 +6,7 @@
         :columns="columns"
         :rows="rows"
         row-key="id"
+        :pagination="{sortBy: 'id'}"
       >
         <template v-slot:body="props">
           <q-tr :props="props">

@@ -13,6 +13,7 @@
           v-model:selected="selectedClient"
           @row-click="selectClient"
           :selected-rows-label="(_ => selectedRowLabel)"
+          :pagination="{sortBy: 'id'}"
         />
       </div>
 

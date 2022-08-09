@@ -7,6 +7,7 @@
       row-key="id"
       no-data-label="Список администраторов пуст"
       :rows-per-page-options="[10, 20, 0]"
+      :pagination="{sortBy: 'id', descending: true}"
     >
       <template v-slot:top-right>
         <q-btn
