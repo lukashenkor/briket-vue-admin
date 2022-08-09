@@ -9,6 +9,7 @@ export function useField(field) {
   const edited = ref(false);
   const blurred = ref(field.blurred);
   const isDate = ref(field.isDate);
+  const validators = ref(field.validators);
 
 
   const reassign = val => {
@@ -43,5 +44,6 @@ export function useField(field) {
     attributes: field.attributes,
     hidden: field.hidden,
     input: field.input,
+    validators,
   };
 }
