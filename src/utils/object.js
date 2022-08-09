@@ -9,3 +9,14 @@ export const refreshFields = (object) => {
 export const blurred = (object, field) => {
   object[field].blurred = true;
 };
+
+export const setFields = (row, object) => {
+  Object.entries(row).forEach(entry => {
+    const [key, value] = entry;
+    if (object.hasOwnProperty(key)) {
+      object[key].value = value;
+      object[key].prevValue = value;
+      object[key].blurred = false;
+    }
+  });
+};

@@ -102,7 +102,7 @@ const onGrab = () => {
   min-height: inherit;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
 

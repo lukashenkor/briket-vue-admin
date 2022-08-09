@@ -6,7 +6,7 @@
           <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
             <q-date v-model="value" first-day-of-week="1" :mask="withoutTime ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'" @update:model-value="() => $refs.qDateProxy.hide()" @input="$emit('input', $event.target.value)">
               <div class="row items-center justify-end">
-                <q-btn v-close-popup label="Close" color="primary" flat />
+                <q-btn v-close-popup label="Закрыть" color="primary" flat />
               </div>
             </q-date>
           </q-popup-proxy>
@@ -30,7 +30,6 @@
 
 <script setup>
 import { computed } from "vue";
-import dayjs from "dayjs";
 
 
 const props = defineProps([ "modelValue", "label", "withoutTime", "name" ]);
