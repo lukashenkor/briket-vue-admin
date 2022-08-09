@@ -155,6 +155,8 @@ import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import { useObject } from "src/hooks/useObject";
 import { apiRoutes, requestJson } from "src/api";
 import { useUtilsStore } from "stores/utils";
+import { refreshFields, blurred } from "src/utils/object";
+import { minLength, required } from "src/utils/validators";
 
 
 const fetching = ref(false);
@@ -189,9 +191,8 @@ onBeforeMount(async () => {
 });
 
 const utilsStore = useUtilsStore();
-const required = val => !!val;
-const minLength = num => val => val.length >= num;
 const passwordMinLength = 8;
+const passwordMaxLength = 36;
 const isPwd = ref(true);
 const passwordInputType = computed(() => isPwd.value ? "password" : "text");
 const waitingResponse = computed(() => utilsStore.waitingResponse);
@@ -226,7 +227,7 @@ const selectedAdmin = useObject({
       name: "password",
       label: "Password",
       type: passwordInputType,
-      maxlength: 36,
+      maxlength: passwordMaxLength,
     },
     input: true,
   },
@@ -242,7 +243,7 @@ const selectedAdmin = useObject({
       name: "password_confirm",
       label: "Password Confirm",
       type: passwordInputType,
-      maxlength: 36,
+      maxlength: passwordMaxLength,
     },
     input: true,
   },
@@ -455,26 +456,13 @@ const showCreateDialog = () => {
   createDialog.value = true;
 };
 
-const blurred = (object, field) => {
-  object[field].blurred = true;
-};
-
 const showEditDialog = (row) => {
   setAdminFields(row, selectedAdmin);
   editDialog.value = true;
 };
 
-const refreshAdminObject = (object) => {
-  Object.keys(object).forEach(key => {
-    object[key].value = '';
-    object[key].prevValue = '';
-    object[key].blurred = false;
-    object[key].valid = true;
-  })
-};
-
 const onHideDialog = (object) => {
-  refreshAdminObject(object);
+  refreshFields(object);
   error.value = "";
 };
 

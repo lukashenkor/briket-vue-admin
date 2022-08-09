@@ -8,11 +8,12 @@ export const isPasswordValid = (password) => {
 };
 
 export const isUsernameValid = (username) => {
-  console.log('isUsernameValid');
   return username.search(/^[\s0-9a-zA-Z]{2,}$/g) >= 0;
 };
 
 export const isEmailValid = (email) => {
-  console.log('isEmailValid');
   return (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
 };
+
+export const required = val => !!val;
+export const minLength = num => val => val.length >= num;

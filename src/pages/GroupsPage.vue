@@ -132,14 +132,12 @@ import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import DraggableDialog from "components/DraggableDialog";
 import { useObject } from "src/hooks/useObject";
 import { useUtilsStore } from "stores/utils";
+import { refreshFields, blurred } from "src/utils/object";
 
 
 const utilsStore = useUtilsStore();
 const fetching = ref(false);
 const waitingResponse = computed(() => utilsStore.waitingResponse);
-// console.log('waitingResponse', waitingResponse.value);
-// waitingResponse.value = true;
-// console.log('waitingResponse.value', waitingResponse.value);
 
 const loadingRoles = ref(false);
 const columns = [
@@ -339,21 +337,8 @@ const setGroupFields = (row, object) => {
   });
 };
 
-const refreshGroupObject = (object) => {
-  Object.keys(object).forEach(key => {
-    object[key].value = '';
-    object[key].prevValue = '';
-    object[key].blurred = false;
-    object[key].valid = true;
-  })
-};
-
 const onHideDialog = (object) => {
-  refreshGroupObject(object);
-};
-
-const blurred = (object, field) => {
-  object[field].blurred = true;
+  refreshFields(object);
 };
 </script>
 

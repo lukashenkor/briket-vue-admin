@@ -104,6 +104,7 @@ import FetchSpinnerComponent from "src/components/FetchSpinnerComponent";
 import DateTimePicker from "components/DateTimePicker";
 import { apiRoutes, requestJson } from "src/api";
 import { useUtilsStore } from "stores/utils";
+import { blurred } from "src/utils/object";
 
 
 const utilsStore = useUtilsStore();
@@ -309,9 +310,6 @@ const isInvalidEditing = computed(() => {
   return false;
 });
 
-const blurred = (object, field) => {
-  object[field].blurred = true;
-};
 
 const getErrorMessage = errors => {
   for (const [ key, value ] of Object.entries(errors)) {
