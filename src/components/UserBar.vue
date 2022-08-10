@@ -34,14 +34,13 @@ const goToProfile = () => {
 };
 
 const logout = async () => {
-  // TODO: Доделать функцию выхода из аккаунта
   localStorage.clear();
-  store.updateUsername("");
   await requestJson({
     url: apiRoutes.logout,
     method: "POST",
     message: "Выход из аккаунта",
   });
+  store.$reset();
   await router.push('/login')
   console.log('Logout');
 };
