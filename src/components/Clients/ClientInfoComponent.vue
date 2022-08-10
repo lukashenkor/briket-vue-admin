@@ -34,25 +34,18 @@
         </q-card-section>
         <q-btn
           class="q-ma-md"
-          label="Изменить рейтинг"
+          label="Редактировать"
           color="primary"
-          @click="ratingEdit = true"
-          v-show="!ratingEdit"
+          @click="showEditDialog"
+          v-if="userRoles.includes('corners-update')"
         />
-        <div class="save-rating" v-show="ratingEdit">
-          <q-btn
-            class="q-ma-md"
-            label="Сохранить"
-            color="positive"
-            @click="editRatingConfirm"
-          />
-          <q-btn
-            class="q-ma-md"
-            label="Отмена"
-            color="negative"
-            @click="editRatingCancel"
-          />
-        </div>
+        <q-btn
+          class="q-ma-md"
+          label="Удалить"
+          color="negative"
+          @click="showDeleteDialog"
+          v-if="userRoles.includes('corners-delete')"
+        />
       </q-card>
     </div>
 
@@ -74,27 +67,65 @@
 
       <ClientInfoInvoiceComponent :tab="tab" :client="client" :items="items.invoice?.data || []" />
       <ClientInfoGoalsComponent
+        v-model="items.goals.data"
         :tab="tab"
         :client="client"
-        :items="items.goals?.data || []"
-        @onCreateGoal="onCreateGoal"
-        @onDeleteGoal="onDeleteGoal"
       />
     </q-card>
   </div>
+
+  <DraggableDialog v-model="dialog" :title="dialogTitle">
+    <q-form @submit="submitHandler" style="width: 80%;">
+      <h3 class="q-mx-auto text-center" v-if="deleteMode">Удалить клиента?<br /> <span class="selected-words text-amber-9 text-center">{{ client.label }}</span></h3>
+      <div v-else>
+        <FieldInput
+          v-for="field in Object.values(clientObject).filter(item => item.input)"
+          :key="field.attributes.name"
+          v-model="field.value"
+          :field="field"
+        />
+        <q-slider
+          v-bind="clientObject.rating.attributes"
+          v-model="clientObject.rating.value"
+        />
+      </div>
+      <div class="dialog-buttons">
+        <q-btn
+          :label="submitButtonLabel"
+          color="positive"
+          type="submit"
+          :disable="waitingResponse"
+        />
+        <q-btn
+          label="Отмена"
+          color="primary"
+          v-close-popup
+        />
+      </div>
+    </q-form>
+  </DraggableDialog>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
+import FieldInput from "components/FieldInput";
 import { apiRoutes, requestJson } from "src/api";
 import ClientInfoInvoiceComponent from "components/Clients/ClientInfoInvoiceComponent";
 import ClientInfoGoalsComponent from "components/Clients/ClientInfoGoalsComponent";
+import { useObject } from "src/hooks/useObject";
+import { required } from "src/utils/validators";
+import DraggableDialog from "components/DraggableDialog";
+import { setFields } from "src/utils/object";
+import { useUtilsStore } from "stores/utils";
+import { useUserStore } from "stores/user";
 
 
-const ratingEdit = ref(false);
-const newRating = ref(null);
-const emits = defineEmits(['update:modelValue', 'goBackClick']);
+const userStore = useUserStore();
+const userRoles = computed(() => userStore.roles);
+const utilsStore = useUtilsStore();
+const waitingResponse = computed(() => utilsStore.waitingResponse);
+const emits = defineEmits(['update:modelValue', 'goBackClick', 'onClientDelete']);
 const fetching = ref(false);
 const tab = ref('invoice');
 const props = defineProps({
@@ -141,7 +172,7 @@ const items = reactive({
     deletable: false,
     addable: false,
   }
-})
+});
 
 onMounted(() => {
   console.log('ClientInfoComponent is mounted');
@@ -177,38 +208,162 @@ onMounted(() => {
     });
 });
 
-onUnmounted(() => {
-  console.log('ClientInfoComponent is unmounted');
+const clientObject = useObject({
+  id: {
+    value: '',
+    hidden: true
+  },
+  label: {
+    value: '',
+    prevValue: '',
+    validators: { required },
+    blurred: false,
+    attributes: {
+      name: "label",
+      label: "Имя клиента",
+      type: "text",
+    },
+    input: true,
+  },
+  area: {
+    value: '',
+    prevValue: '',
+    validators: { required },
+    blurred: false,
+    attributes: {
+      name: "area",
+      label: "Площадь",
+      type: "number",
+      step: "0.01",
+    },
+    input: true,
+  },
+  number: {
+    value: '',
+    prevValue: '',
+    validators: { required },
+    blurred: false,
+    attributes: {
+      name: "number",
+      label: "Number",
+      type: "number",
+    },
+    input: true,
+  },
+  power: {
+    value: '',
+    prevValue: '',
+    validators: { required },
+    blurred: false,
+    attributes: {
+      name: "power",
+      label: "Power",
+      type: "number",
+      step: "0.01",
+    },
+    input: true,
+  },
+  rating: {
+    value: 1,
+    prevValue: '',
+    validators: { required },
+    blurred: false,
+    attributes: {
+      "label": true,
+      "name": "rating",
+      "min": 1,
+      "max": 10,
+      markers: true,
+      "marker-labels": true,
+    },
+  }
 });
 
-const onCreateGoal = goal => {
-  items.goals.data.push(goal);
+const editMode = ref(false);
+const deleteMode = ref(false);
+const dialog = computed({
+  get: () => editMode.value || deleteMode.value,
+  set: () => {
+    editMode.value = false;
+    deleteMode.value = false;
+  }
+});
+const dialogTitle = computed(() => {
+  let label = '';
+  if (editMode.value) label = 'Редактирование';
+  if (deleteMode.value) label = 'Удаление';
+  return `${label} клиента`;
+});
+const submitButtonLabel = computed(() => {
+  let label = '';
+  if (editMode.value) label = 'Сохранить';
+  if (deleteMode.value) label = 'Удалить';
+  return label;
+});
+
+const submitHandler = evt => {
+  editMode.value && editClient();
+  deleteMode.value && deleteClient();
 };
 
-const onDeleteGoal = goalId => {
-  items.goals.data = items.goals.data.filter(goal => goal.id !== goalId);
+
+const showEditDialog = () => {
+  console.log('showEditDialog');
+  setFields(client.value, clientObject);
+  editMode.value = true;
 };
 
-const editRatingConfirm = () => {
-  console.log('editRatingConfirm');
+const showDeleteDialog = () => {
+  console.log('showDeleteDialog');
+  deleteMode.value = true;
 };
 
-const editRatingCancel = () => {
-  console.log('editRatingCancel');
-}
+const editClient = async () => {
+  const body = {};
+  for (const [ key, inner ] of Object.entries(clientObject)) {
+    if (!inner.edited || key === 'rating') continue
+    body[key] = inner.value;
+  }
+  try {
+    const response = await requestJson({
+      url: `${apiRoutes.corners}/${client.value.id}`,
+      method: "PUT",
+      body
+    });
+    if (response.success) {
+      Object.entries(body).forEach(([key, value]) => {
+        client.value[key] = value;
+      });
+    }
+  } finally {
+    dialog.value = false;
+  }
+};
+
+const deleteClient = async () => {
+  try {
+    const response = await requestJson({
+      url: `${apiRoutes.corners}/${client.value.id}`,
+      method: "DELETE",
+    });
+    if (response.success) {
+      emits("onClientDelete", client.value.id);
+    }
+  } finally {
+    dialog.value = false;
+  }
+};
 
 const fileClickHandler = (file) => {
   window.open(file.url, "_blank");
 };
-
-const clientInfo = computed(() => {
+computed(() => {
   return client?.value
     ? Object.entries(client?.value).filter(([ key, value ]) => {
       return typeof value === "string" || typeof value === "number";
     })
     : [];
 });
-console.log('clientInfo', clientInfo);
 </script>
 
 <style scoped>
@@ -220,7 +375,7 @@ console.log('clientInfo', clientInfo);
 
 .info-block > div {
   margin: 0 15px;
-  min-width: 300px;
+  min-width: 350px;
 }
 
 .info-block > .info-block__go-back {
@@ -241,6 +396,7 @@ console.log('clientInfo', clientInfo);
 }
 
 .info-block__text {
+  height: min-content;
   max-width: 400px;
   font-size: 24px;
 }
