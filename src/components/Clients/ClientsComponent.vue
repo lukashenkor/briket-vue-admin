@@ -14,15 +14,27 @@
           @row-click="selectClient"
           :selected-rows-label="(_ => selectedRowLabel)"
           :pagination="{sortBy: 'id'}"
-        />
+        >
+          <template v-slot:top-right>
+            <q-btn
+              label="Добавить"
+              color="positive"
+              @click="dialog = true"
+              v-if="userRoles.includes('corners-create')"
+            />
+          </template>
+        </q-table>
       </div>
 
     </q-slide-transition>
     <q-slide-transition :duration="800">
       <div class="client-info" v-show="selectedClient.length" v-if="selectedClient.length">
-        <ClientInfoComponent v-model="selectedClient[0]" @goBackClick="selectedClient = []"/>
+        <ClientInfoComponent v-model="selectedClient[0]" @goBackClick="selectedClient = []" @onClientDelete="onClientDelete"/>
       </div>
     </q-slide-transition>
+    <DraggableDialog v-model="dialog" title="Добавление клиента">
+
+    </DraggableDialog>
   </div>
 </template>
 
@@ -31,8 +43,12 @@ import { computed, onBeforeMount, reactive, ref } from "vue";
 import ClientInfoComponent from 'components/Clients/ClientInfoComponent'
 import FetchSpinnerComponent from 'components/FetchSpinnerComponent'
 import { apiRoutes, requestJson } from "src/api";
+import DraggableDialog from "components/DraggableDialog";
+import { useUserStore } from "stores/user";
 
 
+const userStore = useUserStore();
+const userRoles = computed(() => userStore.roles);
 const props = defineProps([ "isRatingPage" ]);
 const fetching = ref(false);
 const columns = [
@@ -42,10 +58,10 @@ const columns = [
   { name: 'power', label: 'Power', field: 'power', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'number', label: 'Number', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'rating', label: 'Рейтинг', field: 'rating', sortable: true, align: "left", editable: true, readonly: false, },
-  // { name: 'phoneNumber', label: 'Номер телефона', field: 'phoneNumber', sortable: true, align: "center", readonly: false, },
 ];
 
 const rows = reactive({});
+const dialog = ref(false);
 
 onBeforeMount(async () => {
   fetching.value = true;
@@ -76,6 +92,11 @@ const selectClient = (evt, row, index) => {
     selectedClient.value = [ row ];
   }
 };
+
+const onClientDelete = id => {
+  rows.clients = rows.clients.filter(client => client.id !== id);
+  selectedClient.value = [];
+}
 
 </script>
 
