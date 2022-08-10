@@ -1,9 +1,9 @@
 import { route } from 'quasar/wrappers'
 import { createRouter, createMemoryHistory, createWebHistory } from 'vue-router'
 import routes from './routes'
-import axios from "axios";
 import '../api/index';
-import { apiRoutes, requestJson } from "src/api";
+import { useUserStore } from "stores/user";
+import { computed } from "vue";
 
 /*
  * If not building with SSR mode, you can
@@ -30,22 +30,25 @@ export default route(function(/* { store, ssrContext } */) {
   });
 
   Router.beforeEach(async (to, from, next) => {
-    const accessToken = JSON.parse(localStorage.getItem('access_token'));
+    const userStore = useUserStore();
+    const userRoles = computed(() => userStore.roles);
+    const accessToken = computed(() => userStore.accessToken);
     const loginQuery = { path: "/login", query: { redirect: to.fullPath } };
-    if (
-      to.name !== 'Login' &&
-      (!accessToken)
-    ) {
-      const response = await requestJson({
+
+    if (to.name !== 'Login' && !accessToken.value) {
+      next(loginQuery);
+      /* const response = await requestJson({
         url: apiRoutes.data,
       });
       console.log('response', response);
       if (!response.success) {
         next(loginQuery)
       } else {
+        const userStore = useUserStore();
+        userStore.updateRoles(response.data.roles || []);
         next()
-      }
-    } else if (to.name === 'Login' && accessToken) {
+      } */
+    } else if ((to.name === 'Login' && accessToken.value) || (to.meta.role && !userRoles.value.includes(to.meta.role))) {
       next('/')
     } else {
       // axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
