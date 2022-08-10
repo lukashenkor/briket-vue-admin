@@ -1,5 +1,7 @@
 import { boot } from 'quasar/wrappers'
 import axios from 'axios'
+import { apiRoutes, requestJson } from "src/api";
+import { useUserStore } from "stores/user";
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -9,7 +11,7 @@ import axios from 'axios'
 // for each client)
 const api = axios.create({ baseURL: "https://admin.omegapartners.ru" })
 
-export default boot(({ app }) => {
+export default boot( async ({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios
@@ -21,6 +23,14 @@ export default boot(({ app }) => {
   //       so you can easily perform requests against your app's API
 
   axios.defaults.baseURL = "https://admin.omegapartners.ru";
+  const userStore = useUserStore();
+  const response = await requestJson({
+    url: apiRoutes.data,
+  });
+  if (response.success) {
+    userStore.updateRoles(response.data.roles || []);
+    userStore.updateAccessToken(JSON.parse(localStorage.getItem('access_token')));
+  }
 })
 
 export { api }
