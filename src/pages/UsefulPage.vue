@@ -118,6 +118,7 @@ const items = reactive({
       ],
       uploader: {label: "Выберите изображение", name: "img", outlined: true, clearable: true, accept: ".jpg, .jpeg, .png"},
     },
+    role: "additional_promo",
   },
   "guides": {
     name: 'guides',
@@ -133,6 +134,7 @@ const items = reactive({
       ],
       uploader: {label: "Выберите файлы", name: "files", outlined: true, clearable: true, multiple: true,},
     },
+    role: "additional_guides",
   },
   "knowledge": {
     name: 'knowledge',
@@ -149,6 +151,7 @@ const items = reactive({
       ],
       uploader: {label: "Выберите файлы", name: "files", outlined: true, clearable: true, multiple: true,},
     },
+    role: "additional_knowledge",
   },
 });
 

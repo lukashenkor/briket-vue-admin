@@ -138,7 +138,8 @@ const items = reactive({
       ],
       uploader: {label: "Выберите изображение", accept: ".jpg, .jpeg, .png", name: "img", outlined: true, clearable: true},
       dateTimePicker: {label: "Укажите дату", withoutTime: false, name: "date"}
-    }
+    },
+    role: "news",
   },
   "alerts": {
     name: 'alerts',
@@ -165,8 +166,8 @@ const items = reactive({
       ],
       slider: {"label": true, "name": "priority", "min": 1, "max": 10, markers: true, "marker-labels": true},
       dateTimePicker: {label: "Укажите дату", withoutTime: true, name: "date"}
-    }
-
+    },
+    role: "alerts",
   },
   "events": {
     name: 'events',
@@ -193,8 +194,8 @@ const items = reactive({
       ],
       uploader: {label: "Выберите изображение", accept: ".jpg, .jpeg, .png", name: "img", outlined: true, clearable: true},
       dateTimePicker: {label: "Укажите дату", withoutTime: true, name: "date"}
-    }
-
+    },
+    role: "events",
   }
 });
 

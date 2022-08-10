@@ -9,7 +9,7 @@
         class="bg-grey text-white fit"
         @update:model-value="(value) => { emits('update:modelValue', value) }"
       >
-        <q-tab v-for="item in items" :key="item.name" :name="item.name" :icon="item.icon" :label="item.label">
+        <q-tab v-for="item in Object.values(items).filter(i => !i.role || userRoles.includes(i.role))" :key="item.name" :name="item.name" :icon="item.icon" :label="item.label">
           <q-badge color="blue-7" text-color="white" floating v-if="item?.data?.length">{{ item?.data?.length }}</q-badge>
         </q-tab>
 <!--        <q-tab :ripple="false" name="closed" icon="checklist" label="Выполненные" />-->
@@ -46,6 +46,7 @@
 <script setup>
 import ListComponent from "components/ListComponent";
 import { computed } from "vue";
+import { useUserStore } from "stores/user";
 
 const props = defineProps({
   modelValue: {
@@ -63,6 +64,9 @@ const props = defineProps({
 
 // const tab = computed(() => props.tab);
 // const items = computed(() => props.items);
+
+const userStore = useUserStore();
+const userRoles = computed(() => userStore.roles);
 
 const emits = defineEmits([
   "listItemClick",
