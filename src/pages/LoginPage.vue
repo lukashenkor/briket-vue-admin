@@ -78,9 +78,11 @@ const saveUserData = (data) => {
     localStorage.setItem(key, JSON.stringify(value));
     if (key === "user") {
       userStore.updateUsername(value?.username);
+      userStore.updateRoles(value?.roles || []);
     }
   });
   const accessToken = JSON.parse(localStorage.getItem('access_token'));
+  userStore.updateAccessToken(accessToken);
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
 };
 
