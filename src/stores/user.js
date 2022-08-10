@@ -3,6 +3,8 @@ import { defineStore } from 'pinia';
 export const useUserStore = defineStore('user', {
   state: () => ({
     username: '',
+    roles: [],
+    accessToken: '',
   }),
 
   getters: {
@@ -14,6 +16,12 @@ export const useUserStore = defineStore('user', {
   actions: {
     updateUsername (username) {
       this.username = username;
-    }
+    },
+    updateRoles(roles) {
+      this.roles = roles;
+    },
+    updateAccessToken(token) {
+      this.accessToken = token;
+    },
   }
 })
