@@ -37,7 +37,7 @@
   </q-table>
 
   <DraggableDialog v-model="dialog" min-height="300" :title="dialogTitle" @onHide="onHideDialog(goal)">
-    <q-form @submit.prevent="onSubmitHandler" style="width: 80%;">
+    <q-form @submit.prevent="submitHandler" style="width: 80%;">
       <h3 v-if="deleteMode">Удалить цель № {{ goal.id.value }}?</h3>
 
       <div v-else>
@@ -88,22 +88,14 @@ import { refreshFields, blurred, setFields } from "src/utils/object";
 import { required } from "src/utils/validators";
 
 
-const props = defineProps({
-  tab: {
-    type: String,
-    default: ""
-  },
-  client: {
-    type: Object,
-    default: null,
-  },
-  items: {
-    type: Array,
-    default: null,
-  }
-});
+const props = defineProps([ "tab", "client", "modelValue" ]);
 
-const emits = defineEmits([ "onCreateGoal", "onDeleteGoal", "onEditGoal" ]);
+const emits = defineEmits([ "update:modelValue" ]);
+
+const items = computed({
+  get: () => props.modelValue,
+  set: (val) => emits("update:modelValue", val),
+});
 
 const goalsColumns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
@@ -172,16 +164,16 @@ const dialogTitle = computed(() => {
   if (editMode.value) label = 'Редактирование';
   if (deleteMode.value) label = 'Удаление';
   return `${label} цели`;
-})
+});
 const submitButtonLabel = computed(() => {
   let label = '';
   if (createMode.value) label = 'Создать';
   if (editMode.value) label = 'Сохранить';
   if (deleteMode.value) label = 'Удалить';
   return label
-})
+});
 
-const onSubmitHandler = evt => {
+const submitHandler = evt => {
   editMode.value && editGoal();
   createMode.value && createGoal();
   deleteMode.value && deleteGoal();
@@ -201,28 +193,41 @@ const createGoal = async () => {
       method: "POST",
     });
     if (response.success) {
-      emits("onCreateGoal", response.data);
+      items.value = [...items.value, response.data];
     }
   } finally {
-    createMode.value = false;
+    dialog.value = false;
   }
 };
 
 const showEditDialog = item => {
-  console.log('item', item);
   setFields(item, goal);
   editMode.value = true;
 };
 
-const editGoal = () => {
-  const url = `${apiRoutes.goals.replace('[id]', props.client.id)}/${goal.id.value}`;
+const editGoal = async () => {
+  const url = `${ apiRoutes.goals.replace('[id]', props.client.id) }/${ goal.id.value }`;
   const body = {};
-  for (const [key, inner] of Object.entries(goal)) {
+  for (const inner of Object.values(goal)) {
     if (inner.hidden || !inner.edited) continue
-    body[key] = inner.value;
+    body[inner.attributes.name] = inner.value;
   }
-  console.log('url', url);
-  console.log('body', body);
+  try {
+    const response = await requestJson({
+      url,
+      body,
+      method: "PUT",
+    });
+    if (response.success) {
+      const updatedGoal = items.value.find(item => item.id === goal.id.value);
+      for (const [ key, inner ] of Object.entries(goal)) {
+        if (inner.hidden || !inner.edited) continue
+        updatedGoal[key] = inner.value;
+      }
+    }
+  } finally {
+    dialog.value = false;
+  }
 };
 
 const showDeleteDialog = item => {
@@ -239,10 +244,10 @@ const deleteGoal = async () => {
     });
 
     if (response.success) {
-      emits("onDeleteGoal", goal.id.value);
+      items.value = items.value.filter(item => item.id !== goal.id.value);
     }
   } finally {
-    deleteMode.value = false;
+    dialog.value = false;
   }
 }
 
