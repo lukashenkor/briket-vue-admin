@@ -46,8 +46,8 @@
 </template>
 
 <script>
-import { computed, defineComponent, onBeforeMount, ref } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { computed, defineComponent, ref } from "vue";
+import { useRoute } from "vue-router";
 import Routes from "src/router/routes";
 import UserBar from 'components/UserBar'
 import { useUserStore } from "stores/user";
@@ -61,9 +61,10 @@ export default defineComponent({
 
   setup () {
     const store = useUserStore();
+    const userRoles = computed(() => store.roles);
+    const drawer = ref(false);
     const route = useRoute();
-    const drawer = ref(true);
-    const pages = Routes[0].children.filter(page => !page.hidden);
+    const pages = computed(() => Routes[0].children.filter(page => !page.hidden && (!page.meta?.role || userRoles.value?.includes(page.meta?.role))));
     const currentPageName = computed(() => {
       return Routes[0].children.find(page => page.name === route.name)?.title || 'Домашняя страница';
     });
