@@ -14,6 +14,7 @@ export function useField(field) {
 
   const reassign = val => {
     valid.value = true;
+    blurred.value = false;
     if (typeof val === "object" && !Array.isArray(val)) {
       edited.value = val?.value !== prevValue?.value?.value;
     } else {
