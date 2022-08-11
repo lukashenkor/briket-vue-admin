@@ -19,6 +19,7 @@
       :breakpoint="700"
       class="bg-grey-9"
       v-if="!isLoginPage"
+      elevated
     >
       <q-scroll-area class="fit">
         <div class="drawer-list">
@@ -51,6 +52,7 @@ import { useRoute } from "vue-router";
 import Routes from "src/router/routes";
 import UserBar from 'components/UserBar'
 import { useUserStore } from "stores/user";
+import { hasRole } from "src/utils/validators";
 
 
 export default defineComponent({
@@ -61,10 +63,10 @@ export default defineComponent({
 
   setup () {
     const store = useUserStore();
-    const userRoles = computed(() => store.roles);
-    const drawer = ref(false);
+    const userRoles = computed(() => store.data.roles);
+    const drawer = ref(true);
     const route = useRoute();
-    const pages = computed(() => Routes[0].children.filter(page => !page.hidden && (!page.meta?.role || userRoles.value?.includes(page.meta?.role))));
+    const pages = computed(() => Routes[0].children.filter(page => !page.hidden && (!page.meta?.role || hasRole(page.meta?.role, userRoles.value))));
     const currentPageName = computed(() => {
       return Routes[0].children.find(page => page.name === route.name)?.title || 'Домашняя страница';
     });
@@ -72,9 +74,6 @@ export default defineComponent({
     const isLoginPage = computed(() => currentPageName.value.toLowerCase().indexOf('логин') > -1)
 
     const username = computed(() => store.getUsername);
-    if (!username.value) {
-      store.updateUsername(JSON.parse(localStorage.getItem('user'))?.username);
-    }
 
     return {
       drawer,

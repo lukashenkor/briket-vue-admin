@@ -4,6 +4,7 @@ import routes from './routes'
 import '../api/index';
 import { useUserStore } from "stores/user";
 import { computed } from "vue";
+import { hasRole } from "src/utils/validators";
 
 /*
  * If not building with SSR mode, you can
@@ -31,7 +32,7 @@ export default route(function(/* { store, ssrContext } */) {
 
   Router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore();
-    const userRoles = computed(() => userStore.roles);
+    const userRoles = computed(() => userStore.data.roles);
     const accessToken = computed(() => userStore.accessToken);
     const loginQuery = { path: "/login", query: { redirect: to.fullPath } };
 
@@ -48,7 +49,7 @@ export default route(function(/* { store, ssrContext } */) {
         userStore.updateRoles(response.data.roles || []);
         next()
       } */
-    } else if ((to.name === 'Login' && accessToken.value) || (to.meta.role && !userRoles.value.includes(to.meta.role))) {
+    } else if ((to.name === 'Login' && accessToken.value) || (to.meta.role && !hasRole(to.meta.role, userRoles.value) )) {
       next('/')
     } else {
       // axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;

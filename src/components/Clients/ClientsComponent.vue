@@ -48,7 +48,7 @@ import { useUserStore } from "stores/user";
 
 
 const userStore = useUserStore();
-const userRoles = computed(() => userStore.roles);
+const userRoles = computed(() => userStore.data.roles);
 const props = defineProps([ "isRatingPage" ]);
 const fetching = ref(false);
 const columns = [

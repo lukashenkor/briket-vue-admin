@@ -122,7 +122,7 @@ import { useUserStore } from "stores/user";
 
 
 const userStore = useUserStore();
-const userRoles = computed(() => userStore.roles);
+const userRoles = computed(() => userStore.data.roles);
 const utilsStore = useUtilsStore();
 const waitingResponse = computed(() => utilsStore.waitingResponse);
 const emits = defineEmits(['update:modelValue', 'goBackClick', 'onClientDelete']);

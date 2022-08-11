@@ -66,7 +66,7 @@ const props = defineProps({
 // const items = computed(() => props.items);
 
 const userStore = useUserStore();
-const userRoles = computed(() => userStore.roles);
+const userRoles = computed(() => userStore.data.roles);
 
 const emits = defineEmits([
   "listItemClick",

@@ -28,7 +28,7 @@ export default boot( async ({ app }) => {
     url: apiRoutes.data,
   });
   if (response.success) {
-    userStore.updateRoles(response.data.roles || []);
+    userStore.updateUserData(response.data);
     userStore.updateAccessToken(JSON.parse(localStorage.getItem('access_token')));
   }
 })
