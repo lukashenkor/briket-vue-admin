@@ -93,9 +93,8 @@ export default defineComponent({
 
 .drawer-list__element {
   color: #ffffff;
-  margin: 5px auto;
+  margin: 10px 5px;
   position: relative;
-  padding-left: 10px;
 }
 
 .drawer-list__element::after {
@@ -107,6 +106,7 @@ export default defineComponent({
   bottom: 0;
   right: 0;
   border: 1px solid #fff;
+  border-radius: 100px;
 }
 
 .my-page-layout {
