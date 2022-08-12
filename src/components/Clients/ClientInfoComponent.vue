@@ -65,7 +65,11 @@
         </q-tabs>
       </q-card-section>
 
-      <ClientInfoInvoiceComponent :tab="tab" :client="client" :items="items.invoice?.data || []" />
+      <ClientInfoInvoiceComponent
+        v-model="items.invoice.data"
+        :tab="tab"
+        :client="client"
+      />
       <ClientInfoGoalsComponent
         v-model="items.goals.data"
         :tab="tab"
@@ -175,9 +179,6 @@ const items = reactive({
 });
 
 onMounted(() => {
-  console.log('ClientInfoComponent is mounted');
-  console.log('client', client);
-
   fetching.value = true;
   Promise.all([
     requestJson({
@@ -196,8 +197,6 @@ onMounted(() => {
     })
   ])
     .then(([invoiceResponse, goalsResponse]) => {
-      console.log('invoiceResponse', invoiceResponse);
-      console.log('goalsResponse', goalsResponse);
 
       items.invoice.data = invoiceResponse.data.filter(item => item.corner === client.value.id);
       items.goals.data = goalsResponse.data;
