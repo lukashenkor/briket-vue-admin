@@ -10,7 +10,8 @@
         </q-item-section>
 
         <q-item-section side top>
-          <q-item-label caption>{{ dayjs(item.date).format('DD.MM.YYYY HH:mm:ss') }}</q-item-label>
+          <q-item-label caption v-if="item.date">{{ dayjs(item.date).format(dateDisplayFormat) }}</q-item-label>
+          <q-item-label caption v-if="item.priority" style="color: #374bc9">Приоритет:{{ item.priority }}</q-item-label>
         </q-item-section>
       </q-item>
       <div class="list-item__bottom">
@@ -79,6 +80,10 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  dateDisplayFormat: {
+    type: String,
+    default: "YYYY-MM-DD HH:mm:ss"
+  }
 });
 
 

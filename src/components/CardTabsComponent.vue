@@ -36,6 +36,7 @@
           @listItemClick="(value) => emits('listItemClick', value)"
           @editItemClick="(value) => emits('editItemClick', value)"
           @deleteItemClick="(value) => emits('deleteItemClick', value)"
+          :date-display-format="item?.dateDisplayFormat"
         />
       </div>
     </q-card-section>
