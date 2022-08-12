@@ -10,8 +10,8 @@ import { useUserStore } from "stores/user";
 // "export default () => {}" function below (which runs individually
 // for each client)
 const api = axios.create({ baseURL: "https://admin.omegapartners.ru" })
-
-export default boot( async ({ app }) => {
+let routerInstance = null;
+export default boot( async ({ app, router }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios
@@ -21,16 +21,24 @@ export default boot( async ({ app }) => {
   app.config.globalProperties.$api = api
   // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
   //       so you can easily perform requests against your app's API
+  if (!routerInstance) routerInstance = router;
 
+  const accessToken = JSON.parse(localStorage.getItem('access_token'));
   axios.defaults.baseURL = "https://admin.omegapartners.ru";
+  axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
+
   const userStore = useUserStore();
-  const response = await requestJson({
-    url: apiRoutes.data,
-  });
-  if (response.success) {
-    userStore.updateUserData(response.data);
-    userStore.updateAccessToken(JSON.parse(localStorage.getItem('access_token')));
+  userStore.updateAccessToken(accessToken);
+
+  const isLoginPage = !!(window.location.pathname.indexOf('/login') + 1);
+  if (!isLoginPage || accessToken) {
+    const response = await requestJson({
+      url: apiRoutes.data,
+    });
+    if (response.success) {
+      userStore.updateUserData(response.data);
+    }
   }
 })
 
-export { api }
+export { api, routerInstance };
