@@ -15,7 +15,7 @@ export const isEmailValid = (email) => {
   return (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
 };
 
-export const required = val => !!val;
+export const required = val => !!val || val == '0';
 export const minLength = num => val => val.length >= num;
 
 export const hasRole = (requiredRoles, userRoles) => {
