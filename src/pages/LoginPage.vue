@@ -7,12 +7,16 @@
         v-model="loginValue"
         type="text"
         filled
+        :rules="[required]"
+        error-message="Поле не может быть пустым"
       />
       <q-input
         label="Password"
         v-model="passwordValue"
         :type="isPwd ? 'password' : 'text'"
         filled
+        :rules="[required]"
+        error-message="Поле не может быть пустым"
       >
         <template v-slot:append>
           <q-icon
@@ -37,10 +41,10 @@
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { apiRoutes, requestJson } from "src/api";
-import { notifySuccess, notifyError } from "src/utils/notification";
 import { useUserStore } from "stores/user";
 import { useUtilsStore } from "stores/utils";
 import axios from "axios";
+import { required } from "src/utils/validators";
 
 
 const userStore = useUserStore();
@@ -77,8 +81,7 @@ const saveUserData = (data) => {
     const [ key, value ] = entry;
     localStorage.setItem(key, JSON.stringify(value));
     if (key === "user") {
-      userStore.updateUsername(value?.username);
-      userStore.updateRoles(value?.roles || []);
+      userStore.updateUserData(value);
     }
   });
   const accessToken = JSON.parse(localStorage.getItem('access_token'));
