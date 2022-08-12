@@ -51,9 +51,6 @@ export default async function useRequest({ promise, message, notif }) {
           : `${ message } выполнено с ошибкой. ${ JSON.stringify(result.error) }`
       });
     }
-    /* if (!notif && !result.success) {
-      notifyError(`${ message } выполнено с ошибкой. ${ JSON.stringify(result.error) }`);
-    } */
   }
   return result;
 }
