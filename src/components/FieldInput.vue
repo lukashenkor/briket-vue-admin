@@ -3,6 +3,7 @@
     v-model="fieldValue"
     :key="field.attributes.name"
     v-bind="field.attributes"
+    :disable="waitingResponse"
     class="dialog-input"
     :error-message="inputErrorMessage"
     :type="field.attributes.type === 'password' ? isPwd ? 'password' : 'text' : field.attributes.type"
@@ -22,9 +23,11 @@
 
 <script setup>
 import { computed, ref } from "vue";
+import { useUtilsStore } from "stores/utils";
 
 const props = defineProps(['field', 'modelValue']);
-
+const utilsStore = useUtilsStore();
+const waitingResponse = computed(() => utilsStore.waitingResponse);
 const emits = defineEmits(['update:modelValue']);
 const isPwd = ref(props.field.attributes.type === 'password' ? true : null);
 

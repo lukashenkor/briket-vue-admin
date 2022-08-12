@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-none">
-    <q-input dense v-model="value" :label="label" :rules="[val => !!val || 'Введите дату и время']" :name="name">
+    <q-input :disable="waitingResponse" dense v-model="value" :label="label" :rules="[val => !!val || 'Введите дату и время']" :name="name">
       <template v-slot:prepend>
         <q-icon name="event" class="cursor-pointer">
           <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
@@ -30,10 +30,13 @@
 
 <script setup>
 import { computed } from "vue";
+import { useUtilsStore } from "stores/utils";
 
 
 const props = defineProps([ "modelValue", "label", "withoutTime", "name" ]);
 const emits = defineEmits([ "update:modelValue" ]);
+const utilsStore = useUtilsStore();
+const waitingResponse = computed(() => utilsStore.waitingResponse);
 
 const value = computed({
   get() {
