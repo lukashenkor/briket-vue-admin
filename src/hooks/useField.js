@@ -15,7 +15,10 @@ export function useField(field) {
   const reassign = val => {
     valid.value = true;
     blurred.value = false;
-    if (typeof val === "object" && !Array.isArray(val)) {
+    if (val instanceof File || prevValue.value instanceof File) {
+      edited.value = val?.name !== prevValue.value?.name
+        ||  val?.size !== prevValue.value?.size
+    } else if (typeof val === "object" && !Array.isArray(val)) {
       edited.value = val?.value !== prevValue?.value?.value;
     } else {
       edited.value = val !== prevValue.value;
