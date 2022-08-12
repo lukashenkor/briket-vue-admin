@@ -164,7 +164,7 @@ const tabTitles = {
 onMounted(() => {
   const defaultGetParams = {
     offset: 0,
-    limit: 20,
+    limit: 50,
   };
 
   Promise.all([
@@ -183,9 +183,6 @@ onMounted(() => {
   ])
     .then(([promoResponse, guidesResponse, knowledgeResponse]) => {
       fetching.value = false;
-      console.log('promoResponse', promoResponse);
-      console.log('guidesResponse', guidesResponse);
-      console.log('knowledgeResponse', knowledgeResponse);
 
       promoResponse.success && (items.promo.data = promoResponse.data);
       guidesResponse.success && (items.guides.data = guidesResponse.data);
@@ -211,11 +208,14 @@ const addNewItem = async (evt) => {
   console.log('addNewItem');
   const formData = new FormData(evt.target);
   try {
-    await requestForm({
+    const response = await requestForm({
       url: apiRoutes[tab.value],
       formData: formData,
     });
-  //  TODO: Принимать ответ от сервера с новыми данными и добавлять их на странице
+    console.log('response', response);
+    if (response.success) {
+      items[tab.value].data = [response.data, ...items[tab.value].data];
+    }
   } finally {
     addItemDialog.value = false;
   }
@@ -236,17 +236,23 @@ const editItemClick = item => {
 const editConfirm = async (evt) => {
   console.log('editConfirm');
   const formData = new FormData(evt.target);
-  if (!formData.get("files")?.__key) {
-    formData.delete("files");
+  const fileObjectKey = selectedItem.value.hasOwnProperty("img")
+    ? "img"
+    : "files";
+  if (!formData.get(fileObjectKey)?.__key) {
+    formData.delete(fileObjectKey);
   }
   const url = `${apiRoutes[tab.value]}/${selectedItem.value.id}`;
   try {
-    await requestForm({
+    const response = await requestForm({
       url,
       formData,
       method: "PUT",
     });
-
+    if (response.success) {
+      const updatedItemIndex = items[tab.value].data.findIndex(item => item.id === selectedItem.value.id);
+      items[tab.value].data[updatedItemIndex] = response.data;
+    }
   } finally {
     editItemDialog.value = false;
   }
