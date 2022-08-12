@@ -401,16 +401,14 @@ const confirmEdit = async () => {
   }
   const url = `${ apiRoutes.admins }/${ selectedAdmin.id.value }`;
   try {
-
     const response = await requestJson({
       url,
       body,
       method: "PUT",
     });
     if (response.success) {
-      console.log('response.data', response.data);
       const adminIndex = data.admins.findIndex(admin => admin.id === selectedAdmin.id.value);
-      data.admins[adminIndex] = Object.assign({}, response.data);
+      data.admins[adminIndex] = response.data;
     }
   } finally {
     editDialog.value = false;
