@@ -19,6 +19,7 @@
             </template>
           </q-file>
 
+
           <q-slider
             v-if="items[tab].fields.slider"
             v-model="selectedItem.value.priority"
@@ -99,7 +100,7 @@ import { computed, onMounted, reactive, ref } from "vue";
 import DraggableDialog from "components/DraggableDialog";
 import CardTabsComponent from "components/CardTabsComponent";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
-import { requestJson, apiRoutes, requestForm } from "src/api";
+import { apiRoutes, requestForm, requestJson } from "src/api";
 import dayjs from "dayjs";
 import { useUtilsStore } from "stores/utils";
 import { required } from "src/utils/validators";
@@ -121,6 +122,7 @@ const items = reactive({
     editable: true,
     deletable: true,
     addable: true,
+    dateDisplayFormat: "YYYY-MM-DD HH:mm:ss",
     fields: {
       inputs: [
         {
@@ -149,6 +151,7 @@ const items = reactive({
     editable: true,
     deletable: true,
     addable: true,
+    dateDisplayFormat: "YYYY-MM-DD",
     fields: {
       inputs: [
         {
@@ -164,7 +167,15 @@ const items = reactive({
           "rules": [required],
         },
       ],
-      slider: {"label": true, "name": "priority", "min": 1, "max": 10, markers: true, "marker-labels": true},
+      slider: {
+        "label-value": "Приоритет",
+        "label": true,
+        "name": "priority",
+        "min": 1,
+        "max": 10,
+        markers: true,
+        "marker-labels": true,
+      },
       dateTimePicker: {label: "Укажите дату", withoutTime: true, name: "date"}
     },
     role: "alerts",
@@ -177,6 +188,7 @@ const items = reactive({
     editable: true,
     deletable: true,
     addable: true,
+    dateDisplayFormat: "YYYY-MM-DD",
     fields: {
       inputs: [
         {
@@ -200,9 +212,6 @@ const items = reactive({
 });
 
 onMounted( () => {
-  // TODO: add events and news get requests
-  console.log('Отправляем запрос на получение данных');
-
   Promise.all([
     requestJson({
       url: apiRoutes.events,
@@ -213,13 +222,19 @@ onMounted( () => {
     }),
     requestJson({
       url: apiRoutes.news,
-    })
+    }),
+    requestJson({
+      url: apiRoutes.alerts,
+      params: {
+        offset: 0,
+        limit: 500,
+      }
+    }),
   ])
-    .then(([eventsResponse, newsResponse]) => {
-      console.log('eventsResponse', eventsResponse);
-      console.log('newsResponse', newsResponse);
-      items.news.data = newsResponse.data.news.sort((a, b) => dayjs(b.date).isBefore(dayjs(a.date)) ? -1 : 1);
-      items.events.data = eventsResponse.data.sort((a, b) => dayjs(b.date).isBefore(dayjs(a.date)) ? -1 : 1);
+    .then(([eventsResponse, newsResponse, alertsResponse]) => {
+      items.news.data = newsResponse.data.news.sort(sortByDate);
+      items.events.data = eventsResponse.data.sort(sortByDate);
+      items.alerts.data = alertsResponse.data.sort(sortByDate);
     })
     .finally(() => fetching.value = false);
 });
@@ -244,18 +259,16 @@ const editConfirm = async (evt) => {
   }
   const selId = selectedItem.value.id;
   const url = `${apiRoutes[tab.value]}/${selId}`;
-  for (const [ key, value ] of formData) {
-    console.log('key', key);
-    console.log('value', value);
-  }
-  return
   try {
     const response = await requestForm({
       url,
       formData,
       method: "PUT",
     });
-  //  TODO: Получать ответ от сервера и на основе его добавлять изменения на странице
+    if (response.success) {
+      const updatedItemIndex = items[tab.value].data.findIndex(item => item.id === selId);
+      items[tab.value].data[updatedItemIndex] = response.data;
+    }
   } finally {
     editItemDialog.value = false;
   }
@@ -292,18 +305,11 @@ const newItem = reactive({});
 const addNewItem = async (evt) => {
   const formData = new FormData();
   const url = apiRoutes[tab.value];
-  // TODO: Протестировать, как отправляется formData для alerts
-  // const json = Object.fromEntries(new FormData(evt.target));
-  // console.log('json', json);
-  // console.log('evt.target', evt.target);
   for (const [ key, value ] of new FormData(evt.target)) {
     if (value) {
       formData.append(key, value);
-      // console.log('key', key);
-      // console.log('value', value);
     }
   }
-  // return
   try {
     const response = await requestForm({
       url: url,
@@ -311,7 +317,10 @@ const addNewItem = async (evt) => {
       method: "POST",
     });
     if (response.success) {
-
+      items[tab.value].data = [
+        ...items[tab.value].data,
+        response.data
+      ].sort(sortByDate);
       console.log('response.data', response.data);
     }
 
@@ -320,6 +329,7 @@ const addNewItem = async (evt) => {
   }
 };
 
+const sortByDate = (a, b) => dayjs(b.date).isBefore(dayjs(a.date)) ? -1 : 1;
 
 const addItemDialog = ref(false);
 const editItemDialog = ref(false);
