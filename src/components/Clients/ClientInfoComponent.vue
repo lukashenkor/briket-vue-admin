@@ -110,6 +110,13 @@
           v-model="clientObject.rating.value"
         />
         <ClientContactsComponent v-model="clientObject.contacts.value"/>
+        <q-btn
+          class="q-mt-md"
+          label="Добавить контакт"
+          size="sm"
+          @click="addContact"
+        />
+        <p class="text-negative text-subtitle1" v-show="errorMessage">{{ errorMessage }}</p>
       </div>
       <div class="dialog-buttons">
         <q-btn
@@ -136,7 +143,7 @@ import { apiRoutes, requestJson } from "src/api";
 import ClientInfoInvoiceComponent from "components/Clients/ClientInfoInvoiceComponent";
 import ClientInfoGoalsComponent from "components/Clients/ClientInfoGoalsComponent";
 import { useObject } from "src/hooks/useObject";
-import { required } from "src/utils/validators";
+import { required, requiredOfArray } from "src/utils/validators";
 import DraggableDialog from "components/DraggableDialog";
 import { refreshFields, setFields } from "src/utils/object";
 import { useUtilsStore } from "stores/utils";
@@ -298,6 +305,7 @@ const clientObject = useObject({
   },
   contacts: {
     value: null,
+    validators: { requiredOfArray },
   },
 });
 
@@ -346,6 +354,10 @@ const showDeleteDialog = () => {
 };
 
 const editClient = async () => {
+  errorMessage.value = '';
+  if (!clientObject.contacts.valid) {
+    return errorMessage.value = "Список контактов не может быть пуст";
+  }
   const body = {};
   for (const [ key, inner ] of Object.entries(clientObject)) {
     if (!inner.edited || key === 'rating') continue
@@ -359,9 +371,7 @@ const editClient = async () => {
       body
     });
     if (response.success) {
-      // Object.entries(body).forEach(([key, value]) => {
       client.value = { ...client.value, ...response.data };
-      // });
     }
   } finally {
     dialog.value = false;
@@ -379,6 +389,17 @@ const deleteClient = async () => {
     }
   } finally {
     dialog.value = false;
+  }
+};
+
+const errorMessage = ref("");
+
+const addContact = () => {
+  errorMessage.value = "";
+  if (Array.isArray(clientObject.contacts.value)) {
+    clientObject.contacts.value = [...clientObject.contacts.value, {"name": '', "phone": '', "position": ''}];
+  } else {
+    clientObject.contacts.value = [{"name": '', "phone": '', "position": ''}];
   }
 };
 

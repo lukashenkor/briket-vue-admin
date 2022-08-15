@@ -33,7 +33,7 @@ export function useField(field) {
   };
 
 
-  watch(value, reassign);
+  watch(value, reassign, {deep: true});
   reassign(value.value);
 
   return {
