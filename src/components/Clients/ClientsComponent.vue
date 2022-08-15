@@ -12,7 +12,6 @@
           :rows-per-page-options="[10, 20, 0]"
           v-model:selected="selectedClient"
           @row-click="selectClient"
-          :selected-rows-label="(_ => selectedRowLabel)"
           :pagination="{sortBy: 'id'}"
         >
           <template v-slot:top-right>
@@ -33,7 +32,7 @@
       </div>
     </q-slide-transition>
 
-    <DraggableDialog v-model="dialog" title="Добавление клиента" min-width="700">
+    <DraggableDialog v-model="dialog" title="Добавление клиента" min-width="700" :onHide="onHideDialog">
       <q-form @submit.prevent="submitHandler" style="width: 80%;">
         <FieldInput
           v-for="field in Object.values(client).filter(item => item.input)"
@@ -50,7 +49,7 @@
           size="sm"
           @click="addContact"
         />
-
+        <p class="text-negative text-subtitle1" v-show="errorMessage">{{ errorMessage }}</p>
         <div class="dialog-buttons">
           <q-btn
             label="Добавить"
@@ -79,8 +78,9 @@ import { apiRoutes, requestJson } from "src/api";
 import DraggableDialog from "components/DraggableDialog";
 import { useUserStore } from "stores/user";
 import { useObject } from "src/hooks/useObject";
-import { required } from "src/utils/validators";
+import { required, requiredOfArray } from "src/utils/validators";
 import { useUtilsStore } from "stores/utils";
+import { refreshFields } from "src/utils/object";
 
 
 const utilsStore = useUtilsStore();
@@ -171,10 +171,14 @@ const client = useObject({
   },
   contacts: {
     value: null,
+    validators: { requiredOfArray },
   },
 });
 
+const errorMessage = ref("");
+
 const addContact = () => {
+  errorMessage.value = "";
   if (Array.isArray(client.contacts.value)) {
     client.contacts.value = [...client.contacts.value, {"name": '', "phone": '', "position": ''}];
   } else {
@@ -183,7 +187,10 @@ const addContact = () => {
 };
 
 const submitHandler = async () => {
-  console.log('submitHandler');
+  errorMessage.value = '';
+  if (!client.contacts.valid) {
+    return errorMessage.value = "Список контактов не может быть пуст";
+  }
   const body = {};
   for (const [ key, innerObject ] of Object.entries(client)) {
     body[key] = innerObject.value;
@@ -203,10 +210,6 @@ const submitHandler = async () => {
   }
 };
 
-const selectedRowLabel = computed(() => {
-  return `Выбран клиент: ${selectedClient.value.length && selectedClient.value[0].label}`;
-});
-
 const selectClient = (evt, row, index) => {
   console.log('row', row);
   if (!selectedClient.value || !selectedClient.value.length) {
@@ -223,8 +226,8 @@ const goBackClickHandler = () => {
   selectedClient.value = [];
 };
 
+const onHideDialog = () => {
+  refreshFields(client);
+  errorMessage.value = '';
+};
 </script>
-
-<style scoped>
-
-</style>
