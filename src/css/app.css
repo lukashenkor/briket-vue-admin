@@ -38,12 +38,12 @@
   margin-right: 0;
 }
 
-.table-actions i {
+.my-icon {
   transition: all 0.3s;
   cursor: pointer;
 }
 
-.table-actions i:hover {
+.my-icon:hover {
   transform: scale(1.3);
 }
 
