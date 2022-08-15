@@ -67,14 +67,13 @@ const deleteContact = idx => {
 .contacts-item__body {
   display: flex;
   align-items: center;
-}
-
-.contacts-item__body > label {
-  margin: 2px 4px;
+  gap: 5px;
+  margin-top: 2px;
 }
 
 .contacts-item__label {
   font-size: 12px;
   color: #565656;
+  margin-left: 3px;
 }
 </style>
