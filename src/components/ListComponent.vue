@@ -16,8 +16,8 @@
       </q-item>
       <div class="list-item__bottom">
         <div class="list-item__actions" >
-          <q-icon v-if="editable" name="edit" size="md" color="warning" @click.stop="editItemClick(item)"/>
-          <q-icon v-if="deletable" name="delete" size="md" color="negative" @click.stop="deleteItemClick(item)"/>
+          <EditIconComponent v-if="editable" @click.stop="editItemClick(item)"/>
+          <DeleteIconComponent v-if="deletable" @click.stop="deleteItemClick(item)"/>
         </div>
         <q-separator vertical spaced inset />
 
@@ -62,6 +62,8 @@
 <script setup>
 import * as dayjs from "dayjs";
 import { ref } from "vue";
+import EditIconComponent from "components/EditIconComponent";
+import DeleteIconComponent from "components/DeleteIconComponent";
 
 
 defineProps({
@@ -136,6 +138,10 @@ const fileClickHandler = file => {
 
 .list-item__bottom {
   display: flex;
+}
+
+.list-item__wrapper {
+  position: relative;
 }
 
 

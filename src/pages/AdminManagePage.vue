@@ -36,8 +36,8 @@
           </q-td>
 
           <q-td key="actions" :props="props" class="table-actions">
-            <q-icon name="edit" color="warning" size="sm" @click="showEditDialog(props.row)" />
-            <q-icon name="delete" color="negative" size="sm" @click="showDeleteDialog(props.row)" />
+            <EditIconComponent @click="showEditDialog(props.row)"/>
+            <DeleteIconComponent @click="showDeleteDialog(props.row)"/>
           </q-td>
         </q-tr>
       </template>
@@ -157,13 +157,15 @@ import { apiRoutes, requestJson } from "src/api";
 import { useUtilsStore } from "stores/utils";
 import { refreshFields, blurred } from "src/utils/object";
 import { minLength, required } from "src/utils/validators";
+import EditIconComponent from "components/EditIconComponent";
+import DeleteIconComponent from "components/DeleteIconComponent";
 
 
 const fetching = ref(false);
 const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'login', label: 'Login', field: 'login', sortable: true, align: "left", readonly: false, },
-  { name: 'name', label: 'Name', field: 'name', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'login', label: 'Логин', field: 'login', sortable: true, align: "left", readonly: false, },
+  { name: 'name', label: 'Имя', field: 'name', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'usergroup', label: 'Группа', field: 'usergroup', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'actions', label: 'Действия', field: 'actions', align: "left", readonly: true, },
 ];
@@ -211,7 +213,7 @@ const selectedAdmin = useObject({
     blurred: false,
     attributes: {
       name: "login",
-      label: "Login",
+      label: "Логин",
       type: "text",
     },
   },
@@ -225,7 +227,7 @@ const selectedAdmin = useObject({
     blurred: false,
     attributes: {
       name: "password",
-      label: "Password",
+      label: "Пароль",
       type: passwordInputType,
       maxlength: passwordMaxLength,
     },
@@ -241,7 +243,7 @@ const selectedAdmin = useObject({
     blurred: false,
     attributes: {
       name: "password_confirm",
-      label: "Password Confirm",
+      label: "Подтвердите пароль",
       type: passwordInputType,
       maxlength: passwordMaxLength,
     },
@@ -256,7 +258,7 @@ const selectedAdmin = useObject({
     blurred: false,
     attributes: {
       name: "name",
-      label: "Name",
+      label: "Имя",
       type: "text",
     },
     input: true,
@@ -284,8 +286,8 @@ const createAdmin = useObject({
     },
     blurred: false,
     attributes: {
-      label: "Login",
       name: "login",
+      label: "Логин",
       type: "text",
     },
   },
@@ -299,7 +301,7 @@ const createAdmin = useObject({
     blurred: false,
     attributes: {
       name: "password",
-      label: "Password",
+      label: "Пароль",
       type: passwordInputType,
       maxlength: 36,
     },
@@ -314,7 +316,7 @@ const createAdmin = useObject({
     blurred: false,
     attributes: {
       name: "password_confirm",
-      label: "Password Confirm",
+      label: "Подтвердите пароль",
       type: passwordInputType,
       maxlength: 36,
     },
@@ -328,7 +330,7 @@ const createAdmin = useObject({
     blurred: false,
     attributes: {
       name: "name",
-      label: "Name",
+      label: "Имя",
       type: "text",
     },
   },

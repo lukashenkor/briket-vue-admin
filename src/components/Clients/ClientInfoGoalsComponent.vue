@@ -5,6 +5,7 @@
     :columns="goalsColumns"
     v-show="tab === 'goals'"
     no-data-label="Список целей пуст"
+    :pagination="{sortBy: 'id', descending: true}"
   >
     <template v-slot:top-left>
       <q-btn
@@ -29,8 +30,8 @@
           {{ props.row.goal }}
         </q-td>
         <q-td key="actions" :props="props" class="table-actions">
-          <q-icon name="edit" color="warning" size="sm" @click="showEditDialog(props.row)" />
-          <q-icon name="delete" color="negative" size="sm" @click="showDeleteDialog(props.row)" />
+          <EditIconComponent @click="showEditDialog(props.row)"/>
+          <DeleteIconComponent @click="showDeleteDialog(props.row)"/>
         </q-td>
       </q-tr>
     </template>
@@ -86,6 +87,8 @@ import { useUtilsStore } from "stores/utils";
 import { apiRoutes, requestJson } from "src/api";
 import { refreshFields, blurred, setFields } from "src/utils/object";
 import { required } from "src/utils/validators";
+import EditIconComponent from "components/EditIconComponent";
+import DeleteIconComponent from "components/DeleteIconComponent";
 
 
 const props = defineProps([ "tab", "client", "modelValue" ]);
@@ -257,7 +260,3 @@ const onHideDialog = object => {
 };
 
 </script>
-
-<style scoped>
-
-</style>

@@ -36,7 +36,7 @@
             ]).format("YYYY.MM.DD HH:mm") }}
             </q-td>
             <q-td key="actions" :props="props">
-              <q-icon class="cursor-move" name="edit" color="yellow-7" size="sm" @click="showEditDialog(props.row)" />
+              <EditIconComponent size="sm" @click="showEditDialog(props.row)" />
             </q-td>
           </q-tr>
         </template>
@@ -106,6 +106,7 @@ import { apiRoutes, requestJson } from "src/api";
 import { useUtilsStore } from "stores/utils";
 import { blurred } from "src/utils/object";
 import { required } from "src/utils/validators";
+import EditIconComponent from "components/EditIconComponent";
 
 
 const utilsStore = useUtilsStore();
