@@ -16,7 +16,7 @@ export const isEmailValid = (email) => {
 };
 
 export const required = val => !!val || val == '0';
-export const minLength = num => val => val.length >= num;
+export const minLength = num => val => val?.length >= num;
 
 export const hasRole = (requiredRoles, userRoles) => {
   if (Array.isArray(requiredRoles)) {
