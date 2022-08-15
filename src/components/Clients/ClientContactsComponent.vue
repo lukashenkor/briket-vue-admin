@@ -14,6 +14,7 @@
           :rules="[required]"
           error-message="Некорректное значение"
           outlined
+          autofocus
         />
         <q-input
           v-model="contacts[idx]['phone']"
