@@ -95,7 +95,7 @@
     </q-card>
   </div>
 
-  <DraggableDialog v-model="dialog" :title="dialogTitle">
+  <DraggableDialog v-model="dialog" :title="dialogTitle" :onHide="onHideDialog">
     <q-form @submit="submitHandler" style="width: 80%;">
       <h3 class="q-mx-auto text-center" v-if="deleteMode">Удалить клиента?<br /> <span class="selected-words text-amber-9 text-center">{{ client.label }}</span></h3>
       <div v-else>
@@ -138,7 +138,7 @@ import ClientInfoGoalsComponent from "components/Clients/ClientInfoGoalsComponen
 import { useObject } from "src/hooks/useObject";
 import { required } from "src/utils/validators";
 import DraggableDialog from "components/DraggableDialog";
-import { setFields } from "src/utils/object";
+import { refreshFields, setFields } from "src/utils/object";
 import { useUtilsStore } from "stores/utils";
 import { useUserStore } from "stores/user";
 import ClientContactsComponent
@@ -382,13 +382,9 @@ const deleteClient = async () => {
   }
 };
 
-computed(() => {
-  return client?.value
-    ? Object.entries(client?.value).filter(([ key, value ]) => {
-      return typeof value === "string" || typeof value === "number";
-    })
-    : [];
-});
+const onHideDialog = () => {
+  refreshFields(clientObject);
+};
 </script>
 
 <style scoped>

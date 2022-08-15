@@ -13,7 +13,6 @@ export default async function useRequest({ promise, message, notif }) {
   try {
     utilsStore.updateWaitingResponse(true);
     const response = await promise;
-    console.log('response', response);
 
     if (response.status >= 200 && response.status < 300) {
       const data = response.data;
