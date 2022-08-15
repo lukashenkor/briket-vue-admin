@@ -1,6 +1,6 @@
 import axios from "axios";
 import useRequest from "src/hooks/useRequest";
-import { notify } from "src/utils/notification";
+import { getNotify } from "src/utils/notification";
 
 
 const methodToMessage = {
@@ -28,15 +28,6 @@ export const apiRoutes = {
   roles: "/api/adminroles",
   adminRoles: "/api/admingrouprole",
 };
-
-function getNotify(method) {
-  return method.toUpperCase() !== "GET" ?
-    notify({
-      type: "ongoing",
-      message: "Ожидается ответ от сервера",
-    })
-    : null;
-}
 
 export const requestJson = async ({ url, method = "GET", body, params, message }) => {
   const options = {

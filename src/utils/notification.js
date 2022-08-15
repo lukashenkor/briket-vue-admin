@@ -1,6 +1,16 @@
 import { Notify } from "quasar";
 
 
+export function getNotify(method) {
+  return method.toUpperCase() !== "GET" ?
+    notify({
+      type: "ongoing",
+      message: "Ожидается ответ от сервера",
+    })
+    : null;
+}
+
+
 export function notify(options) {
   return Notify.create({ ...options, actions: [ { icon: "close", color: "white" } ] });
 }
