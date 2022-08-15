@@ -2,6 +2,7 @@
   <div class="info-block">
     <div class="info-block__go-back" @click="() => { emits('goBackClick') }">
       <q-icon name="arrow_back" size="40px" />
+      <q-tooltip anchor="top end">Вернуться назад</q-tooltip>
     </div>
     <div class="info-block__text">
       <q-card bordered class="my-card">
@@ -30,6 +31,22 @@
           <p class="info-block__item">
             <span>Рейтинг:</span> {{ client.rating }}
           </p>
+          <div class="info-block__item">
+            <span>Контакты:</span>
+            <div class="info-block__contacts">
+              <q-card
+                v-for="contact in client.contacts"
+                :key="contact.phone"
+                bordered
+
+              >
+                <div class="text-h7">{{ contact.name }}</div>
+                <div class="text-subtitle2">{{ contact.position }}</div>
+                <div class="text-subtitle2">{{ contact.phone }}</div>
+
+              </q-card>
+            </div>
+          </div>
 
         </q-card-section>
         <q-btn
@@ -92,6 +109,7 @@
           v-bind="clientObject.rating.attributes"
           v-model="clientObject.rating.value"
         />
+        <ClientContactsComponent v-model="clientObject.contacts.value"/>
       </div>
       <div class="dialog-buttons">
         <q-btn
@@ -123,6 +141,8 @@ import DraggableDialog from "components/DraggableDialog";
 import { setFields } from "src/utils/object";
 import { useUtilsStore } from "stores/utils";
 import { useUserStore } from "stores/user";
+import ClientContactsComponent
+  from "components/Clients/ClientContactsComponent";
 
 
 const userStore = useUserStore();
@@ -275,7 +295,10 @@ const clientObject = useObject({
       markers: true,
       "marker-labels": true,
     },
-  }
+  },
+  contacts: {
+    value: null,
+  },
 });
 
 const editMode = ref(false);
@@ -307,8 +330,13 @@ const submitHandler = evt => {
 
 
 const showEditDialog = () => {
-  console.log('showEditDialog');
   setFields(client.value, clientObject);
+  const contacts = [];
+  for (const value of Object.values(client.value.contacts)) {
+    const el = Object.assign({}, value)
+    contacts.push(el);
+  }
+  clientObject["contacts"].value = contacts;
   editMode.value = true;
 };
 
@@ -323,6 +351,7 @@ const editClient = async () => {
     if (!inner.edited || key === 'rating') continue
     body[key] = inner.value;
   }
+  body["contacts"] = clientObject.contacts.value;
   try {
     const response = await requestJson({
       url: `${apiRoutes.corners}/${client.value.id}`,
@@ -330,9 +359,9 @@ const editClient = async () => {
       body
     });
     if (response.success) {
-      Object.entries(body).forEach(([key, value]) => {
-        client.value[key] = value;
-      });
+      // Object.entries(body).forEach(([key, value]) => {
+      client.value = { ...client.value, ...response.data };
+      // });
     }
   } finally {
     dialog.value = false;
@@ -353,9 +382,6 @@ const deleteClient = async () => {
   }
 };
 
-const fileClickHandler = (file) => {
-  window.open(file.url, "_blank");
-};
 computed(() => {
   return client?.value
     ? Object.entries(client?.value).filter(([ key, value ]) => {
@@ -416,8 +442,35 @@ computed(() => {
   border-bottom: 1px solid;
 }
 
+.info-block__item > span {
+  color: #232222;
+}
+
 .my-card {
   width: 100%;
   height: 100%;
+}
+
+.info-block__contacts {
+  display: flex;
+  flex-wrap: wrap;
+  word-wrap: anywhere;
+  justify-content: space-between;
+}
+
+.info-block__contacts > div {
+  text-align: center;
+  padding: 5px;
+  margin: 5px;
+  width: 45%;
+}
+
+.tel-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.tel-link:hover {
+  text-decoration: underline;
 }
 </style>
