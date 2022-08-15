@@ -1,6 +1,5 @@
-import { notify, notifyError } from "src/utils/notification";
+import { notify } from "src/utils/notification";
 import { useUtilsStore } from "stores/utils";
-import route from "src/router";
 import { useUserStore } from "stores/user";
 import { routerInstance } from "boot/axios";
 
