@@ -69,7 +69,6 @@
 
 <script setup>
 import * as dayjs from "dayjs";
-import { ref } from "vue";
 import EditIconComponent from "components/EditIconComponent";
 import DeleteIconComponent from "components/DeleteIconComponent";
 
@@ -123,11 +122,6 @@ const fileClickHandler = file => {
 </script>
 
 <style scoped>
-.list-item__id {
-  margin: 0 10px;
-  font-size: 42px;
-}
-
 .list-item__actions {
   margin-top: 5px;
   display: flex;

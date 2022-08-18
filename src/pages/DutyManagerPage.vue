@@ -167,7 +167,6 @@ const rows = ref([]);
 
 
 onMounted(async () => {
-  console.log("Отправка запроса на получение всех записей");
   const defaultGetParams = {
     date_start: "2021-01-01",
     date_end: dayjs().format("YYYY-MM-DD"),

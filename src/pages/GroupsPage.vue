@@ -83,7 +83,7 @@
         <template v-slot:option="{ itemProps, opt, selected, toggleOption }">
           <q-item v-bind="itemProps">
             <q-item-section>
-              <q-item-label > {{ opt.name }} </q-item-label>
+              <q-item-label > {{ opt.title ? opt.title : opt.name }} </q-item-label>
             </q-item-section>
             <q-item-section side>
               <q-toggle :model-value="selected" @update:model-value="toggleOption(opt)" />

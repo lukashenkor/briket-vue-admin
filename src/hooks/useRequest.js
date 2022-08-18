@@ -6,7 +6,6 @@ import { routerInstance } from "boot/axios";
 
 export default async function useRequest({ promise, message, notif }) {
   const utilsStore = useUtilsStore();
-  const userStore = useUserStore();
   const result = {
     success: true
   };
@@ -24,9 +23,10 @@ export default async function useRequest({ promise, message, notif }) {
       result.data = data;
     }
   } catch (error) {
-    console.log('error', error.response.status);
+    console.error('Request fails with error: ', error);
     const status = error.response.status;
     if (status === 401) {
+      const userStore = useUserStore();
       const router = routerInstance;
       userStore.$reset();
       await router.push('/login');

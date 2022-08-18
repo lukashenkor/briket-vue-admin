@@ -9,8 +9,8 @@ const methodToMessage = {
   "POST": "Добавление данных",
 };
 export const apiRoutes = {
-  data: "api/token/data",
-  auth: "api/token/auth",
+  data: "/api/token/data",
+  auth: "/api/token/auth",
   logout: "/api/token/remove",
   feedback: "/api/feedback",
   events: "/api/events",
@@ -21,7 +21,7 @@ export const apiRoutes = {
   knowledge: "/api/additional/knowledge",
   dutymanager: "/api/dutymanager",
   invoice: "/api/finance/invoices",
-  goals: "/api/corners/[id]/goal",
+  goals: "/api/corners/[id]/goal", // must replace [id] with corner's id when set request options
   corners: "/api/corners",
   admins: "/api/admins",
   groups: "/api/admingroups",
