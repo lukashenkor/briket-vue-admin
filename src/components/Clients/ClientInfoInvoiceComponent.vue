@@ -5,13 +5,14 @@
     :columns="invoiceColumns"
     v-show="tab === 'invoice'"
     no-data-label="Список счетов пуст"
+    :pagination="{sortBy: 'id', descending: true}"
   >
     <template v-slot:top-left>
       <q-btn
         label="Добавить"
         color="positive"
         size="md"
-        @click="createDialog = true"
+        @click="createMode = true"
       />
     </template>
     <template v-slot:body="props">
@@ -37,8 +38,8 @@
         <q-td key="number" :props="props">
           {{ props.row.number }}
         </q-td>
-        <q-td key="type" :props="props">
-          {{ props.row.type }}
+        <q-td key="itype" :props="props">
+          {{ props.row.itype }}
         </q-td>
         <q-td key="file" :props="props">
           <q-chip
@@ -51,64 +52,201 @@
           </q-chip>
         </q-td>
         <q-td key="actions" :props="props" class="table-actions">
-          <q-icon name="edit" color="warning" size="sm" @click="showEditDialog(props.row)" />
-          <q-icon name="delete" color="negative" size="sm" @click="showDeleteDialog(props.row)" />
+          <EditIconComponent @click="showEditDialog(props.row)" />
+          <DeleteIconComponent @click="showDeleteDialog(props.row)" />
         </q-td>
       </q-tr>
     </template>
   </q-table>
 
-  <DraggableDialog v-model="createDialog" min-height="300" title="Создание счёта" @onHide="onHideDialog(invoice)">
-    <DateTimePicker
-      v-for="field in Object.values(invoice).filter(item => item.isDate)"
-      :key="field.attributes.name"
-      v-model="field.value"
-      v-bind="field.attributes"
-      @blur="blurred(invoice, field.attributes.name)"
-      class="dialog-input"
-    />
-    <q-input
-      v-for="field in Object.values(invoice).filter(item => item.input)"
-      :key="field.attributes.name"
-      v-model="field.value"
-      v-bind="field.attributes"
-      class="dialog-input"
-      @blur="blurred(invoice, field.attributes.name)"
-      :error="!field.valid && field.blurred"
-      :error-message="field.errors.required ? 'Поле не может быть пустым' : ''"
-    />
-  </DraggableDialog>
+<!--  <DraggableDialog v-model="createDialog" min-height="300" title="Создание счёта" @onHide="onHideDialog(invoice)">
+    <q-form @submit.prevent="createInvoice" style="width: 80%;">
+      <DateTimePicker
+        v-for="field in Object.values(invoice).filter(item => item.isDate)"
+        :key="field.attributes.name"
+        v-model="field.value"
+        v-bind="field.attributes"
+        @blur="blurred(invoice, field.attributes.name)"
+        class="dialog-input"
+        :without-time="true"
+      />
+      <FieldInput
+        v-for="field in Object.values(invoice).filter(item => item.input)"
+        :key="field.attributes.name"
+        v-model="field.value"
+        :field="field"
+        @blur="field.blurred = true"
+      />
+&lt;!&ndash;      <q-input
+        v-for="field in Object.values(invoice).filter(item => item.input)"
+        :key="field.attributes.name"
+        v-model="field.value"
+        v-bind="field.attributes"
+        class="dialog-input"
+        @blur="blurred(invoice, field.attributes.name)"
+        :error="!field.valid && field.blurred"
+        error-message="Поле не может быть пустым"
+        :rules="[...Object.values(field.validators)]"
+      />&ndash;&gt;
+      <q-file
+        v-model="invoice.file.value"
+        v-bind="invoice.file.attributes"
+        :rules="[...Object.values(invoice.file.validators)]"
+        error-message="Поле не может быть пустым"
+      >
+        <template v-slot:prepend>
+          <q-icon name="attach_file" />
+        </template>
+      </q-file>
 
-  <DraggableDialog v-model="editDialog" min-height="300" title="Редактирование счёта" @onHide="onHideDialog(invoice)">
+      <div class="dialog-buttons">
+        <q-btn
+          label="Создать"
+          color="positive"
+          type="submit"
+          :disable="waitingResponse"
+        />
+        <q-btn
+          label="Отмена"
+          color="primary"
+          v-close-popup
+        />
+      </div>
+    </q-form>
+  </DraggableDialog>-->
 
-  </DraggableDialog>
+<!--  <DraggableDialog v-model="editDialog" min-height="300" title="Редактирование счёта" @onHide="onHideDialog(invoice)">
+    <q-form @submit.prevent="editInvoice" style="width: 80%;">
+      <DateTimePicker
+        v-for="field in Object.values(invoice).filter(item => item.isDate)"
+        :key="field.attributes.name"
+        v-model="field.value"
+        v-bind="field.attributes"
+        @blur="blurred(invoice, field.attributes.name)"
+        class="dialog-input"
+        :without-time="true"
+      />
+      <FieldInput
+        v-for="field in Object.values(invoice).filter(item => item.input)"
+        :key="field.attributes.name"
+        v-model="field.value"
+        :field="field"
+        @blur="field.blurred = true"
+      />
+&lt;!&ndash;      <q-input
+        v-for="field in Object.values(invoice).filter(item => item.input)"
+        :key="field.attributes.name"
+        v-model="field.value"
+        v-bind="field.attributes"
+        class="dialog-input"
+        @blur="blurred(invoice, field.attributes.name)"
+        :error="!field.valid && field.blurred"
+        error-message="Поле не может быть пустым"
+        :rules="[...Object.values(field.validators)]"
+      />&ndash;&gt;
+      <q-file
+        v-model="invoice.file.value"
+        v-bind="invoice.file.attributes"
+        :rules="[...Object.values(invoice.file.validators)]"
+        error-message="Поле не может быть пустым"
+      >
+        <template v-slot:prepend>
+          <q-icon name="attach_file" />
+        </template>
+      </q-file>
 
-  <DraggableDialog v-model="deleteDialog" min-height="300" title="Удаление счёта" @onHide="onHideDialog(invoice)">
+      <div class="dialog-buttons">
+        <q-btn
+          label="Сохранить"
+          color="positive"
+          type="submit"
+          :disable="waitingResponse"
+        />
+        <q-btn
+          label="Отмена"
+          color="primary"
+          v-close-popup
+        />
+      </div>
+    </q-form>
+  </DraggableDialog>-->
 
+  <DraggableDialog v-model="dialog" :title="dialogTitle" @onHide="onHideDialog(invoice)">
+    <q-form @submit.prevent="submitHandler" style="width: 80%;">
+      <h3 class="q-mx-auto text-center" v-if="deleteMode">
+        Удалить счёт?
+        <br />
+        <span class="selected-words text-amber-9 text-center">№ {{ invoice.id.value }}</span>
+      </h3>
+      <div v-else>
+        <DateTimePicker
+          v-for="field in Object.values(invoice).filter(item => item.isDate)"
+          :key="field.attributes.name"
+          v-model="field.value"
+          v-bind="field.attributes"
+          @blur="blurred(invoice, field.attributes.name)"
+          class="dialog-input"
+          :without-time="true"
+        />
+        <FieldInput
+          v-for="field in Object.values(invoice).filter(filterInvoiceInputs)"
+          :key="field.attributes.name"
+          v-model="field.value"
+          :field="field"
+          @blur="field.blurred = true"
+        />
+        <q-file
+          v-model="invoice.file.value"
+          v-bind="invoice.file.attributes"
+          :rules="[...Object.values(invoice.file.validators)]"
+          error-message="Поле не может быть пустым"
+          :disable="waitingResponse"
+        >
+          <template v-slot:prepend>
+            <q-icon name="attach_file" />
+          </template>
+        </q-file>
+      </div>
+
+      <div class="dialog-buttons">
+        <q-btn
+          :label="submitButtonLabel"
+          color="positive"
+          type="submit"
+          :disable="waitingResponse"
+        />
+        <q-btn
+          label="Отмена"
+          color="primary"
+          v-close-popup
+        />
+      </div>
+    </q-form>
   </DraggableDialog>
 
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import DraggableDialog from "components/DraggableDialog";
+import FieldInput from "components/FieldInput";
 import { useObject } from "src/hooks/useObject";
 import DateTimePicker from "components/DateTimePicker";
+import { useUtilsStore } from "stores/utils";
+import { apiRoutes, requestForm, requestJson } from "src/api";
+import { refreshFields, blurred, setFields } from "src/utils/object";
+import { required } from "src/utils/validators";
+import EditIconComponent from "components/EditIconComponent";
+import DeleteIconComponent from "components/DeleteIconComponent";
 
 
-const props = defineProps({
-  tab: {
-    type: String,
-    default: ""
-  },
-  client: {
-    type: Object,
-    default: null,
-  },
-  items: {
-    type: Array,
-    default: null,
-  }
+const props = defineProps(['tab', 'client', 'modelValue']);
+
+const emits = defineEmits([ "update:modelValue" ]);/*  */
+
+const items = computed({
+  get: () => props.modelValue,
+  set: (val) => emits("update:modelValue", val),
 });
 
 const invoiceColumns = [
@@ -118,21 +256,44 @@ const invoiceColumns = [
   { name: 'date_end', label: 'Дата окончания', field: 'date_end', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'summ', label: 'Сумма', field: 'summ', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'payed', label: 'Выплачено', field: 'payed', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'number', label: 'Number', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'type', label: 'Тип', field: 'type', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'itype', label: 'Тип', field: 'itype', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'file', label: 'Файл', field: 'file', sortable: false, align: "center", editable: false, readonly: true, },
   { name: 'actions', label: 'Действия', field: 'actions', sortable: false, align: "left", editable: false, readonly: true, },
 ];
 
-const deleteDialog = ref(false);
-const editDialog = ref(false);
-const createDialog = ref(false);
+const utilsStore = useUtilsStore();
+const waitingResponse = computed(() => utilsStore.waitingResponse);
 
-const required = val => !!val;
+const editMode = ref(false);
+const deleteMode = ref(false);
+const createMode = ref(false);
+const dialog = computed({
+  get: () => editMode.value || deleteMode.value || createMode.value,
+  set: () => {
+    editMode.value = false;
+    deleteMode.value = false;
+    createMode.value = false;
+  }
+});
+const dialogTitle = computed(() => {
+  let label = '';
+  if (editMode.value) label = 'Редактирование';
+  if (deleteMode.value) label = 'Удаление';
+  if (createMode.value) label = 'Создание';
+  return `${label} счёта`;
+});
+const submitButtonLabel = computed(() => {
+  let label = '';
+  if (createMode.value) label = 'Добавить';
+  if (editMode.value) label = 'Сохранить';
+  if (deleteMode.value) label = 'Удалить';
+  return label;
+});
+
 const invoice = useObject({
   id: {
     value: '',
-    prevValue: '',
   },
   date: {
     value: '',
@@ -211,11 +372,11 @@ const invoice = useObject({
     input: true,
     attributes: {
       name: "number",
-      label: "Number",
+      label: "Номер",
       type: "number",
     },
   },
-  type: {
+  itype: {
     value: '',
     prevValue: '',
     validators: {
@@ -224,39 +385,112 @@ const invoice = useObject({
     blurred: false,
     input: true,
     attributes: {
-      name: "type",
+      name: "itype",
       label: "Тип",
       type: "number",
     },
   },
   file: {
-    value: '',
-    prevValue: '',
+    value: null,
+    blurred: false,
     validators: {
       required,
     },
-    blurred: false,
+    attributes: {
+      label: "Выберите файл",
+      name: "file",
+      outlined: true,
+      clearable: true,
+    }
   },
 });
 
-const blurred = (object, field) => {
-  object[field].blurred = true;
+
+const submitHandler = evt => {
+  createMode.value && createInvoice(evt);
+  editMode.value && editInvoice(evt);
+  deleteMode.value && deleteInvoice(evt);
+};
+
+const editInvoice = async () => {
+  const formData = new FormData();
+  formData.append("corner", props.client.id);
+  for (const [ key, innerObject ] of Object.entries(invoice)) {
+    if (innerObject.edited) {
+      formData.append(key, innerObject.value);
+    }
+  }
+  const url = `${ apiRoutes.invoice }/${ invoice.id.value }`;
+  try {
+    const response = await requestForm({
+      url,
+      formData,
+      method: "PUT",
+    });
+    if (response.success) {
+      const invoiceIndex = items.value.findIndex(item => item.id === invoice.id.value);
+      items.value[invoiceIndex] = {...response.data};
+    }
+  } finally {
+    dialog.value = false;
+  }
+};
+
+const deleteInvoice = async () => {
+  const url = `${ apiRoutes.invoice }/${ invoice.id.value }`;
+  try {
+    const response = await requestJson({
+      url,
+      method: "DELETE",
+    });
+    if (response.success) {
+      items.value = items.value.filter(item => item.id !== invoice.id.value);
+    }
+  } finally {
+    dialog.value = false;
+  }
+
+};
+
+const createInvoice = async (evt) => {
+  const formData = new FormData(evt.target);
+  formData.append("corner", props.client.id);
+  try {
+    const response = await requestForm({
+      url: apiRoutes.invoice,
+      formData
+    });
+    if (response.success) {
+      items.value = [...items.value, response.data];
+    }
+  } finally {
+    dialog.value = false;
+  }
 };
 
 const showEditDialog = item => {
-  console.log('item', item);
+  setFields(item, invoice);
+  editMode.value = true;
 };
 
 const showDeleteDialog = item => {
-  console.log('item', item);
+  invoice.id.value = item.id;
+  deleteMode.value = true;
 };
 
 const onHideDialog = (object) => {
-  console.log('object', object);
+  refreshFields(object);
 };
 
 const fileClickHandler = (file) => {
   window.open(file.url, '_blank');
+};
+
+const filterInvoiceInputs = item => {
+  if (createMode.value) {
+    return item.input && item.attributes.name !== "payed";
+  }
+  return item.input;
 }
 </script>
 
