@@ -1,16 +1,24 @@
 <template>
   <q-list>
-    <div class="list-item__wrapper" v-for="(item, index) in items" :key="item.id" @click="listItemClickHandler(item)">
+    <div
+      v-for="(item, index) in items"
+      :key="item.id" @click="listItemClickHandler(item)"
+      class="list-item__wrapper"
+      :class="dayjs(item.date).isBefore(dayjs()) ? 'list-item__old' : ''"
+    >
 
       <q-item>
-        <span class="list-item__id">{{ item.id }}</span>
-        <q-item-section>
+        <q-item-section style="padding-left: 20px;">
           <q-item-label>{{ item.title }}</q-item-label>
           <q-item-label caption :lines="lines">{{ item.text }}</q-item-label>
         </q-item-section>
 
         <q-item-section side top>
-          <q-item-label caption v-if="item.date">{{ dayjs(item.date).format(dateDisplayFormat) }}</q-item-label>
+          <q-item-label
+            caption
+            v-if="item.date"
+            :class="dayjs(item.date).isBefore(dayjs()) ? 'list-item__date-old' : ''"
+          >{{ dayjs(item.date).format(dateDisplayFormat) }}</q-item-label>
           <q-item-label caption v-if="item.priority" style="color: #374bc9">Приоритет:{{ item.priority }}</q-item-label>
         </q-item-section>
       </q-item>
@@ -19,7 +27,7 @@
           <EditIconComponent v-if="editable" @click.stop="editItemClick(item)"/>
           <DeleteIconComponent v-if="deletable" @click.stop="deleteItemClick(item)"/>
         </div>
-        <q-separator vertical spaced inset />
+        <q-separator vertical spaced />
 
         <q-img
           style="max-height: 200px;"
@@ -52,7 +60,7 @@
         </div>
       </div>
 
-      <q-separator spaced inset v-if="index !== items.length - 1" />
+      <q-separator spaced v-if="index !== items.length - 1" />
 
       <slot></slot>
     </div>
@@ -142,6 +150,20 @@ const fileClickHandler = file => {
 
 .list-item__wrapper {
   position: relative;
+  cursor: default;
+}
+
+.list-item__old {
+  opacity: .3;
+  transition: .3s;
+}
+
+.list-item__old:hover {
+  opacity: 1;
+}
+
+.list-item__date-old {
+  color: #f59b9b;
 }
 
 
