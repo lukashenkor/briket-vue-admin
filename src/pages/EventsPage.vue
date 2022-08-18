@@ -212,12 +212,13 @@ const items = reactive({
 });
 
 onMounted( () => {
+  const todayPlusYear = dayjs().add(1, 'year').format("YYYY-MM-DD");
   Promise.all([
     requestJson({
       url: apiRoutes.events,
       params: {
         start: "2020-01-01",
-        end: "2023-01-01",
+        end: todayPlusYear,
       }
     }),
     requestJson({
