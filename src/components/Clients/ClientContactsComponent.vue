@@ -29,7 +29,7 @@
         />
         <q-input
           v-model="contacts[idx]['position']"
-          label="Позиция"
+          label="Должность"
           type="text"
           :rules="[required]"
           error-message="Некорректное значение"

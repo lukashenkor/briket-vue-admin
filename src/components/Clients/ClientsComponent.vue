@@ -12,7 +12,10 @@
           :rows-per-page-options="[10, 20, 0]"
           v-model:selected="selectedClient"
           @row-click="selectClient"
-          :pagination="{sortBy: 'id'}"
+          :pagination="{
+            sortBy: isRatingPage ? 'rating' : 'id',
+            descending: isRatingPage,
+          }"
         >
           <template v-slot:top-right>
             <q-btn
@@ -40,6 +43,10 @@
           v-model="field.value"
           :field="field"
           @blur="field.blurred = true"
+        />
+        <q-slider
+          v-bind="client.rating.attributes"
+          v-model="client.rating.value"
         />
         <ClientContactsComponent
           v-model="client.contacts.value"
@@ -93,7 +100,7 @@ const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'label', label: 'Наименование', field: 'label', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'area', label: 'Area', field: 'area', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'power', label: 'Power', field: 'power', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'power', label: 'Мощность', field: 'power', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'rating', label: 'Рейтинг', field: 'rating', sortable: true, align: "left", editable: true, readonly: false, },
 ];
@@ -153,7 +160,7 @@ const client = useObject({
     input: true,
     attributes: {
       name: "power",
-      label: "Power",
+      label: "Мощность",
       type: "number",
     },
   },
@@ -167,6 +174,23 @@ const client = useObject({
       name: "number",
       label: "Номер",
       type: "number",
+    },
+  },
+  rating: {
+    value: 1,
+    prevValue: '',
+    validators: { required },
+    blurred: false,
+    attributes: {
+      "label": true,
+      "label-always": true,
+      "name": "rating",
+      "min": 1.0,
+      "max": 10.0,
+      step: 0.1,
+      markers: 1,
+      markerLabels: true,
+      "label-value": "Рейтинг",
     },
   },
   contacts: {
@@ -210,7 +234,7 @@ const submitHandler = async () => {
   }
 };
 
-const selectClient = (evt, row, index) => {
+const selectClient = (evt, row ) => {
   console.log('row', row);
   if (!selectedClient.value || !selectedClient.value.length) {
     selectedClient.value = [ row ];

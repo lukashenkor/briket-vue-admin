@@ -26,26 +26,20 @@
             <span>Number:</span> {{ client.number }}
           </p>
           <p class="info-block__item">
-            <span>Power:</span> {{ client.power }}
+            <span>Мощность:</span> {{ client.power }}
           </p>
           <p class="info-block__item">
             <span>Рейтинг:</span> {{ client.rating }}
           </p>
           <div class="info-block__item">
-            <span>Контакты:</span>
-            <div class="info-block__contacts">
-              <q-card
-                v-for="contact in client.contacts"
-                :key="contact.phone"
-                bordered
-
-              >
-                <div class="text-h7">{{ contact.name }}</div>
-                <div class="text-subtitle2">{{ contact.position }}</div>
-                <div class="text-subtitle2">{{ contact.phone }}</div>
-
-              </q-card>
-            </div>
+            <q-table
+              :columns="contactsColumns"
+              :rows="client.contacts"
+              hide-bottom
+              title="Контакты"
+              :rows-per-page-options="[0]"
+              flat
+            />
           </div>
 
         </q-card-section>
@@ -165,6 +159,12 @@ const props = defineProps({
   }
 });
 
+const contactsColumns = [
+  { name: 'name', label: 'Имя', field: 'name', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'phone', label: 'Телефон', field: 'phone', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'position', label: 'Должность', field: 'position', sortable: true, align: "left", editable: true, readonly: false, },
+];
+
 const client = computed({
   get() {
     return props.modelValue ? props.modelValue : {};
@@ -283,7 +283,7 @@ const clientObject = useObject({
     blurred: false,
     attributes: {
       name: "power",
-      label: "Power",
+      label: "Мощность",
       type: "number",
       step: "0.01",
     },
@@ -296,11 +296,14 @@ const clientObject = useObject({
     blurred: false,
     attributes: {
       "label": true,
+      "label-always": true,
       "name": "rating",
-      "min": 1,
-      "max": 10,
-      markers: true,
-      "marker-labels": true,
+      "min": 1.0,
+      "max": 10.0,
+      step: 0.1,
+      markers: 1,
+      markerLabels: true,
+      "label-value": "Рейтинг",
     },
   },
   contacts: {
@@ -331,7 +334,7 @@ const submitButtonLabel = computed(() => {
   return label;
 });
 
-const submitHandler = evt => {
+const submitHandler = () => {
   editMode.value && editClient();
   deleteMode.value && deleteClient();
 };
@@ -417,7 +420,7 @@ const onHideDialog = () => {
 
 .info-block > div {
   margin: 0 15px;
-  min-width: 350px;
+  min-width: 400px;
 }
 
 .info-block > .info-block__go-back {
@@ -439,7 +442,7 @@ const onHideDialog = () => {
 
 .info-block__text {
   height: min-content;
-  max-width: 400px;
+  max-width: 430px;
   font-size: 24px;
 }
 
@@ -468,13 +471,6 @@ const onHideDialog = () => {
   height: 100%;
 }
 
-.info-block__contacts {
-  display: flex;
-  flex-wrap: wrap;
-  word-wrap: anywhere;
-  justify-content: space-between;
-}
-
 .info-block__contacts > div {
   text-align: center;
   padding: 5px;
@@ -482,12 +478,4 @@ const onHideDialog = () => {
   width: 45%;
 }
 
-.tel-link {
-  text-decoration: none;
-  color: inherit;
-}
-
-.tel-link:hover {
-  text-decoration: underline;
-}
 </style>
