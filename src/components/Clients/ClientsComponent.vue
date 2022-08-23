@@ -31,7 +31,7 @@
     </q-slide-transition>
     <q-slide-transition :duration="800">
       <div class="client-info" v-show="selectedClient.length" v-if="selectedClient.length">
-        <ClientInfoComponent v-model="selectedClient[0]" @goBackClick="goBackClickHandler" @onClientDelete="onClientDelete"/>
+        <ClientInfoComponent v-model="selectedClient[0]" @goBackClick="goBackClickHandler" @onClientDelete="onClientDelete" @editClient="editClient"/>
       </div>
     </q-slide-transition>
 
@@ -47,6 +47,7 @@
         <q-slider
           v-bind="client.rating.attributes"
           v-model="client.rating.value"
+          :label-value="`Рейтинг: ${client.rating.value}`"
         />
         <ClientContactsComponent
           v-model="client.contacts.value"
@@ -56,7 +57,6 @@
           size="sm"
           @click="addContact"
         />
-        <p class="text-negative text-subtitle1" v-show="errorMessage">{{ errorMessage }}</p>
         <div class="dialog-buttons">
           <q-btn
             label="Добавить"
@@ -114,12 +114,7 @@ onBeforeMount(async () => {
     const response = await requestJson({
       url: apiRoutes.corners
     });
-    if (props.isRatingPage) {
-      // TODO: Добавить сортировку по рейтингу
-      rows.clients = response.data.corners.sort((a, b) => b.number - a.number);
-    } else {
-      rows.clients = response.data.corners;
-    }
+    rows.clients = response.data.corners;
   } finally {
     fetching.value = false;
   }
@@ -179,7 +174,6 @@ const client = useObject({
   rating: {
     value: 1,
     prevValue: '',
-    validators: { required },
     blurred: false,
     attributes: {
       "label": true,
@@ -190,19 +184,15 @@ const client = useObject({
       step: 0.1,
       markers: 1,
       markerLabels: true,
-      "label-value": "Рейтинг",
     },
   },
   contacts: {
     value: null,
-    validators: { requiredOfArray },
   },
 });
 
-const errorMessage = ref("");
 
 const addContact = () => {
-  errorMessage.value = "";
   if (Array.isArray(client.contacts.value)) {
     client.contacts.value = [...client.contacts.value, {"name": '', "phone": '', "position": ''}];
   } else {
@@ -210,15 +200,17 @@ const addContact = () => {
   }
 };
 
+const editClient = editedClient => {
+  const clientIndex = rows.clients.findIndex(row => row.id === editedClient.id);
+  rows.clients[clientIndex] = editedClient;
+};
+
 const submitHandler = async () => {
-  errorMessage.value = '';
-  if (!client.contacts.valid) {
-    return errorMessage.value = "Список контактов не может быть пуст";
-  }
   const body = {};
   for (const [ key, innerObject ] of Object.entries(client)) {
     body[key] = innerObject.value;
   }
+  !body["contacts"] && (body["contacts"] = []);
   try {
     const response = await requestJson({
       url: apiRoutes.corners,
@@ -234,8 +226,7 @@ const submitHandler = async () => {
   }
 };
 
-const selectClient = (evt, row ) => {
-  console.log('row', row);
+const selectClient = (evt, row) => {
   if (!selectedClient.value || !selectedClient.value.length) {
     selectedClient.value = [ row ];
   }
@@ -252,6 +243,5 @@ const goBackClickHandler = () => {
 
 const onHideDialog = () => {
   refreshFields(client);
-  errorMessage.value = '';
 };
 </script>
