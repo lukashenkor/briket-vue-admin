@@ -31,7 +31,7 @@
           <p class="info-block__item">
             <span>Рейтинг:</span> {{ client.rating }}
           </p>
-          <div class="info-block__item">
+          <div class="info-block__item" v-if="client.contacts?.length">
             <q-table
               :columns="contactsColumns"
               :rows="client.contacts"
@@ -86,6 +86,13 @@
         :tab="tab"
         :client="client"
       />
+      <ClientInfoReportComponent
+        v-model="items.report.data"
+        :tab="tab"
+        :client="client"
+        :loading="reportLoading"
+        @onMonthPickerInput="reportMonthChange"
+      />
     </q-card>
   </div>
 
@@ -102,6 +109,7 @@
         <q-slider
           v-bind="clientObject.rating.attributes"
           v-model="clientObject.rating.value"
+          :label-value="`Рейтинг: ${clientObject.rating.value}`"
         />
         <ClientContactsComponent v-model="clientObject.contacts.value"/>
         <q-btn
@@ -110,7 +118,6 @@
           size="sm"
           @click="addContact"
         />
-        <p class="text-negative text-subtitle1" v-show="errorMessage">{{ errorMessage }}</p>
       </div>
       <div class="dialog-buttons">
         <q-btn
@@ -144,20 +151,20 @@ import { useUtilsStore } from "stores/utils";
 import { useUserStore } from "stores/user";
 import ClientContactsComponent
   from "components/Clients/ClientContactsComponent";
+import ClientInfoReportComponent
+  from "components/Clients/ClientInfoReportComponent";
+import dayjs from "dayjs";
 
 
 const userStore = useUserStore();
 const userRoles = computed(() => userStore.data.roles);
 const utilsStore = useUtilsStore();
 const waitingResponse = computed(() => utilsStore.waitingResponse);
-const emits = defineEmits(['update:modelValue', 'goBackClick', 'onClientDelete']);
+const emits = defineEmits(['update:modelValue', 'goBackClick', 'onClientDelete', 'editClient']);
 const fetching = ref(false);
 const tab = ref('invoice');
-const props = defineProps({
-  modelValue: {
-    type: Object
-  }
-});
+const props = defineProps(['modelValue']);
+const reportLoading = ref(false);
 
 const contactsColumns = [
   { name: 'name', label: 'Имя', field: 'name', sortable: true, align: "left", editable: true, readonly: false, },
@@ -194,6 +201,15 @@ const items = reactive({
     deletable: false,
     addable: false,
   },
+  report: {
+    name: "report",
+    label: "Отчёты",
+    icon: "receipt_long",
+    lines: 0,
+    editable: false,
+    deletable: false,
+    addable: false,
+  },
   deviation: {
     name: "deviation",
     label: "Отклонения",
@@ -202,10 +218,11 @@ const items = reactive({
     editable: false,
     deletable: false,
     addable: false,
-  }
+  },
 });
 
 onMounted(() => {
+  const date = dayjs().endOf('month');
   fetching.value = true;
   Promise.all([
     requestJson({
@@ -221,13 +238,21 @@ onMounted(() => {
       params: {
         start: "2020-02-02",
       },
+    }),
+    requestJson({
+      url: apiRoutes.report,
+      params: {
+        start: date.startOf("month").format("YYYY-MM-DD"),
+        end: date.endOf("month").format("YYYY-MM-DD"),
+        corner: client.value.id,
+      },
     })
   ])
-    .then(([invoiceResponse, goalsResponse]) => {
-
-      items.invoice.data = invoiceResponse.data.filter(item => item.corner === client.value.id);
-      items.goals.data = goalsResponse.data;
+    .then(([invoiceResponse, goalsResponse, reportsResponse]) => {
+      items.invoice.data = invoiceResponse.data.filter(item => item.corner === client.value.id) || [];
+      items.goals.data = goalsResponse.data || [];
       items.deviation.data = [];
+      items.report.data = reportsResponse.data || [];
     })
     .finally(() => {
       fetching.value = false;
@@ -303,7 +328,6 @@ const clientObject = useObject({
       step: 0.1,
       markers: 1,
       markerLabels: true,
-      "label-value": "Рейтинг",
     },
   },
   contacts: {
@@ -357,16 +381,12 @@ const showDeleteDialog = () => {
 };
 
 const editClient = async () => {
-  errorMessage.value = '';
-  if (!clientObject.contacts.valid) {
-    return errorMessage.value = "Список контактов не может быть пуст";
-  }
   const body = {};
   for (const [ key, inner ] of Object.entries(clientObject)) {
-    if (!inner.edited || key === 'rating') continue
+    if (!inner.edited) continue
     body[key] = inner.value;
   }
-  body["contacts"] = clientObject.contacts.value;
+  !clientObject["contacts"]?.value?.length && (body["contacts"] = []);
   try {
     const response = await requestJson({
       url: `${apiRoutes.corners}/${client.value.id}`,
@@ -374,7 +394,9 @@ const editClient = async () => {
       body
     });
     if (response.success) {
-      client.value = { ...client.value, ...response.data };
+      const editedClient = { ...client.value, ...response.data };
+      client.value = editedClient;
+      emits('editClient', editedClient);
     }
   } finally {
     dialog.value = false;
@@ -395,10 +417,28 @@ const deleteClient = async () => {
   }
 };
 
-const errorMessage = ref("");
+const reportMonthChange = async dayjsObject => {
+  console.log('dayjsObject.format()', dayjsObject.format('YYYY-MM-DD'));
+  reportLoading.value = true;
+  items.report.data = [];
+  try {
+    const response = await requestJson({
+      url: apiRoutes.report,
+      params: {
+        start: dayjsObject.startOf("month").format("YYYY-MM-DD"),
+        end: dayjsObject.endOf("month").format("YYYY-MM-DD"),
+        corner: client.value.id,
+      }
+    });
+    if (response.success) {
+      items.report.data = response.data;
+    }
+  } finally {
+    reportLoading.value = false;
+  }
+};
 
 const addContact = () => {
-  errorMessage.value = "";
   if (Array.isArray(clientObject.contacts.value)) {
     clientObject.contacts.value = [...clientObject.contacts.value, {"name": '', "phone": '', "position": ''}];
   } else {

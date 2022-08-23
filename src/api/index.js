@@ -22,6 +22,7 @@ export const apiRoutes = {
   dutymanager: "/api/dutymanager",
   invoice: "/api/finance/invoices",
   goals: "/api/corners/[id]/goal", // must replace [id] with corner's id when set request options
+  report: "/api/finance/report",
   corners: "/api/corners",
   admins: "/api/admins",
   groups: "/api/admingroups",
