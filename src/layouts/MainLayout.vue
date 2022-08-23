@@ -34,6 +34,7 @@
               class="router-link"
               exact-active-class="router-link-active"
               exact
+              @click.prevent="drawer = false"
             >
               {{ page.title }}
             </router-link>
