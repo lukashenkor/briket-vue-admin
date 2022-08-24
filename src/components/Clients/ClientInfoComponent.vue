@@ -23,7 +23,7 @@
             <span>Площадь:</span> {{ client.area }}
           </p>
           <p class="info-block__item">
-            <span>Number:</span> {{ client.number }}
+            <span>Номер:</span> {{ client.number }}
           </p>
           <p class="info-block__item">
             <span>Мощность:</span> {{ client.power }}
@@ -70,7 +70,7 @@
           align="justify"
           class="bg-grey text-white fit"
         >
-          <q-tab v-for="item in items" :key="item.name" :name="item.name" :icon="item.icon" :label="item.label">
+          <q-tab v-for="item in Object.values(items).filter(i => userRoles.includes(i.role))" :key="item.name" :name="item.name" :icon="item.icon" :label="item.label">
             <q-badge color="blue-7" text-color="white" floating v-if="item?.data?.length">{{ item?.data?.length }}</q-badge>
           </q-tab>
         </q-tabs>
@@ -80,11 +80,13 @@
         v-model="items.invoice.data"
         :tab="tab"
         :client="client"
+        v-if="userRoles.includes('finance_invoices')"
       />
       <ClientInfoGoalsComponent
         v-model="items.goals.data"
         :tab="tab"
         :client="client"
+        v-if="userRoles.includes('corners-goal')"
       />
       <ClientInfoReportComponent
         v-model="items.report.data"
@@ -92,6 +94,7 @@
         :client="client"
         :loading="reportLoading"
         @onMonthPickerInput="reportMonthChange"
+        v-if="userRoles.includes('finance_report')"
       />
     </q-card>
   </div>
@@ -191,6 +194,7 @@ const items = reactive({
     editable: false,
     deletable: false,
     addable: false,
+    role: "finance_invoices"
   },
   goals: {
     name: "goals",
@@ -200,6 +204,7 @@ const items = reactive({
     editable: false,
     deletable: false,
     addable: false,
+    role: "corners-goal",
   },
   report: {
     name: "report",
@@ -209,8 +214,10 @@ const items = reactive({
     editable: false,
     deletable: false,
     addable: false,
+    role: "finance_report",
   },
-  deviation: {
+  // Нет понимания, что такое отклонения
+  /* deviation: {
     name: "deviation",
     label: "Отклонения",
     icon: "dangerous",
@@ -218,7 +225,7 @@ const items = reactive({
     editable: false,
     deletable: false,
     addable: false,
-  },
+  }, */
 });
 
 onMounted(() => {
@@ -251,7 +258,7 @@ onMounted(() => {
     .then(([invoiceResponse, goalsResponse, reportsResponse]) => {
       items.invoice.data = invoiceResponse.data.filter(item => item.corner === client.value.id) || [];
       items.goals.data = goalsResponse.data || [];
-      items.deviation.data = [];
+      // items.deviation.data = [];
       items.report.data = reportsResponse.data || [];
     })
     .finally(() => {

@@ -21,7 +21,7 @@
 
       <div class="dialog-buttons">
         <q-btn
-          label="Редактировать"
+          label="Сохранить"
           color="positive"
           type="submit"
           :disable="waitingResponse"
@@ -39,7 +39,7 @@
     <h3>Удалить {{ tabTitles[tab] }}?
       <br />
       <span class="selected-words text-blue-grey-9">
-        {{ `${selectedItem.value.id} ${selectedItem.value.title}` }}
+        {{ `${selectedItem.value.title}` }}
       </span>
     </h3>
     <div class="dialog-buttons">
@@ -153,12 +153,29 @@ const items = reactive({
     },
     role: "additional_knowledge",
   },
+  "additionalReports": {
+    name: 'additionalReports',
+    label: 'Отчёты',
+    lines: 0,
+    icon: 'receipt_long',
+    editable: true,
+    deletable: true,
+    addable: true,
+    fields: {
+      inputs: [
+        {"label": "Заголовок", "name": "title", "type": "text"},
+      ],
+      uploader: {label: "Выберите файлы", name: "files", outlined: true, clearable: true, multiple: true,},
+    },
+    role: "additional_reports",
+  },
 });
 
 const tabTitles = {
   guides: 'гайд',
   promo: 'акцию',
   knowledge: 'базу знаний',
+  additionalReports: 'отчёт',
 };
 
 onMounted(() => {
@@ -180,13 +197,18 @@ onMounted(() => {
       url: apiRoutes.knowledge,
       params: defaultGetParams,
     }),
+    requestJson({
+      url: apiRoutes.additionalReports,
+      params: defaultGetParams,
+    }),
   ])
-    .then(([promoResponse, guidesResponse, knowledgeResponse]) => {
+    .then(([promoResponse, guidesResponse, knowledgeResponse, reportsResponse]) => {
       fetching.value = false;
 
       promoResponse.success && (items.promo.data = promoResponse.data);
       guidesResponse.success && (items.guides.data = guidesResponse.data);
       knowledgeResponse.success && (items.knowledge.data = knowledgeResponse.data);
+      reportsResponse.success && (items.additionalReports.data = reportsResponse.data);
 
     });
 });

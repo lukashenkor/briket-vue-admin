@@ -99,7 +99,7 @@ const fetching = ref(false);
 const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'label', label: 'Наименование', field: 'label', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'area', label: 'Area', field: 'area', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'area', label: 'Площадь', field: 'area', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'power', label: 'Мощность', field: 'power', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'rating', label: 'Рейтинг', field: 'rating', sortable: true, align: "left", editable: true, readonly: false, },

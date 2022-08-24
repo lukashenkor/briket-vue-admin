@@ -2,7 +2,8 @@
   <q-list>
     <div
       v-for="(item, index) in items"
-      :key="item.id" @click="listItemClickHandler(item)"
+      :key="item.id"
+      @click="listItemClickHandler(item)"
       class="list-item__wrapper"
       :class="dayjs(item.date).isBefore(dayjs()) ? 'list-item__old' : ''"
     >
@@ -30,11 +31,12 @@
         <q-separator vertical spaced />
 
         <q-img
-          style="max-height: 200px;"
+          :img-style="{maxHeight: '200px'}"
+          :style="{maxHeight: '200px', maxWidth: '300px'}"
           v-if="item?.img?.hasOwnProperty('url')"
           class="q-ml-xl cursor-pointer"
           :src="item.img.url"
-          @click="imgClickHandler($event)"
+          @click="imgClickHandler(item.img)"
           loading="lazy"
           fit="contain"
         >
@@ -109,9 +111,10 @@ const deleteItemClick = item => {
   emits('deleteItemClick', item);
 };
 
-const imgClickHandler = event => {
-  console.log('event', event);
-  window.open(event.target.src, '_blank');
+const imgClickHandler = item => {
+  // console.log('event', event);
+  // window.open(event.target.src, '_blank');
+  window.open(item.url, "_blank");
 };
 
 const fileClickHandler = file => {
@@ -160,5 +163,7 @@ const fileClickHandler = file => {
   color: #f59b9b;
 }
 
-
+.q-img__container {
+  cursor: default !important;
+}
 </style>

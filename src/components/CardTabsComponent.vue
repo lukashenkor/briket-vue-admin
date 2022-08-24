@@ -12,7 +12,6 @@
         <q-tab v-for="item in Object.values(items).filter(i => !i.role || userRoles.includes(i.role))" :key="item.name" :name="item.name" :icon="item.icon" :label="item.label">
           <q-badge color="blue-7" text-color="white" floating v-if="item?.data?.length">{{ item?.data?.length }}</q-badge>
         </q-tab>
-<!--        <q-tab :ripple="false" name="closed" icon="checklist" label="Выполненные" />-->
       </q-tabs>
     </q-card-section>
 

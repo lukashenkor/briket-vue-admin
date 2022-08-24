@@ -19,6 +19,7 @@ export const apiRoutes = {
   promo: "/api/additional/promo",
   guides: "/api/additional/guides",
   knowledge: "/api/additional/knowledge",
+  additionalReports: "/api/additional/reports",
   dutymanager: "/api/dutymanager",
   invoice: "/api/finance/invoices",
   goals: "/api/corners/[id]/goal", // must replace [id] with corner's id when set request options
