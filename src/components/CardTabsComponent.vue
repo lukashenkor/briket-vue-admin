@@ -38,6 +38,8 @@
           :date-display-format="item?.dateDisplayFormat"
         />
       </div>
+      <div v-intersection="onIntersection" />
+      <FetchSpinnerComponent :fetching="fetching"/>
     </q-card-section>
     <slot></slot>
   </q-card>
@@ -45,8 +47,10 @@
 
 <script setup>
 import ListComponent from "components/ListComponent";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useUserStore } from "stores/user";
+import { useUtilsStore } from "stores/utils";
+import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 
 const props = defineProps({
   modelValue: {
@@ -54,6 +58,10 @@ const props = defineProps({
   },
   items: {
     type: Object,
+  },
+  fetching: {
+    type: Boolean,
+    default: false,
   }
 });
 
@@ -73,8 +81,18 @@ const emits = defineEmits([
   "update:modelValue",
   "editItemClick",
   "deleteItemClick",
-  "addItemClick"
+  "addItemClick",
+  "intersection"
 ]);
+
+const onIntersection = {
+  handler(entry) {
+    emits('intersection', entry);
+  },
+  cfg: {
+    threshold: 0,
+  }
+}
 
 const tab = computed({
   get() {

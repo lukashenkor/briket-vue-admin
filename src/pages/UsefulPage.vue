@@ -3,10 +3,12 @@
   <CardTabsComponent
     v-if="!fetching"
     :items="items"
+    :fetching="virtualPagination"
     v-model="tab"
     @addItemClick="addItemClick"
     @editItemClick="editItemClick"
     @deleteItemClick="deleteItemClick"
+    @intersection="onIntersection"
   />
   <DraggableDialog v-model="editItemDialog" title="Редактирование">
     <q-form @submit.prevent="editConfirm" class="q-gutter-md fit" >
@@ -101,6 +103,37 @@ const utilsStore = useUtilsStore();
 const waitingResponse = computed(() => utilsStore.waitingResponse);
 const fetching = ref(true);
 const tab = ref('promo');
+const virtualPagination = ref(false);
+
+
+const fetchLimit = 10;
+const onIntersection = async (entry) => {
+  if (!entry.isIntersecting) return;
+  const tabName = tab.value;
+  if (!items[tabName].requestOffset) return;
+
+  try {
+    virtualPagination.value = true;
+    const response = await requestJson({
+      url: apiRoutes[tabName],
+      params: {
+        offset: items[tabName].requestOffset,
+        limit: fetchLimit,
+      }
+    });
+    if (response.success) {
+      if (response.data?.length === fetchLimit) {
+        items[tabName].requestOffset += fetchLimit;
+      } else {
+        items[tabName].requestOffset = null;
+      }
+      items[tabName].data = [...items[tabName].data, ...response.data];
+    }
+  } finally {
+    virtualPagination.value = false;
+  }
+};
+
 const items = reactive({
   "promo": {
     name: 'promo',
@@ -119,6 +152,7 @@ const items = reactive({
       uploader: {label: "Выберите изображение", name: "img", outlined: true, clearable: true, accept: ".jpg, .jpeg, .png"},
     },
     role: "additional_promo",
+    requestOffset: 0,
   },
   "guides": {
     name: 'guides',
@@ -135,6 +169,7 @@ const items = reactive({
       uploader: {label: "Выберите файлы", name: "files", outlined: true, clearable: true, multiple: true,},
     },
     role: "additional_guides",
+    requestOffset: 0,
   },
   "knowledge": {
     name: 'knowledge',
@@ -152,6 +187,7 @@ const items = reactive({
       uploader: {label: "Выберите файлы", name: "files", outlined: true, clearable: true, multiple: true,},
     },
     role: "additional_knowledge",
+    requestOffset: 0,
   },
   "additionalReports": {
     name: 'additionalReports',
@@ -168,6 +204,7 @@ const items = reactive({
       uploader: {label: "Выберите файлы", name: "files", outlined: true, clearable: true, multiple: true,},
     },
     role: "additional_reports",
+    requestOffset: 0,
   },
 });
 
@@ -179,37 +216,49 @@ const tabTitles = {
 };
 
 onMounted(() => {
-  const defaultGetParams = {
+  const initParams = {
     offset: 0,
-    limit: 50,
-  };
-
+    limit: fetchLimit,
+  }
   Promise.all([
     requestJson({
       url: apiRoutes.promo,
-      params: defaultGetParams,
+      params: initParams,
     }),
     requestJson({
       url: apiRoutes.guides,
-      params: defaultGetParams,
+      params: initParams,
     }),
     requestJson({
       url: apiRoutes.knowledge,
-      params: defaultGetParams,
+      params: initParams,
     }),
     requestJson({
       url: apiRoutes.additionalReports,
-      params: defaultGetParams,
+      params: initParams,
     }),
   ])
     .then(([promoResponse, guidesResponse, knowledgeResponse, reportsResponse]) => {
       fetching.value = false;
 
-      promoResponse.success && (items.promo.data = promoResponse.data);
-      guidesResponse.success && (items.guides.data = guidesResponse.data);
-      knowledgeResponse.success && (items.knowledge.data = knowledgeResponse.data);
-      reportsResponse.success && (items.additionalReports.data = reportsResponse.data);
+      if (promoResponse.success) {
+        items.promo.data = promoResponse.data;
+        items.promo.requestOffset = promoResponse.data?.length < fetchLimit ? null : items.promo.requestOffset + fetchLimit;
+      }
+      if (guidesResponse.success) {
+        items.guides.data = guidesResponse.data;
+        items.guides.requestOffset = guidesResponse.data?.length < fetchLimit ? null : items.guides.requestOffset + fetchLimit;
+      }
 
+      if (knowledgeResponse.success) {
+        items.knowledge.data = knowledgeResponse.data;
+        items.knowledge.requestOffset = knowledgeResponse.data?.length < fetchLimit ? null : items.knowledge.requestOffset + fetchLimit;
+      }
+
+      if (reportsResponse.success) {
+        items.additionalReports.data = reportsResponse.data;
+        items.additionalReports.requestOffset = reportsResponse.data?.length < fetchLimit ? null : items.additionalReports.requestOffset + fetchLimit;
+      }
     });
 });
 
@@ -227,7 +276,6 @@ const addItemClick = () => {
 
 const newItem = reactive({});
 const addNewItem = async (evt) => {
-  console.log('addNewItem');
   const formData = new FormData(evt.target);
   try {
     const response = await requestForm({
@@ -237,6 +285,7 @@ const addNewItem = async (evt) => {
     console.log('response', response);
     if (response.success) {
       items[tab.value].data = [response.data, ...items[tab.value].data];
+      items[tab.value].requestOffset += 1;
     }
   } finally {
     addItemDialog.value = false;
