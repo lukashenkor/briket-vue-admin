@@ -36,6 +36,7 @@
           @editItemClick="(value) => emits('editItemClick', value)"
           @deleteItemClick="(value) => emits('deleteItemClick', value)"
           :date-display-format="item?.dateDisplayFormat"
+          :parentName="parentName"
         />
       </div>
       <div v-intersection="onIntersection" />
@@ -62,6 +63,10 @@ const props = defineProps({
   fetching: {
     type: Boolean,
     default: false,
+  },
+  parentName: {
+    type: String,
+    default: "",
   }
 });
 

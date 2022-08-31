@@ -1,6 +1,6 @@
 <template>
   <FetchSpinnerComponent :fetching="fetching"/>
-  <CardTabsComponent v-if="!fetching" :items="items" v-model="tab" @listItemClick="listItemClick" />
+  <CardTabsComponent v-if="!fetching" :items="items" v-model="tab" @listItemClick="listItemClick" :parent-name="'feedback'" />
 
   <DraggableDialog v-model="dialog" :title="selectedItem?.value?.title" @onHide="onHideDialog">
     <h6>{{ selectedItem.value.title }}</h6>
