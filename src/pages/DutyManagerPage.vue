@@ -37,6 +37,7 @@
             </q-td>
             <q-td key="actions" :props="props">
               <EditIconComponent size="sm" @click="showEditDialog(props.row)" />
+              <DeleteIconComponent size="sm" @click="showDeleteDialog(props.row)" />
             </q-td>
           </q-tr>
         </template>
@@ -92,6 +93,23 @@
       >
         {{ editingError }}</p>
     </DraggableDialog>
+
+    <DraggableDialog v-model="deleteDialog" title="Удаление" @onHide="onHideDialog">
+      <h3>Удалить дежурного менеджера <span style="color: #374bc9">{{ selectedRow.name.value }}</span>?</h3>
+      <div class="dialog-buttons">
+        <q-btn
+          label="Удалить"
+          color="negative"
+          :disable="waitingResponse"
+          @click="confirmDelete"
+        />
+        <q-btn
+          label="Отмена"
+          color="primary"
+          v-close-popup
+        />
+      </div>
+    </DraggableDialog>
   </div>
 </template>
 
@@ -107,6 +125,7 @@ import { useUtilsStore } from "stores/utils";
 import { blurred } from "src/utils/object";
 import { required } from "src/utils/validators";
 import EditIconComponent from "components/EditIconComponent";
+import DeleteIconComponent from "components/DeleteIconComponent";
 
 
 const utilsStore = useUtilsStore();
@@ -189,6 +208,7 @@ const editingError = ref(null);
 
 
 const editDialog = ref(false);
+const deleteDialog = ref(false);
 const selectedRow = useObject({
   name: {
     value: "",
@@ -251,6 +271,10 @@ const setFields = (row, object) => {
   });
 };
 
+const showEditDialog = row => {
+  setFields(row, selectedRow);
+  editDialog.value = true;
+};
 
 const confirmEdit = async () => {
   const dStart = dayjs(selectedRow.date_start.value);
@@ -277,7 +301,6 @@ const confirmEdit = async () => {
     method: "PUT",
     body
   });
-  // return console.log('response', response);
   if (!response.success) {
     return
   }
@@ -291,14 +314,30 @@ const confirmEdit = async () => {
   editDialog.value = false;
 };
 
-const showEditDialog = (row) => {
+const showDeleteDialog = row => {
   setFields(row, selectedRow);
-  editDialog.value = true;
+  deleteDialog.value = true;
+};
+
+const confirmDelete = async () => {
+  try {
+    const url = `${ apiRoutes.dutymanager }/${ selectedRow.id.value }`;
+    const response = await requestJson({
+      url,
+      method: "DELETE",
+    });
+    console.log('response', response);
+    if (response.success) {
+      rows.value = rows.value.filter(row => row.id !== selectedRow.id.value);
+    }
+  } finally {
+    deleteDialog.value = false;
+  }
 };
 
 const onHideDialog = () => {
   editingError.value = '';
-}
+};
 
 
 const isInvalidEditing = computed(() => {
