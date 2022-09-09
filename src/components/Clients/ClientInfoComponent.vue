@@ -20,13 +20,13 @@
             <span>ID:</span> {{ client.id }}
           </p>
           <p class="info-block__item">
-            <span>Площадь:</span> {{ client.area }}
+            <span>Площадь (кв.м.):</span> {{ client.area }}
           </p>
           <p class="info-block__item">
             <span>Номер:</span> {{ client.number }}
           </p>
           <p class="info-block__item">
-            <span>Мощность:</span> {{ client.power }}
+            <span>Мощность (кВт):</span> {{ client.power }}
           </p>
           <p class="info-block__item">
             <span>Рейтинг:</span> {{ client.rating }}
