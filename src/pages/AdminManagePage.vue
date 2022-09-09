@@ -221,8 +221,7 @@ const selectedAdmin = useObject({
     value: '',
     prevValue: '',
     validators: {
-      required,
-      minLength: minLength(passwordMinLength),
+      minLength: minLength(passwordMinLength, true),
     },
     blurred: false,
     attributes: {
@@ -237,8 +236,7 @@ const selectedAdmin = useObject({
     value: '',
     prevValue: '',
     validators: {
-      required,
-      minLength: minLength(passwordMinLength),
+      minLength: minLength(passwordMinLength, true),
     },
     blurred: false,
     attributes: {
