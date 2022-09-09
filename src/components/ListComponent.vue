@@ -18,6 +18,7 @@
           <q-item-label
             caption
             v-if="item.date"
+            class="date-caption"
             :class="parentName !== 'feedback' && dayjs(item.date).isBefore(dayjs()) ? 'list-item__date-old' : ''"
           >{{ dayjs(item.date).format(dateDisplayFormat) }}</q-item-label>
           <q-item-label caption v-if="item.priority" style="color: #374bc9">Приоритет:{{ item.priority }}</q-item-label>
@@ -73,6 +74,7 @@
 import * as dayjs from "dayjs";
 import EditIconComponent from "components/EditIconComponent";
 import DeleteIconComponent from "components/DeleteIconComponent";
+import { newTabImage } from "src/utils/file";
 
 
 defineProps({
@@ -116,9 +118,7 @@ const deleteItemClick = item => {
 };
 
 const imgClickHandler = item => {
-  // console.log('event', event);
-  // window.open(event.target.src, '_blank');
-  window.open(item.url, "_blank");
+  newTabImage(item.url);
 };
 
 const fileClickHandler = file => {
@@ -169,5 +169,10 @@ const fileClickHandler = file => {
 
 .q-img__container {
   cursor: default !important;
+}
+
+.date-caption {
+  font-weight: 500;
+  font-size: 0.85rem;
 }
 </style>
