@@ -1,5 +1,5 @@
 import { route } from 'quasar/wrappers'
-import { createRouter, createMemoryHistory, createWebHistory } from 'vue-router'
+import { createRouter, createMemoryHistory, createWebHashHistory } from 'vue-router'
 import routes from './routes'
 import '../api/index';
 import { useUserStore } from "stores/user";
@@ -18,7 +18,7 @@ import { hasRole } from "src/utils/validators";
 export default route(function(/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
-    : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHistory)
+    : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHashHistory : createWebHashHistory)
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
