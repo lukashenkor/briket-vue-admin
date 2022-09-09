@@ -118,7 +118,7 @@ const deleteItemClick = item => {
 };
 
 const imgClickHandler = item => {
-  newTabImage(item.url);
+  newTabImage(item);
 };
 
 const fileClickHandler = file => {

@@ -6,11 +6,12 @@ export async function getFileFromUrl(url, name, defaultType = 'image/jpeg'){
   });
 }
 
-export function newTabImage(url) {
+export function newTabImage(file) {
   const image = new Image();
-  image.src = url;
+  image.src = file.url;
 
   const w = window.open("",'_blank');
   w.document.write(image.outerHTML);
+  w.document.title = file.name;
   w.document.close();
 }
