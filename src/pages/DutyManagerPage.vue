@@ -20,7 +20,7 @@
               {{ props.row.phone }}
             </q-td>
             <q-td key="date_start" :props="props">
-              {{ dayjs(props.row.date_start, [
+              {{ props?.row?.date_start && dayjs(props.row.date_start, [
               "DD.MM.YYYY HH:mm:ss",
               "DD.MM.YYYY HH:mm",
               "DD.MM.YYYY",
@@ -28,7 +28,7 @@
             ]).format("YYYY.MM.DD HH:mm") }}
             </q-td>
             <q-td key="date_end" :props="props">
-              {{ dayjs(props.row.date_end, [
+              {{ props?.row?.date_end && dayjs(props.row?.date_end, [
               "DD.MM.YYYY HH:mm:ss",
               "DD.MM.YYYY HH:mm",
               "DD.MM.YYYY",
