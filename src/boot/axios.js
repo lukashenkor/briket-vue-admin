@@ -9,7 +9,11 @@ import { useUserStore } from "stores/user";
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: "https://admin.omegapartners.ru" })
+const baseURL =
+  process.env.NODE_ENV === "development"
+    ? "http://127.0.0.1:5001"
+    : "https://admin.omegapartners.ru";
+const api = axios.create({ baseURL })
 let routerInstance = null;
 export default boot( async ({ app, router }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
@@ -24,7 +28,7 @@ export default boot( async ({ app, router }) => {
   if (!routerInstance) routerInstance = router;
 
   const accessToken = JSON.parse(localStorage.getItem('access_token'));
-  axios.defaults.baseURL = "https://admin.omegapartners.ru";
+  axios.defaults.baseURL = baseURL;
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
 
   const userStore = useUserStore();
