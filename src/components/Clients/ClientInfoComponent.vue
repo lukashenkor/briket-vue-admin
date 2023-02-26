@@ -251,7 +251,7 @@ onMounted(() => {
       params: {
         start: date.startOf("month").format("YYYY-MM-DD"),
         end: date.endOf("month").format("YYYY-MM-DD"),
-        corner: client.value.id,
+        corner_id: client.value.id,
       },
     })
   ])
@@ -425,7 +425,6 @@ const deleteClient = async () => {
 };
 
 const reportMonthChange = async dayjsObject => {
-  console.log('dayjsObject.format()', dayjsObject.format('YYYY-MM-DD'));
   reportLoading.value = true;
   items.report.data = [];
   try {
@@ -434,7 +433,7 @@ const reportMonthChange = async dayjsObject => {
       params: {
         start: dayjsObject.startOf("month").format("YYYY-MM-DD"),
         end: dayjsObject.endOf("month").format("YYYY-MM-DD"),
-        corner: client.value.id,
+        corner_id: client.value.id,
       }
     });
     if (response.success) {

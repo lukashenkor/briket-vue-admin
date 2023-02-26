@@ -85,7 +85,7 @@ import { apiRoutes, requestJson } from "src/api";
 import DraggableDialog from "components/DraggableDialog";
 import { useUserStore } from "stores/user";
 import { useObject } from "src/hooks/useObject";
-import { required, requiredOfArray } from "src/utils/validators";
+import { minLength, required } from 'src/utils/validators';
 import { useUtilsStore } from "stores/utils";
 import { refreshFields } from "src/utils/object";
 
@@ -103,6 +103,7 @@ const columns = [
   { name: 'power', label: 'Мощность (кВт)', field: 'power', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'rating', label: 'Рейтинг', field: 'rating', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'login', label: 'Логин', field: 'login', sortable: false, align: "left", editable: false, readonly: true, },
 ];
 
 const rows = reactive({});
@@ -121,6 +122,9 @@ onBeforeMount(async () => {
 });
 
 const selectedClient = ref([]);
+
+const passwordMinLength = 8;
+const passwordMaxLength = 36;
 
 const client = useObject({
   label: {
@@ -184,6 +188,31 @@ const client = useObject({
       step: 0.1,
       markers: 1,
       markerLabels: true,
+    },
+  },
+  login: {
+    value: "",
+    prevValue: "",
+    validators: { required },
+    blurred: false,
+    input: true,
+    attributes: {
+      name: "login",
+      label: "Логин клиента",
+      type: "text",
+    },
+  },
+  password: {
+    value: "",
+    prevValue: "",
+    validators: { required, minLength: minLength(passwordMinLength) },
+    blurred: false,
+    input: true,
+    attributes: {
+      name: "password",
+      label: "Пароль клиента",
+      type: "password",
+      maxlength: passwordMaxLength
     },
   },
   contacts: {

@@ -20,8 +20,8 @@
         <q-td key="id" :props="props">
           {{ props.row.id }}
         </q-td>
-        <q-td key="date" :props="props">
-          {{ props.row.date }}
+        <q-td key="date_at" :props="props">
+          {{ props.row.date_at }}
         </q-td>
         <q-td key="date_start" :props="props">
           {{ props.row.date_start }}
@@ -29,17 +29,17 @@
         <q-td key="date_end" :props="props">
           {{ props.row.date_end }}
         </q-td>
-        <q-td key="summ" :props="props">
-          {{ props.row.summ }}
+        <q-td key="amount" :props="props">
+          {{ props.row.amount }}
         </q-td>
-        <q-td key="payed" :props="props">
-          {{ props.row.payed }}
+        <q-td key="paid" :props="props">
+          {{ props.row.paid }}
         </q-td>
         <q-td key="number" :props="props">
           {{ props.row.number }}
         </q-td>
-        <q-td key="itype" :props="props">
-          {{ props.row.itype }}
+        <q-td key="type" :props="props">
+          {{ props.row.type }}
         </q-td>
         <q-td key="file" :props="props">
           <q-chip
@@ -251,13 +251,13 @@ const items = computed({
 
 const invoiceColumns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'date', label: 'Дата', field: 'date', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'date_at', label: 'Дата', field: 'date_at', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'date_start', label: 'Дата начала', field: 'date_start', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'date_end', label: 'Дата окончания', field: 'date_end', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'summ', label: 'Сумма', field: 'summ', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'payed', label: 'Выплачено', field: 'payed', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'amount', label: 'Сумма', field: 'amount', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'paid', label: 'Выплачено', field: 'paid', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'itype', label: 'Тип', field: 'itype', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'type', label: 'Тип', field: 'type', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'file', label: 'Файл', field: 'file', sortable: false, align: "center", editable: false, readonly: true, },
   { name: 'actions', label: 'Действия', field: 'actions', sortable: false, align: "left", editable: false, readonly: true, },
 ];
@@ -295,7 +295,7 @@ const invoice = useObject({
   id: {
     value: '',
   },
-  date: {
+  date_at: {
     value: '',
     prevValue: '',
     validators: {
@@ -304,7 +304,7 @@ const invoice = useObject({
     blurred: false,
     isDate: true,
     attributes: {
-      name: "date",
+      name: "date_at",
       label: "Дата",
     },
   },
@@ -334,7 +334,7 @@ const invoice = useObject({
       label: "Дата окончания",
     },
   },
-  summ: {
+  amount: {
     value: '',
     prevValue: '',
     validators: {
@@ -343,12 +343,12 @@ const invoice = useObject({
     blurred: false,
     input: true,
     attributes: {
-      name: "summ",
+      name: "amount",
       label: "Сумма",
       type: "number",
     },
   },
-  payed: {
+  paid: {
     value: '',
     prevValue: '',
     validators: {
@@ -357,7 +357,7 @@ const invoice = useObject({
     blurred: false,
     input: true,
     attributes: {
-      name: "payed",
+      name: "paid",
       label: "Выплачено",
       type: "number",
     },
@@ -376,7 +376,7 @@ const invoice = useObject({
       type: "number",
     },
   },
-  itype: {
+  type: {
     value: '',
     prevValue: '',
     validators: {
@@ -385,7 +385,7 @@ const invoice = useObject({
     blurred: false,
     input: true,
     attributes: {
-      name: "itype",
+      name: "type",
       label: "Тип",
       type: "number",
     },
@@ -414,7 +414,7 @@ const submitHandler = evt => {
 
 const editInvoice = async () => {
   const formData = new FormData();
-  formData.append("corner", props.client.id);
+  formData.append("corner_id", props.client.id);
   for (const [ key, innerObject ] of Object.entries(invoice)) {
     if (innerObject.edited) {
       formData.append(key, innerObject.value);
@@ -454,7 +454,7 @@ const deleteInvoice = async () => {
 
 const createInvoice = async (evt) => {
   const formData = new FormData(evt.target);
-  formData.append("corner", props.client.id);
+  formData.append("corner_id", props.client.id);
   try {
     const response = await requestForm({
       url: apiRoutes.invoice,
@@ -488,7 +488,7 @@ const fileClickHandler = (file) => {
 
 const filterInvoiceInputs = item => {
   if (createMode.value) {
-    return item.input && item.attributes.name !== "payed";
+    return item.input && item.attributes.name !== "paid";
   }
   return item.input;
 }
