@@ -21,6 +21,7 @@ export const apiRoutes = {
   knowledge: "/api/additional/knowledge",
   additionalReports: "/api/additional/reports",
   dutymanager: "/api/dutymanager",
+  shift: "/api/dutymanager/shift",
   invoice: "/api/finance/invoices",
   goals: "/api/corners/[id]/goal", // must replace [id] with corner's id when set request options
   report: "/api/finance/report",
