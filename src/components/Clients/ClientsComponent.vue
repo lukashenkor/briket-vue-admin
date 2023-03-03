@@ -99,7 +99,7 @@ const fetching = ref(false);
 const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'label', label: 'Наименование', field: 'label', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'area', label: 'Площадь (кв.м.)', field: 'area', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'area_size', label: 'Площадь (кв.м.)', field: 'area_size', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'power', label: 'Мощность (кВт)', field: 'power', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'rating', label: 'Рейтинг', field: 'rating', sortable: true, align: "left", editable: true, readonly: false, },
@@ -246,7 +246,6 @@ const submitHandler = async () => {
       method: "POST",
       body,
     });
-    console.log('new client response', response);
     if (response.success) {
       rows.clients = [ ...rows.clients, response.data ];
     }

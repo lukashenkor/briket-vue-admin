@@ -20,7 +20,7 @@
             <span>ID:</span> {{ client.id }}
           </p>
           <p class="info-block__item">
-            <span>Площадь (кв.м.):</span> {{ client.area }}
+            <span>Площадь (кв.м.):</span> {{ client.area_size }}
           </p>
           <p class="info-block__item">
             <span>Номер:</span> {{ client.number }}
@@ -56,6 +56,13 @@
           color="negative"
           @click="showDeleteDialog"
           v-if="userRoles.includes('corners-delete')"
+        />
+        <q-btn
+          class="q-ma-md"
+          label="Сменить пароль"
+          color="warning"
+          @click="showPasswordChangeDialog"
+          v-if="userRoles.includes('corners-update')"
         />
       </q-card>
     </div>
@@ -101,26 +108,35 @@
 
   <DraggableDialog v-model="dialog" :title="dialogTitle" :onHide="onHideDialog">
     <q-form @submit="submitHandler" style="width: 80%;">
-      <h3 class="q-mx-auto text-center" v-if="deleteMode">Удалить клиента?<br /> <span class="selected-words text-amber-9 text-center">{{ client.label }}</span></h3>
+      <div v-if="!changePasswordMode">
+        <h3 class="q-mx-auto text-center" v-if="deleteMode">Удалить клиента?<br /> <span class="selected-words text-amber-9 text-center">{{ client.label }}</span></h3>
+        <div v-else>
+          <FieldInput
+            v-for="field in Object.values(clientObject).filter(item => item.input)"
+            :key="field.attributes.name"
+            v-model="field.value"
+            :field="field"
+          />
+          <q-slider
+            v-bind="clientObject.rating.attributes"
+            v-model="clientObject.rating.value"
+            :label-value="`Рейтинг: ${clientObject.rating.value}`"
+          />
+          <ClientContactsComponent v-model="clientObject.contacts.value"/>
+          <q-btn
+            class="q-mt-md"
+            label="Добавить контакт"
+            size="sm"
+            @click="addContact"
+          />
+        </div>
+      </div>
       <div v-else>
         <FieldInput
-          v-for="field in Object.values(clientObject).filter(item => item.input)"
-          :key="field.attributes.name"
-          v-model="field.value"
-          :field="field"
-        />
-        <q-slider
-          v-bind="clientObject.rating.attributes"
-          v-model="clientObject.rating.value"
-          :label-value="`Рейтинг: ${clientObject.rating.value}`"
-        />
-        <ClientContactsComponent v-model="clientObject.contacts.value"/>
-        <q-btn
-          class="q-mt-md"
-          label="Добавить контакт"
-          size="sm"
-          @click="addContact"
-        />
+            key="newPassword.password.attributes.name"
+            v-model="newPassword.password.value"
+            :field="newPassword.password"
+          />
       </div>
       <div class="dialog-buttons">
         <q-btn
@@ -157,6 +173,7 @@ import ClientContactsComponent
 import ClientInfoReportComponent
   from "components/Clients/ClientInfoReportComponent";
 import dayjs from "dayjs";
+import { minLength } from "src/utils/validators";
 
 
 const userStore = useUserStore();
@@ -342,32 +359,67 @@ const clientObject = useObject({
     validators: { requiredOfArray },
   },
 });
+const passwordMinLength = 8;
+const passwordMaxLength = 36;
 
 const editMode = ref(false);
 const deleteMode = ref(false);
+const changePasswordMode = ref(false);
+const newPassword = useObject({
+  password: {
+    value: '',
+    prevValue: '',
+    validators: { required, minLength: minLength(passwordMinLength) },
+    blurred: false,
+    attributes: {
+      name: "password",
+      label: "Новый пароль",
+      type: "password",
+      maxlength: passwordMaxLength
+    },
+    input: true,
+  }
+});
 const dialog = computed({
-  get: () => editMode.value || deleteMode.value,
+  get: () => editMode.value || deleteMode.value || changePasswordMode.value,
   set: () => {
     editMode.value = false;
     deleteMode.value = false;
+    changePasswordMode.value = false;
   }
 });
 const dialogTitle = computed(() => {
   let label = '';
   if (editMode.value) label = 'Редактирование';
-  if (deleteMode.value) label = 'Удаление';
+  else if (deleteMode.value) label = 'Удаление';
+  else if (changePasswordMode.value) label = 'Изменение пароля';
   return `${label} клиента`;
 });
 const submitButtonLabel = computed(() => {
   let label = '';
-  if (editMode.value) label = 'Сохранить';
-  if (deleteMode.value) label = 'Удалить';
+  if (editMode.value || changePasswordMode.value) label = 'Сохранить';
+  else if (deleteMode.value) label = 'Удалить';
   return label;
 });
 
 const submitHandler = () => {
   editMode.value && editClient();
   deleteMode.value && deleteClient();
+  changePasswordMode.value && changeClientPassword();
+};
+
+
+const changeClientPassword = async () => {
+  const body = {password: newPassword.password.value};
+  try {
+    requestJson({
+      url: `${apiRoutes.users}/${client.value.id}`,
+      method: "PUT",
+      body
+    });
+  } finally {
+    dialog.value = false;
+  }
 };
 
 
@@ -383,9 +435,12 @@ const showEditDialog = () => {
 };
 
 const showDeleteDialog = () => {
-  console.log('showDeleteDialog');
   deleteMode.value = true;
 };
+
+const showPasswordChangeDialog = () => {
+  changePasswordMode.value = true;
+}
 
 const editClient = async () => {
   const body = {};
@@ -454,6 +509,7 @@ const addContact = () => {
 
 const onHideDialog = () => {
   refreshFields(clientObject);
+  refreshFields(newPassword);
 };
 </script>
 

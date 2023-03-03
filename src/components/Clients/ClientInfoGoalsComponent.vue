@@ -255,7 +255,6 @@ const deleteGoal = async () => {
 }
 
 const onHideDialog = object => {
-  console.log('onHideDialog');
   refreshFields(object);
 };
 

@@ -243,11 +243,9 @@ onMounted( () => {
 
 const selectedItem = reactive({});
 const listItemClick = (item) => {
-  console.log('listItemClick', item);
 };
 
 const editItemClick = (item) => {
-  console.log('editItemClick', item);
   selectedItem.value = Object.assign({}, item);
   delete selectedItem.value.img;
   editItemDialog.value = true;
@@ -277,7 +275,6 @@ const editConfirm = async (evt) => {
 
 
 const deleteItemClick = (item) => {
-  console.log('deleteItemClick', item);
   selectedItem.value = item;
   deleteItemDialog.value = true;
 };
@@ -322,7 +319,6 @@ const addNewItem = async (evt) => {
         ...items[tab.value].data,
         response.data
       ].sort(sortByDate);
-      console.log('response.data', response.data);
     }
 
   } finally {

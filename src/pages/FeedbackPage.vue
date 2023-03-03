@@ -1,13 +1,15 @@
 <template>
   <FetchSpinnerComponent :fetching="fetching"/>
-  <CardTabsComponent v-if="!fetching" :items="items" v-model="tab" @listItemClick="listItemClick" :parent-name="'feedback'" />
+  <div class="feedback-container">
+    <CardTabsComponent v-if="!fetching" :items="items" v-model="tab" @listItemClick="listItemClick" :parent-name="'feedback'" />
+  </div>
 
   <DraggableDialog v-model="dialog" :title="selectedItem?.value?.title" @onHide="onHideDialog">
     <h6>{{ selectedItem.value.title }}</h6>
     <p class="paragraph-text">{{ selectedItem.value.text }}</p>
     <q-input
       type="textarea"
-      v-model="selectedItem.value.answerText"
+      v-model="selectedItem.value.answer"
       filled
       label="Ответ"
       class="fit"
@@ -21,7 +23,7 @@
         label="Отправить"
         color="positive"
         @click="sendAnswer"
-        :disable="!selectedItem.value.answerText?.length || waitingResponse"
+        :disable="!selectedItem.value.answer?.length || waitingResponse"
         v-if="selectedItem.value.status === 0"
       />
       <q-btn
@@ -102,18 +104,19 @@ const onHideDialog = () => {
 };
 
 const sendAnswer = async () => {
+  const body = {
+    status: 1,
+    answer: selectedItem.value.answer
+  }
+
   try {
     const response = await requestJson({
       url: `${apiRoutes.feedback}/${selectedItem.value.id}`,
       method: "PUT",
-      body: {
-        status: 1,
-      }
+      body
     });
-    console.log('response', response);
 
     if (response.success) {
-      notifySuccess("Редактирование успешно");
       selectedItem.value.status = 1;
     }
   } finally {

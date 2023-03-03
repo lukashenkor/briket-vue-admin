@@ -49,5 +49,6 @@ export function useField(field) {
     hidden: field.hidden,
     input: field.input,
     validators,
+    methods: field?.methods,
   };
 }

@@ -30,6 +30,7 @@ export const apiRoutes = {
   groups: "/api/admingroups",
   roles: "/api/adminroles",
   adminRoles: "/api/admingrouprole",
+  users: "/api/users",
 };
 
 export const requestJson = async ({ url, method = "GET", body, params, message }) => {

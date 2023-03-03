@@ -5,7 +5,7 @@
       :key="item.id"
       @click="listItemClickHandler(item)"
       class="list-item__wrapper"
-      :class="parentName !== 'feedback' && dayjs(item.date).isBefore(dayjs()) ? 'list-item__old' : ''"
+      :class="parentName !== 'feedback' && dayjs(item.date).isBefore(dayjs()) ? 'list-item__old' : parentName"
     >
 
       <q-item>
@@ -122,7 +122,6 @@ const imgClickHandler = item => {
 };
 
 const fileClickHandler = file => {
-  console.log('fileClickHandler ListComponent. file: ', file);
   window.open(file.url, "_blank");
 }
 

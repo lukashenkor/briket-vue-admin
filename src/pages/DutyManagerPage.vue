@@ -5,6 +5,8 @@
       <q-tabs
         narrow-indicator
         dense
+        align="justify"
+        class="bg-grey text-white fit"
         v-model="tab"
       >
         <q-tab name="managers" label="Список менеджеров" />
@@ -13,15 +15,24 @@
 
     </q-card-section>
 
-    <q-card-section>
+    <q-card-section style="padding: 0;">
       <div v-show="tab === 'managers'">
-        <div class="q-pa-md duty-manager__content">
+        <div class="q-pa-md duty-manager__content" style="padding: 0">
             <q-table
               :columns="columns"
-              :rows="rows"
+              :rows="managersList"
               row-key="id"
               :pagination="{sortBy: 'id'}"
+              no-data-label="Список менеджеров пуст"
             >
+              <template v-slot:top-left>
+                <q-btn
+                  class="q-my-md"
+                  label="Добавить"
+                  color="positive"
+                  @click="addDialog = true"
+                />
+              </template>
               <template v-slot:body="props">
                 <q-tr :props="props">
                   <q-td key="id" :props="props">
@@ -39,56 +50,69 @@
                   </q-td>
                 </q-tr>
               </template>
-              <template v-slot:bottom>
-                <q-btn
-                  class="q-my-md"
-                  label="Добавить"
-                  color="positive"
-                  @click="addDialog = true"
-                />
-              </template>
             </q-table>
           </div>
       </div>
 
       <div v-show="tab === 'shifts'">
+        <h4 style="text-align: center; padding: 5px 0; border-bottom: 1px solid #cdcdcd;">
+            Текущий дежурный менеджер: <b>{{ currentShift?.name || 'Не найден' }}</b>
+          </h4>
         <q-splitter
-          v-model="splitterModel"
-          style="height: 450px"
+          disable
+          :model-value="30"
         >
-
           <template v-slot:before>
-            <div class="q-pa-md">
+            <div class="q-pa-md flex column flex-center">
               <q-date
                 v-model="date"
-                :events="events"
-                event-color="green-6"
+                :events="calendarEvents"
                 first-day-of-week="1"
                 today-btn
-                @navigation="(view) => testLog(view)"
+                @navigation="(view) => datepickerDateChangeHandler(view)"
+                :locale="qDateLocale"
+              />
+              <q-btn
+                dense
+                color="positive"
+                label="Добавить смену"
+                class="q-mt-sm"
+                style="width: 290px;"
+                @click="openShiftDialog('POST')"
               />
             </div>
           </template>
 
           <template v-slot:after>
+            <FetchSpinnerComponent :fetching="shiftsFetching"/>
             <q-tab-panels
               v-model="date"
               animated
               transition-prev="jump-up"
               transition-next="jump-up"
+              v-show="!shiftsFetching"
             >
-              <QTabPanel
-                v-for="shift in shifts"
-                v-bind:key="shift.shift_id"
-                :name="dayjs(shift.date_start).format('YYYY/MM/DD')"
-                style="overflow: hidden"
+            <QTabPanel
+              v-for="[key, eventsArray] in Object.entries(events)"
+              v-bind:key="key"
+              :name="dayjs(key).format('YYYY/MM/DD')"
+              style="overflow: hidden"
               >
-                <div style="overflow: hidden; padding: 20px">
-
-                  <div class="text-h4 q-mb-md">Дежурный менеджер: {{shift.name}}</div>
-                  <p>Дата начала: {{ dayjs(shift.date_start).format('DD.MM.YYYY HH:mm:ss') }}</p>
-                  <p>Дата окончания: {{ dayjs(shift.date_end).format('DD.MM.YYYY HH:mm:ss') }}</p>
-                  <q-splitter horizontal />
+                <div
+                  v-for="event in eventsArray"
+                  :key="event.id"
+                  style="overflow: hidden; padding: 20px; display:flex; flex-direction: row; border-bottom: 1px solid #a1a1a1;"
+                  :style="`backgroundColor: ${dayjs(event.start_at).isSame(date, 'date') ? '#26a69a1c' : 'none'}`"
+                >
+                  <div class="q-mr-md" style="display:flex; flex-direction: column; align-items: center; justify-content: space-around">
+                    <edit-icon-component @click="openShiftDialog('PUT', event)"/>
+                    <delete-icon-component @click="openShiftDialog('DELETE', event)"/>
+                  </div>
+                  <div>
+                    <h4 class="q-mb-sm">Дежурный менеджер: {{event.name}}</h4>
+                    <p>Дата начала: {{ dayjs(event.start_at).format('YYYY.MM.DD HH:mm:ss') }}</p>
+                    <p>Дата окончания: {{ dayjs(event.end_at).format('YYYY.MM.DD HH:mm:ss') }}</p>
+                  </div>
                 </div>
               </QTabPanel>
             </q-tab-panels>
@@ -99,23 +123,66 @@
   </q-card>
 
 
-  <DraggableDialog v-model="addDialog" title="Добавление нового менеджера" @onHide="onHideDialog">
+  <DraggableDialog v-model="shiftDialog" title="Смены" @onHide="onHideDialog(selectedShift)">
+    <div style="width: 50%; min-width: 400px; display:flex; flex-direction: column; gap: 40px" v-if="shiftMethod !== 'DELETE'">
+      <q-select
+        label="Менеджер"
+        :options="managersList.map(row => ({ value: row.id, label: row.name}))"
+        v-model="selectedShift.manager_id.value"
+        v-show="shiftMethod === 'POST'"
+      />
+
+      <DateTimePicker
+        label="Дата начала"
+        v-model="selectedShift.start_at.value"
+        @blur="blurred(selectedShift, 'start_at')"
+      />
+
+      <DateTimePicker
+        label="Дата окончания"
+        v-model="selectedShift.end_at.value"
+        @blur="blurred(selectedShift, 'end_at')"
+      />
+    </div>
+    <h4 v-else>
+      Вы действительно хотите удалить смену?
+    </h4>
+
+    <div class="dialog-buttons">
+      <q-btn
+        label="Подтвердить"
+        color="positive"
+        @click="confirmShiftRequest"
+        :disable="isShiftInvalid || waitingResponse"
+      />
+      <q-btn
+        label="Отмена"
+        color="primary"
+        v-close-popup
+      />
+    </div>
+
+    <p style="color: #940a0a">{{ shiftError }}</p>
+  </DraggableDialog>
+
+
+  <DraggableDialog v-model="addDialog" title="Добавление нового менеджера" @onHide="onHideDialog(selectedManager)">
     <q-input
-      v-model="selectedRow.name.value"
+      v-model="selectedManager.name.value"
       label="Имя"
-      :error="selectedRow.name.blurred && !selectedRow.name.valid"
-      :error-message="getErrorMessage(selectedRow.name.errors)"
+      :error="selectedManager.name.blurred && !selectedManager.name.valid"
+      :error-message="getErrorMessage(selectedManager.name.errors)"
       class="dialog-input"
-      @blur="blurred(selectedRow, 'name')"
+      @blur="blurred(selectedManager, 'name')"
     />
     <q-input
-      v-model="selectedRow.phone.value"
+      v-model="selectedManager.phone.value"
       label="Номер телефона"
-      :error="selectedRow.phone.blurred && !selectedRow.phone.valid"
-      :error-message="getErrorMessage(selectedRow.phone.errors)"
+      :error="selectedManager.phone.blurred && !selectedManager.phone.valid"
+      :error-message="getErrorMessage(selectedManager.phone.errors)"
       mask="+7-(###)-###-##-##"
       class="dialog-input"
-      @blur="blurred(selectedRow, 'phone')"
+      @blur="blurred(selectedManager, 'phone')"
     />
     <div class="dialog-buttons">
       <q-btn
@@ -137,24 +204,23 @@
       {{ editingError }}</p>
   </DraggableDialog>
 
-
-  <DraggableDialog v-model="editDialog" title="Редактирование" @onHide="onHideDialog">
+  <DraggableDialog v-model="editDialog" title="Редактирование менеджера" @onHide="onHideDialog(selectedManager)">
     <q-input
-      v-model="selectedRow.name.value"
+      v-model="selectedManager.name.value"
       label="Имя"
-      :error="selectedRow.name.blurred && !selectedRow.name.valid"
-      :error-message="getErrorMessage(selectedRow.name.errors)"
+      :error="selectedManager.name.blurred && !selectedManager.name.valid"
+      :error-message="getErrorMessage(selectedManager.name.errors)"
       class="dialog-input"
-      @blur="blurred(selectedRow, 'name')"
+      @blur="blurred(selectedManager, 'name')"
     />
     <q-input
-      v-model="selectedRow.phone.value"
+      v-model="selectedManager.phone.value"
       label="Номер телефона"
-      :error="selectedRow.phone.blurred && !selectedRow.phone.valid"
-      :error-message="getErrorMessage(selectedRow.phone.errors)"
+      :error="selectedManager.phone.blurred && !selectedManager.phone.valid"
+      :error-message="getErrorMessage(selectedManager.phone.errors)"
       mask="+7-(###)-###-##-##"
       class="dialog-input"
-      @blur="blurred(selectedRow, 'phone')"
+      @blur="blurred(selectedManager, 'phone')"
     />
     <div class="dialog-buttons">
       <q-btn
@@ -176,8 +242,8 @@
       {{ editingError }}</p>
   </DraggableDialog>
 
-  <DraggableDialog v-model="deleteDialog" title="Удаление" @onHide="onHideDialog">
-    <h3>Удалить дежурного менеджера <span style="color: #374bc9">{{ selectedRow.name.value }}</span>?</h3>
+  <DraggableDialog v-model="deleteDialog" title="Удаление менеджера" @onHide="onHideDialog(selectedManager)">
+    <h3>Удалить дежурного менеджера <span style="color: #374bc9">{{ selectedManager.name.value }}</span>?</h3>
     <div class="dialog-buttons">
       <q-btn
         label="Удалить"
@@ -200,19 +266,15 @@ import dayjs from "dayjs";
 import { useObject } from "src/hooks/useObject";
 import DraggableDialog from "src/components/DraggableDialog";
 import FetchSpinnerComponent from "src/components/FetchSpinnerComponent";
-import DateTimePicker from "components/DateTimePicker";
 import { apiRoutes, requestJson } from "src/api";
 import { useUtilsStore } from "stores/utils";
-import { blurred, refreshFields } from 'src/utils/object';
+import { blurred, hasInvalidFields, refreshFields } from 'src/utils/object';
 import { required } from "src/utils/validators";
 import EditIconComponent from "components/EditIconComponent";
 import DeleteIconComponent from "components/DeleteIconComponent";
 import { parseQDateNavigationMinMaxMonthDate } from 'src/utils/date';
+import DateTimePicker from 'components/DateTimePicker.vue';
 
-const testLog = (view) => {
-  const { maxDate, minDate } = parseQDateNavigationMinMaxMonthDate(view);
-}
-const splitterModel = ref(35);
 const date = ref(dayjs(new Date).format("YYYY/MM/DD"))
 const events = ref([  ]);
 
@@ -254,30 +316,67 @@ const columns = [
     readonly: true
   }
 ];
-const rows = ref([]);
+const managersList = ref([]);
 const shifts = ref([]);
 const tab = ref("managers");
+const calendarEvents = ref([]);
+const currentShift = ref({});
+
+const parseShifts = shifts => {
+  const evts = {}
+  calendarEvents.value = [];
+  currentShift.value = {};
+  const todayDate = dayjs();
+  shifts.forEach(shift => {
+    const start_at = dayjs(shift.start_at);
+    const end_at = dayjs(shift.end_at);
+
+    if (todayDate.isAfter(start_at) && todayDate.isBefore(end_at)) {
+      currentShift.value = shift;
+    }
+
+    if (!calendarEvents.value.includes(start_at.format('YYYY/MM/DD'))) {
+      calendarEvents.value.push(start_at.format('YYYY/MM/DD'));
+    }
+    const diff = end_at.date() - start_at.date();
+
+    for (let i = 0; i <= diff; i++) {
+      const shiftDateRange = start_at.add(i, 'days').format('YYYY/MM/DD');
+
+      if (evts[shiftDateRange]) {
+        evts[shiftDateRange].push(shift);
+      } else {
+        evts[shiftDateRange] = [shift];
+      }
+    }
+  })
+  Object.entries(evts).forEach(([key, eventArray]) => {
+    evts[key] = eventArray.sort((a, b) => dayjs(a.start_at).isAfter(dayjs(b.start_at)) ? 1 : -1)
+  })
+  events.value = evts;
+};
 
 onMounted(async () => {
-  const defaultGetParams = {
-    date_start: "2021-01-01",
-    date_end: dayjs().format("YYYY-MM-DD"),
-  };
+  const currentDate = dayjs(date.value, 'YYYY/MM/DD')
+  const { maxDate, minDate } = parseQDateNavigationMinMaxMonthDate({month: currentDate.month() + 1, year: currentDate.year()});
+    const shiftRequestParams = {
+      start_at: minDate.format("YYYY-MM-DDTHH:mm:ss"),
+      end_at: maxDate.format("YYYY-MM-DDTHH:mm:ss"),
+    }
   try {
     fetching.value = true;
     const [dutyManagerResponse, shiftResponse] = await Promise.all([
       requestJson({
         url: apiRoutes.dutymanager,
-        // params: defaultGetParams,
       }),
       requestJson({
         url: apiRoutes.shift,
-        // params: defaultGetParams,
+        params: shiftRequestParams,
       })
     ]);
     shifts.value = shiftResponse.data;
-    events.value = shiftResponse.data.map(item => dayjs(item.date_start).format('YYYY/MM/DD'));
-    rows.value = dutyManagerResponse.data;
+    parseShifts(shiftResponse.data);
+    managersList.value = dutyManagerResponse.data;
   } finally {
     fetching.value = false;
   }
@@ -288,7 +387,7 @@ const editingError = ref(null);
 const addDialog = ref(false);
 const editDialog = ref(false);
 const deleteDialog = ref(false);
-const selectedRow = useObject({
+const selectedManager = useObject({
   name: {
     value: "",
     prevValue: "",
@@ -325,17 +424,15 @@ const setFields = (row, object) => {
 };
 
 const showEditDialog = row => {
-  setFields(row, selectedRow);
+  setFields(row, selectedManager);
   editDialog.value = true;
 };
 
 const confirmAdd = async () => {
   const body = {};
-  for (const [ key, innerObject ] of Object.entries(selectedRow)) {
+  for (const [ key, innerObject ] of Object.entries(selectedManager)) {
     body[key] = innerObject.value;
   }
-
-  // return console.log('body', body);
   const url = `${apiRoutes.dutymanager}`;
   try {
     const response = await requestJson({
@@ -345,7 +442,7 @@ const confirmAdd = async () => {
     });
     if (!response.success) return
 
-    rows.value.push(response.data);
+    managersList.value.push(response.data);
   } finally {
     addDialog.value = false;
   }
@@ -353,12 +450,12 @@ const confirmAdd = async () => {
 
 const confirmEdit = async () => {
   const body = {};
-  for (const [ key, inner ] of Object.entries(selectedRow)) {
+  for (const [ key, inner ] of Object.entries(selectedManager)) {
     if (inner.edited) {
       body[key] = inner.value;
     }
   }
-  const url = `${apiRoutes.dutymanager}/${selectedRow.id.value}`;
+  const url = `${apiRoutes.dutymanager}/${selectedManager.id.value}`;
   const response = await requestJson({
     url,
     method: "PUT",
@@ -367,49 +464,45 @@ const confirmEdit = async () => {
   if (!response.success) {
     return
   }
-  const editedManagerIndex = rows.value.findIndex(item => item.id === selectedRow.id.value);
-  Object.keys(rows.value[editedManagerIndex]).forEach(key => {
-    if (selectedRow.hasOwnProperty(key)) {
-      rows.value[editedManagerIndex][key] = selectedRow[key].value;
+  const editedManagerIndex = managersList.value.findIndex(item => item.id === selectedManager.id.value);
+  Object.keys(managersList.value[editedManagerIndex]).forEach(key => {
+    if (selectedManager.hasOwnProperty(key)) {
+      managersList.value[editedManagerIndex][key] = selectedManager[key].value;
     }
   });
   editDialog.value = false;
 };
 
 const showDeleteDialog = row => {
-  setFields(row, selectedRow);
+  setFields(row, selectedManager);
   deleteDialog.value = true;
 };
 
 const confirmDelete = async () => {
   try {
-    const url = `${ apiRoutes.dutymanager }/${ selectedRow.id.value }`;
+    const url = `${ apiRoutes.dutymanager }/${ selectedManager.id.value }`;
     const response = await requestJson({
       url,
       method: "DELETE",
     });
-    console.log('response', response);
     if (response.success) {
-      rows.value = rows.value.filter(row => row.id !== selectedRow.id.value);
+      managersList.value = managersList.value.filter(row => row.id !== selectedManager.id.value);
     }
   } finally {
     deleteDialog.value = false;
   }
 };
 
-const onHideDialog = () => {
+const onHideDialog = (object) => {
   editingError.value = '';
-  refreshFields(selectedRow);
+  shiftError.value = '';
+  shiftMethod.value = '';
+  refreshFields(object, false);
 };
 
 
 const isInvalidEditing = computed(() => {
-  for (const value of Object.values(selectedRow)) {
-    if (value.hasOwnProperty("valid") && !value.valid) {
-      return true;
-    }
-  }
-  return false;
+  return hasInvalidFields(selectedManager)
 });
 
 
@@ -418,13 +511,159 @@ const getErrorMessage = errors => {
     if (value) {
       switch (key) {
         case 'required':
-          console.log('required');
           return 'Поле не может быть пустым'
       }
     }
   }
 };
 
+
+const shiftDialog = ref(false);
+const shiftsFetching = ref(false);
+const shiftMethod = ref("");
+const shiftError = ref('');
+
+const selectedShift = useObject({
+  id: {
+    value: null,
+    hidden: true,
+  },
+  manager_id: {
+    value: null,
+    prevValue: "",
+    validators: {
+      required,
+    },
+    methods: ['POST'],
+    blurred: false
+  },
+  start_at: {
+    value: null,
+    prevValue: "",
+    isDate: true,
+    validators: {
+      required,
+    },
+    methods: ['POST', 'PUT'],
+    blurred: false
+  },
+  end_at: {
+    value: null,
+    prevValue: "",
+    isDate: true,
+    validators: {
+      required,
+    },
+    methods: ['POST', 'PUT'],
+    blurred: false
+  }
+});
+
+const confirmShiftRequest = async () => {
+  if (shiftMethod.value !== "DELETE"
+    && dayjs(selectedShift.start_at.value).isAfter(dayjs(selectedShift.end_at.value))
+  ) {
+    return shiftError.value = 'Дата начала не должна быть больше даты окончания';
+  }
+  shiftError.value = "";
+
+  const body = {};
+  for (const [ key, inner ] of Object.entries(selectedShift)) {
+    if ((inner.hasOwnProperty('hidden') && inner.hidden) || !inner?.methods?.includes(shiftMethod.value)) continue;
+    if (key === 'manager_id') {
+      body[key] = inner.value.value;
+    } else {
+      body[key] = inner.value;
+    }
+  }
+  const urlPostfix = shiftMethod.value === 'POST' ? '' : `/${selectedShift.id.value}`;
+  const url = `${ apiRoutes.shift }${urlPostfix}`;
+  const options = {
+    url,
+    method: shiftMethod.value || "POST"
+  };
+  if (shiftMethod.value !== 'delete') {
+    options.body = body;
+  }
+  try {
+    const response = await requestJson(options);
+
+    if (!response.success) return
+    
+    if  (shiftMethod.value === 'POST') {
+      const shiftManager = managersList.value.find(manager => manager.id === selectedShift.manager_id.value.value);
+      const newShift = {
+        start_at: response.data.start_at,
+        end_at: response.data.end_at,
+        id: response.data.id,
+        manager_id: response.data.duty_manager_id,
+        name: shiftManager.name,
+        phone: shiftManager.phone
+      };
+  
+      shifts.value.push(newShift);
+    } else if (shiftMethod.value === 'PUT') {
+      const editedShift = shifts.value.find(shift => shift.id === selectedShift.id.value)
+      editedShift.start_at = response.data.start_at;
+      editedShift.end_at = response.data.end_at;
+    } else {
+      shifts.value = shifts.value.filter(shift => shift.id !== selectedShift.id.value);
+    }
+
+    parseShifts(shifts.value);
+
+  } finally {
+    shiftDialog.value = false;
+  }
+};
+
+
+const datepickerDateChangeHandler = async (view) => {
+  const { maxDate, minDate } = parseQDateNavigationMinMaxMonthDate(view);
+  const params = {
+    start_at: minDate.format("YYYY-MM-DDTHH:mm:ss"),
+    end_at: maxDate.format("YYYY-MM-DDTHH:mm:ss")
+  };
+
+  shiftsFetching.value = true;
+  try {
+    const response = await requestJson({
+      url: apiRoutes.shift,
+      params,
+    });
+
+    if (response.success) {
+      parseShifts(response.data);
+    }
+  } finally {
+    shiftsFetching.value = false;
+  }
+}
+
+const openShiftDialog = (method, shift) => {
+  if (shift) {
+    for (const [key, value] of Object.entries(shift)) {
+      if (selectedShift.hasOwnProperty(key)) {
+        if (key === 'manager_id') {
+          selectedShift.manager_id.value = {label: shift.name, value}
+        } else if (selectedShift[key].isDate) {
+          selectedShift[key].value = dayjs(value).format('YYYY-MM-DD HH:mm:ss');
+        } else {
+          selectedShift[key].value = value;
+        }
+      }
+    }
+  } else {
+    selectedShift.start_at.value = dayjs(date.value).format('YYYY-MM-DD HH:mm:ss');
+  }
+  shiftDialog.value = true;
+  shiftMethod.value = method;
+};
+
+
+const isShiftInvalid = computed(() => {
+  return hasInvalidFields(selectedShift);
+});
 </script>
 
 <style scoped>

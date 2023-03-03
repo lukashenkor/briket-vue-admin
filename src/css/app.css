@@ -66,3 +66,13 @@
 .q-img .q-img__image {
   width: initial;
 }
+
+.feedback {
+  transition: all .3s;
+  cursor: pointer !important;
+}
+
+.feedback:hover {
+  background-color: #eaeaea;
+
+}
