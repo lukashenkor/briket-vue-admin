@@ -99,11 +99,12 @@ const fetching = ref(false);
 const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'label', label: 'Наименование', field: 'label', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'login', label: 'Логин', field: 'login', sortable: false, align: "left", editable: false, readonly: true, },
   { name: 'area_size', label: 'Площадь (кв.м.)', field: 'area_size', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'power', label: 'Мощность (кВт)', field: 'power', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'rating', label: 'Рейтинг', field: 'rating', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'login', label: 'Логин', field: 'login', sortable: false, align: "left", editable: false, readonly: true, },
+
 ];
 
 const rows = reactive({});
@@ -127,6 +128,31 @@ const passwordMinLength = 8;
 const passwordMaxLength = 36;
 
 const client = useObject({
+   login: {
+    value: "",
+    prevValue: "",
+    validators: { required },
+    blurred: false,
+    input: true,
+    attributes: {
+      name: "login",
+      label: "Логин клиента",
+      type: "text",
+    },
+  },
+  password: {
+    value: "",
+    prevValue: "",
+    validators: { required, minLength: minLength(passwordMinLength) },
+    blurred: false,
+    input: true,
+    attributes: {
+      name: "password",
+      label: "Пароль клиента",
+      type: "password",
+      maxlength: passwordMaxLength
+    },
+  },
   label: {
     value: "",
     prevValue: "",
@@ -139,14 +165,14 @@ const client = useObject({
       type: "text",
     },
   },
-  area: {
+  area_size: {
     value: "",
     prevValue: "",
     validators: { required },
     blurred: false,
     input: true,
     attributes: {
-      name: "area",
+      name: "area_size",
       label: "Площадь",
       type: "number",
     },
@@ -183,36 +209,11 @@ const client = useObject({
       "label": true,
       "label-always": true,
       "name": "rating",
-      "min": 1.0,
+      "min": 0.0,
       "max": 10.0,
       step: 0.1,
       markers: 1,
       markerLabels: true,
-    },
-  },
-  login: {
-    value: "",
-    prevValue: "",
-    validators: { required },
-    blurred: false,
-    input: true,
-    attributes: {
-      name: "login",
-      label: "Логин клиента",
-      type: "text",
-    },
-  },
-  password: {
-    value: "",
-    prevValue: "",
-    validators: { required, minLength: minLength(passwordMinLength) },
-    blurred: false,
-    input: true,
-    attributes: {
-      name: "password",
-      label: "Пароль клиента",
-      type: "password",
-      maxlength: passwordMaxLength
     },
   },
   contacts: {

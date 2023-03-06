@@ -17,6 +17,9 @@
 
         <q-card-section>
           <p class="info-block__item">
+            <span>Login:</span> {{ client.login }}
+          </p>
+          <p class="info-block__item">
             <span>ID:</span> {{ client.id }}
           </p>
           <p class="info-block__item">
@@ -300,13 +303,13 @@ const clientObject = useObject({
     },
     input: true,
   },
-  area: {
+  area_size: {
     value: '',
     prevValue: '',
     validators: { required },
     blurred: false,
     attributes: {
-      name: "area",
+      name: "area_size",
       label: "Площадь",
       type: "number",
       step: "0.01",
