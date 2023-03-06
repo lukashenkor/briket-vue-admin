@@ -31,8 +31,8 @@
             {{ props.row.name }}
           </q-td>
 
-          <q-td key="usergroup" :props="props">
-            {{ data.groups[props.row.usergroup]?.label }}
+          <q-td key="admin_group_id" :props="props">
+            {{ data.groups[props.row.admin_group_id]?.label }}
           </q-td>
 
           <q-td key="actions" :props="props" class="table-actions">
@@ -81,8 +81,8 @@
         </template>
       </q-input>
       <q-select
-        v-model="selectedAdmin.usergroup.value"
-        v-bind="selectedAdmin.usergroup.attributes"
+        v-model="selectedAdmin.admin_group_id.value"
+        v-bind="selectedAdmin.admin_group_id.attributes"
         class="dialog-input"
         :options="Object.values(data.groups)"
       >
@@ -166,7 +166,7 @@ const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'login', label: 'Логин', field: 'login', sortable: true, align: "left", readonly: false, },
   { name: 'name', label: 'Имя', field: 'name', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'usergroup', label: 'Группа', field: 'usergroup', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'admin_group_id', label: 'Группа', field: 'admin_group_id', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'actions', label: 'Действия', field: 'actions', align: "left", readonly: true, },
 ];
 
@@ -261,12 +261,12 @@ const selectedAdmin = useObject({
     },
     input: true,
   },
-  usergroup: {
+  admin_group_id: {
     value: '',
     prevValue: '',
     blurred: false,
     attributes: {
-      name: "usergroup",
+      name: "admin_group_id",
       label: "Группа",
       multiple: false,
       "stack-label": false,
@@ -340,9 +340,9 @@ const setAdminFields = (row, object) => {
   Object.entries(row).forEach(entry => {
     const [key, value] = entry;
     if (object.hasOwnProperty(key)) {
-      if (key === "usergroup") {
-        object[key].value = data.groups[row.usergroup]
-        object[key].prevValue = data.groups[row.usergroup]
+      if (key === "admin_group_id") {
+        object[key].value = data.groups[row.admin_group_id]
+        object[key].prevValue = data.groups[row.admin_group_id]
       } else {
         object[key].value = value;
         object[key].prevValue = value;
