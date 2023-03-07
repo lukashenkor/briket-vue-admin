@@ -255,9 +255,9 @@ onMounted(() => {
     requestJson({
       url: apiRoutes.invoice,
       params: {
+        corner_id: client.value.id,
         offset: 0,
         limit: 100,
-        status: 0,
       },
     }),
     requestJson({
