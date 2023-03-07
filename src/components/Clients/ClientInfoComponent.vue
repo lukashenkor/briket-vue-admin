@@ -262,9 +262,7 @@ onMounted(() => {
     }),
     requestJson({
       url: apiRoutes.goals.replace('[id]', client.value.id),
-      params: {
-        start: "2020-02-02",
-      },
+      params: {},
     }),
     requestJson({
       url: apiRoutes.report,

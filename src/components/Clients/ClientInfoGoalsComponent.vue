@@ -20,11 +20,11 @@
         <q-td key="id" :props="props">
           {{ props.row.id }}
         </q-td>
-        <q-td key="date_start" :props="props">
-          {{ props.row.date_start }}
+        <q-td key="start_at" :props="props">
+          {{ props.row.start_at }}
         </q-td>
-        <q-td key="date_end" :props="props">
-          {{ props.row.date_end }}
+        <q-td key="end_at" :props="props">
+          {{ props.row.end_at }}
         </q-td>
         <q-td key="goal" :props="props">
           {{ props.row.goal }}
@@ -102,8 +102,8 @@ const items = computed({
 
 const goalsColumns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'date_start', label: 'Дата начала', field: 'date_start', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'date_end', label: 'Дата окончания', field: 'date_end', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'start_at', label: 'Дата начала', field: 'start_at', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'end_at', label: 'Дата окончания', field: 'end_at', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'goal', label: 'Цель', field: 'goal', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'actions', label: 'Действия', field: 'actions', sortable: false, align: "left", editable: false, readonly: true, },
 ];
@@ -115,25 +115,25 @@ const goal = useObject({
     value: '',
     hidden: true,
   },
-  date_start: {
+  start_at: {
     value: '',
     prevValue: '',
     validators: {required},
     blurred: false,
     isDate: true,
     attributes: {
-      name: "start",
+      name: "start_at",
       label: "Начало",
     },
   },
-  date_end: {
+  end_at: {
     value: '',
     prevValue: '',
     validators: {required},
     blurred: false,
     isDate: true,
     attributes: {
-      name: "end",
+      name: "end_at",
       label: "Окончание",
     },
   },

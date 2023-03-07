@@ -308,7 +308,7 @@ const invoice = useObject({
       label: "Дата",
     },
   },
-  date_start: {
+  start_at: {
     value: '',
     prevValue: '',
     validators: {
@@ -317,11 +317,11 @@ const invoice = useObject({
     blurred: false,
     isDate: true,
     attributes: {
-      name: "date_start",
+      name: "start_at",
       label: "Дата начала",
     },
   },
-  date_end: {
+  end_at: {
     value: '',
     prevValue: '',
     validators: {
@@ -330,7 +330,7 @@ const invoice = useObject({
     blurred: false,
     isDate: true,
     attributes: {
-      name: "date_end",
+      name: "end_at",
       label: "Дата окончания",
     },
   },
