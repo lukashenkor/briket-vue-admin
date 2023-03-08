@@ -44,11 +44,6 @@
           :field="field"
           @blur="field.blurred = true"
         />
-        <q-slider
-          v-bind="client.rating.attributes"
-          v-model="client.rating.value"
-          :label-value="`Рейтинг: ${client.rating.value}`"
-        />
         <ClientContactsComponent
           v-model="client.contacts.value"
         />
@@ -94,7 +89,7 @@ const utilsStore = useUtilsStore();
 const waitingResponse = computed(() => utilsStore.waitingResponse);
 const userStore = useUserStore();
 const userRoles = computed(() => userStore.data.roles);
-const props = defineProps([ "isRatingPage" ]);
+const props = defineProps([ "isRatingPage", "corner_id" ]);
 const fetching = ref(false);
 const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
@@ -117,6 +112,12 @@ onBeforeMount(async () => {
       url: apiRoutes.corners
     });
     rows.clients = response.data.corners;
+    if (props.corner_id) {
+      const client = rows.clients.find(row => row.id === Number(props.corner_id))
+      if (client) {
+        selectClient(undefined, client);
+      }
+    }
   } finally {
     fetching.value = false;
   }
@@ -175,6 +176,11 @@ const client = useObject({
       name: "area_size",
       label: "Площадь",
       type: "number",
+      "min": 0.0,
+      "max": 10.0,
+      step: 0.1,
+      markers: 1,
+      markerLabels: true,
     },
   },
   power: {
@@ -187,6 +193,11 @@ const client = useObject({
       name: "power",
       label: "Мощность",
       type: "number",
+      "min": 0.0,
+      "max": 10.0,
+      step: 0.1,
+      markers: 1,
+      markerLabels: true,
     },
   },
   number: {
@@ -199,21 +210,6 @@ const client = useObject({
       name: "number",
       label: "Номер",
       type: "number",
-    },
-  },
-  rating: {
-    value: 1,
-    prevValue: '',
-    blurred: false,
-    attributes: {
-      "label": true,
-      "label-always": true,
-      "name": "rating",
-      "min": 0.0,
-      "max": 10.0,
-      step: 0.1,
-      markers: 1,
-      markerLabels: true,
     },
   },
   contacts: {

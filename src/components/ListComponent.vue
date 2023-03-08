@@ -11,6 +11,12 @@
       <q-item>
         <q-item-section style="padding-left: 20px;">
           <q-item-label>{{ item.title }}</q-item-label>
+          <q-item-label
+            v-show="Object.keys(item).includes('answer') && item?.corner_id"
+            class="feedback-corner-id"
+            @click.stop.exact="cornerIdClickHandler(item.corner_id)"
+          >corner_id: {{ item.corner_id }}
+          </q-item-label>
           <q-item-label caption :lines="lines">{{ item.text }}</q-item-label>
         </q-item-section>
 
@@ -75,6 +81,7 @@ import * as dayjs from "dayjs";
 import EditIconComponent from "components/EditIconComponent";
 import DeleteIconComponent from "components/DeleteIconComponent";
 import { newTabImage } from "src/utils/file";
+import { useRouter } from 'vue-router';
 
 
 defineProps({
@@ -105,6 +112,7 @@ defineProps({
 
 
 const emits = defineEmits(['listItemClick', 'editItemClick', 'deleteItemClick']);
+const router = useRouter();
 const listItemClickHandler = item => {
   emits('listItemClick', item);
 };
@@ -123,6 +131,15 @@ const imgClickHandler = item => {
 
 const fileClickHandler = file => {
   window.open(file.url, "_blank");
+}
+
+const cornerIdClickHandler = (corner_id) => {
+  router.push({
+    name: 'Clients',
+    params: {
+      corner_id
+    }
+  });
 }
 
 </script>
@@ -173,5 +190,16 @@ const fileClickHandler = file => {
 .date-caption {
   font-weight: 500;
   font-size: 0.85rem;
+}
+
+.feedback-corner-id {
+  width: 100px;
+  color:#027bc7;
+  cursor:pointer;
+  transition: all .2s;
+}
+
+.feedback-corner-id:hover {
+  color: #4cb0f5;
 }
 </style>

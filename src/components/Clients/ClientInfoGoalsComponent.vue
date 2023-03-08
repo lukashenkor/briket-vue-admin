@@ -17,6 +17,10 @@
     </template>
     <template v-slot:body="props">
       <q-tr :props="props">
+        <q-td key="actions" :props="props" class="table-actions">
+          <EditIconComponent @click="showEditDialog(props.row)"/>
+          <DeleteIconComponent @click="showDeleteDialog(props.row)"/>
+        </q-td>
         <q-td key="id" :props="props">
           {{ props.row.id }}
         </q-td>
@@ -28,10 +32,6 @@
         </q-td>
         <q-td key="goal" :props="props">
           {{ props.row.goal }}
-        </q-td>
-        <q-td key="actions" :props="props" class="table-actions">
-          <EditIconComponent @click="showEditDialog(props.row)"/>
-          <DeleteIconComponent @click="showDeleteDialog(props.row)"/>
         </q-td>
       </q-tr>
     </template>
@@ -101,11 +101,11 @@ const items = computed({
 });
 
 const goalsColumns = [
+  { name: 'actions', label: 'Действия', field: 'actions', sortable: false, align: "left", editable: false, readonly: true, },
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'start_at', label: 'Дата начала', field: 'start_at', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'end_at', label: 'Дата окончания', field: 'end_at', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'goal', label: 'Цель', field: 'goal', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'actions', label: 'Действия', field: 'actions', sortable: false, align: "left", editable: false, readonly: true, },
 ];
 const utilsStore = useUtilsStore();
 const waitingResponse = computed(() => utilsStore.waitingResponse);

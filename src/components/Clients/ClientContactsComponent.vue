@@ -21,9 +21,9 @@
           label="Телефон"
           type="text"
           mask="+7-(###)-###-##-##"
-          fill-mask
           unmasked-value
-          :rules="[required]"
+          lazy-rules
+          :rules="[required, val => val.length === 10 || 'Введите номер телефона']"
           error-message="Некорректное значение"
           outlined
         />

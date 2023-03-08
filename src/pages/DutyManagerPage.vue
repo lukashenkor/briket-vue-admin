@@ -42,7 +42,7 @@
                     {{ props.row.name }}
                   </q-td>
                   <q-td key="phone" :props="props">
-                    {{ props.row.phone }}
+                    +7{{ props.row.phone }}
                   </q-td>
                   <q-td key="actions" :props="props">
                     <EditIconComponent size="sm" @click="showEditDialog(props.row)" />
@@ -181,6 +181,9 @@
       :error="selectedManager.phone.blurred && !selectedManager.phone.valid"
       :error-message="getErrorMessage(selectedManager.phone.errors)"
       mask="+7-(###)-###-##-##"
+      :rules="[val => val.length === 10 || 'Введите номер телефона']"
+      lazy-rules
+      unmasked-value
       class="dialog-input"
       @blur="blurred(selectedManager, 'phone')"
     />
@@ -487,6 +490,8 @@ const confirmDelete = async () => {
     });
     if (response.success) {
       managersList.value = managersList.value.filter(row => row.id !== selectedManager.id.value);
+      const dayjsObject = dayjs(date.value, 'YYYY/MM/DD');
+      await datepickerDateChangeHandler({month: dayjsObject.month() + 1, year: dayjsObject.year()})
     }
   } finally {
     deleteDialog.value = false;
@@ -589,7 +594,7 @@ const confirmShiftRequest = async () => {
     const response = await requestJson(options);
 
     if (!response.success) return
-    
+
     if  (shiftMethod.value === 'POST') {
       const shiftManager = managersList.value.find(manager => manager.id === selectedShift.manager_id.value.value);
       const newShift = {
@@ -600,7 +605,7 @@ const confirmShiftRequest = async () => {
         name: shiftManager.name,
         phone: shiftManager.phone
       };
-  
+
       shifts.value.push(newShift);
     } else if (shiftMethod.value === 'PUT') {
       const editedShift = shifts.value.find(shift => shift.id === selectedShift.id.value)

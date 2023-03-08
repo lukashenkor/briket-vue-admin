@@ -110,7 +110,7 @@
   </div>
 
   <DraggableDialog v-model="dialog" :title="dialogTitle" :onHide="onHideDialog">
-    <q-form @submit="submitHandler" style="width: 80%;">
+    <q-form @submit="submitHandler" style="width: 90%;">
       <div v-if="!changePasswordMode">
         <h3 class="q-mx-auto text-center" v-if="deleteMode">Удалить клиента?<br /> <span class="selected-words text-amber-9 text-center">{{ client.label }}</span></h3>
         <div v-else>
@@ -177,6 +177,7 @@ import ClientInfoReportComponent
   from "components/Clients/ClientInfoReportComponent";
 import dayjs from "dayjs";
 import { minLength } from "src/utils/validators";
+import { isEqual } from 'lodash';
 
 
 const userStore = useUserStore();
@@ -274,10 +275,16 @@ onMounted(() => {
     })
   ])
     .then(([invoiceResponse, goalsResponse, reportsResponse]) => {
-      items.invoice.data = invoiceResponse.data.filter(item => item.corner === client.value.id) || [];
-      items.goals.data = goalsResponse.data || [];
+      items.invoice.data = invoiceResponse?.success ?
+        invoiceResponse?.data?.filter(item => item.corner_id === client.value.id) || []
+        : [];
+      items.goals.data = goalsResponse?.success ?
+        goalsResponse.data || []
+        : [];
       // items.deviation.data = [];
-      items.report.data = reportsResponse.data || [];
+      items.report.data = reportsResponse?.success
+        ? reportsResponse.data || []
+        : [];
     })
     .finally(() => {
       fetching.value = false;
@@ -340,7 +347,7 @@ const clientObject = useObject({
     input: true,
   },
   rating: {
-    value: 1,
+    value: '',
     prevValue: '',
     validators: { required },
     blurred: false,
@@ -348,7 +355,7 @@ const clientObject = useObject({
       "label": true,
       "label-always": true,
       "name": "rating",
-      "min": 1.0,
+      "min": 0.0,
       "max": 10.0,
       step: 0.1,
       markers: 1,
@@ -412,9 +419,12 @@ const submitHandler = () => {
 
 const changeClientPassword = async () => {
   const body = {password: newPassword.password.value};
+  console.log('client.value', client.value);
+  console.log('client.value.user_id', client.value.user_id);
+  return
   try {
     requestJson({
-      url: `${apiRoutes.users}/${client.value.id}`,
+      url: `${apiRoutes.users}/${client.value.user_id}`,
       method: "PUT",
       body
     });
@@ -427,9 +437,11 @@ const changeClientPassword = async () => {
 const showEditDialog = () => {
   setFields(client.value, clientObject);
   const contacts = [];
-  for (const value of Object.values(client.value.contacts)) {
-    const el = Object.assign({}, value)
-    contacts.push(el);
+  if (client?.value?.contacts?.length) {
+    for (const value of Object.values(client?.value?.contacts)) {
+      const el = Object.assign({}, value)
+      contacts.push(el);
+    }
   }
   clientObject["contacts"].value = contacts;
   editMode.value = true;
@@ -449,7 +461,9 @@ const editClient = async () => {
     if (!inner.edited) continue
     body[key] = inner.value;
   }
-  !clientObject["contacts"]?.value?.length && (body["contacts"] = []);
+  if (isEqual(clientObject["contacts"]?.value, clientObject["contacts"]?.prevValue)) {
+    delete body["contacts"];
+  }
   try {
     const response = await requestJson({
       url: `${apiRoutes.corners}/${client.value.id}`,

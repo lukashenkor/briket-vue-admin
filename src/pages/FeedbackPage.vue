@@ -6,6 +6,15 @@
 
   <DraggableDialog v-model="dialog" :title="selectedItem?.value?.title" @onHide="onHideDialog">
     <h6>{{ selectedItem.value.title }}</h6>
+
+    <q-spinner-dots size="50" color="primary" v-if="waitingResponse"/>
+    <div class="text-left feedback-corner-info" v-if="!waitingResponse">
+      <p>corner_id: {{selectedFeedbackClient.corner_id}}</p>
+      <p>Наименование: {{selectedFeedbackClient.label}}</p>
+      <p>Площадь: {{selectedFeedbackClient.area_size}}</p>
+      <p>Number: {{selectedFeedbackClient.number}}</p>
+      <p>Мощность: {{selectedFeedbackClient.power}}</p>
+    </div>
     <p class="paragraph-text">{{ selectedItem.value.text }}</p>
     <q-input
       type="textarea"
@@ -93,10 +102,23 @@ onMounted( async () => {
   }
 });
 
+const selectedFeedbackClient = ref({});
 const selectedItem = reactive({});
-const listItemClick = (item) => {
+const listItemClick = async (item) => {
+  utilsStore.updateWaitingResponse(true)
   selectedItem.value = item;
   dialog.value = true;
+  try {
+    const feedbackClient = await requestJson({
+      url: `${apiRoutes.corners}/${item.corner_id}`
+    });
+
+    if (feedbackClient.success) {
+      selectedFeedbackClient.value = feedbackClient.data;
+    }
+  } finally {
+    utilsStore.updateWaitingResponse(false)
+  }
 };
 
 const onHideDialog = () => {
@@ -133,5 +155,13 @@ const dialogButtonsStyle = computed(() => selectedItem?.value.status === 0
 .paragraph-text {
   max-width: 100%;
   overflow-wrap: break-word;
+}
+
+.feedback-corner-info {
+  width: 100%;
+}
+
+.feedback-corner-info > p {
+  margin: 0;
 }
 </style>
