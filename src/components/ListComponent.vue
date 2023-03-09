@@ -201,5 +201,6 @@ const cornerIdClickHandler = (corner_id) => {
 
 .feedback-corner-id:hover {
   color: #4cb0f5;
+  transform: scale(1.1);
 }
 </style>

@@ -2,7 +2,7 @@
   <div class="info-block">
     <div class="info-block__go-back" @click="() => { emits('goBackClick') }">
       <q-icon name="arrow_back" size="40px" />
-      <q-tooltip anchor="top end">Вернуться назад</q-tooltip>
+      <q-tooltip anchor="top end">Назад к списку</q-tooltip>
     </div>
     <div class="info-block__text">
       <q-card bordered class="my-card">
@@ -418,15 +418,13 @@ const submitHandler = () => {
 
 
 const changeClientPassword = async () => {
-  const body = {password: newPassword.password.value};
-  console.log('client.value', client.value);
-  console.log('client.value.user_id', client.value.user_id);
-  return
+  const body = { password: newPassword.password.value };
   try {
     requestJson({
       url: `${apiRoutes.users}/${client.value.user_id}`,
       method: "PUT",
-      body
+      body,
+      message: "Редактирование пароля"
     });
   } finally {
     dialog.value = false;
