@@ -26,7 +26,7 @@
             v-bind="items[tab].fields.slider"
           />
 
-          <DateTimePicker v-bind="items[tab].fields.dateTimePicker" v-model="selectedItem.value.date"/>
+          <DateTimePicker v-bind="items[tab].fields.dateTimePicker" v-model="selectedItem.value.publish_at"/>
         </div>
 
         <div class="dialog-buttons">
@@ -66,14 +66,19 @@
       <q-form @submit.prevent="addNewItem" class="q-gutter-md fit" enctype="multipart/form-data">
         <div class="add-item-body">
           <q-input v-for="item in items[tab].fields.inputs" :key="item.name" v-bind="item" v-model="newItem[item.name]" />
-          <q-file v-if="items[tab].fields.uploader" v-bind="items[tab].fields.uploader" v-model="newItem[items[tab].fields.uploader.name]" >
+          <q-file 
+            v-if="items[tab].fields.uploader" 
+            v-bind="items[tab].fields.uploader" 
+            v-model="newItem[items[tab].fields.uploader.name]" 
+            :rules="[(val) => val || 'Выберите файл']"
+          >
             <template v-slot:prepend>
               <q-icon name="attach_file" />
             </template>
           </q-file>
 
           <q-slider v-if="items[tab].fields.slider" v-bind="items[tab].fields.slider" v-model="newItem[items[tab].fields.slider.name]"/>
-          <DateTimePicker v-bind="items[tab].fields.dateTimePicker" v-model="newItem.date"/>
+          <DateTimePicker v-bind="items[tab].fields.dateTimePicker" v-model="newItem.publish_at"/>
         </div>
 
         <div class="dialog-buttons">
@@ -111,8 +116,6 @@ const utilsStore = useUtilsStore();
 const waitingResponse = computed(() => utilsStore.waitingResponse);
 const fetching = ref(true);
 const tab = ref('news');
-const news = reactive({});
-const events = reactive({});
 const items = reactive({
   "news": {
     name: 'news',
@@ -139,7 +142,7 @@ const items = reactive({
         },
       ],
       uploader: {label: "Выберите изображение", accept: ".jpg, .jpeg, .png", name: "img", outlined: true, clearable: true},
-      dateTimePicker: {label: "Укажите дату", withoutTime: false, name: "date"}
+      dateTimePicker: {label: "Укажите дату", withoutTime: false, name: "publish_at"}
     },
     role: "news",
   },
@@ -176,7 +179,7 @@ const items = reactive({
         markers: true,
         "marker-labels": true,
       },
-      dateTimePicker: {label: "Укажите дату", withoutTime: true, name: "date"}
+      dateTimePicker: {label: "Укажите дату", withoutTime: true, name: "publish_at"}
     },
     role: "alerts",
   },
@@ -205,7 +208,7 @@ const items = reactive({
         },
       ],
       uploader: {label: "Выберите изображение", accept: ".jpg, .jpeg, .png", name: "img", outlined: true, clearable: true},
-      dateTimePicker: {label: "Укажите дату", withoutTime: true, name: "date"}
+      dateTimePicker: {label: "Укажите дату", withoutTime: true, name: "publish_at"}
     },
     role: "events",
   }
@@ -247,6 +250,7 @@ const listItemClick = (item) => {
 
 const editItemClick = (item) => {
   selectedItem.value = Object.assign({}, item);
+  selectedItem.value.publish_at = dayjs(selectedItem.value.publish_at, 'YYYY-MM-DDTHH:mm:ss').format(items[tab.value].dateDisplayFormat)
   delete selectedItem.value.img;
   editItemDialog.value = true;
 };
@@ -326,7 +330,7 @@ const addNewItem = async (evt) => {
   }
 };
 
-const sortByDate = (a, b) => dayjs(b.date).isBefore(dayjs(a.date)) ? -1 : 1;
+const sortByDate = (a, b) => dayjs(b.publish_at).isBefore(dayjs(a.publish_at)) ? -1 : 1;
 
 const addItemDialog = ref(false);
 const editItemDialog = ref(false);
