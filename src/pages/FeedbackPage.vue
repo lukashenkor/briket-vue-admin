@@ -9,11 +9,11 @@
 
     <q-spinner-dots size="50" color="primary" v-if="waitingResponse"/>
     <div class="text-left feedback-corner-info" v-if="!waitingResponse">
-      <p>corner_id: {{selectedFeedbackClient.corner_id}}</p>
+      <p @click="cornerIdClickHandler(selectedFeedbackClient.corner_id)">Corner_id: {{ selectedFeedbackClient.corner_id }}</p>
+      <p>User_id: {{selectedFeedbackClient.user_id}}</p>
+      <p>Login: {{selectedFeedbackClient.login}}</p>
       <p>Наименование: {{selectedFeedbackClient.label}}</p>
-      <p>Площадь: {{selectedFeedbackClient.area_size}}</p>
       <p>Number: {{selectedFeedbackClient.number}}</p>
-      <p>Мощность: {{selectedFeedbackClient.power}}</p>
     </div>
     <p class="paragraph-text">{{ selectedItem.value.text }}</p>
     <q-input
@@ -50,8 +50,8 @@ import DraggableDialog from "components/DraggableDialog";
 import CardTabsComponent from "components/CardTabsComponent";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import { apiRoutes, requestJson } from "src/api";
-import { notifySuccess } from "src/utils/notification";
 import { useUtilsStore } from "stores/utils";
+import { useRouter } from "vue-router";
 
 
 const utilsStore = useUtilsStore();
