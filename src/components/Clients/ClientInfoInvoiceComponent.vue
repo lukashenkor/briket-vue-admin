@@ -28,7 +28,7 @@
           {{ dayjs(props.row.date_at, 'YYYY-MM-DDTHH:mm:ss').format('YYYY-MM-DD') }}
         </q-td>
         <q-td key="start_at" :props="props">
-          {{ props.row.start_at }}
+          {{ dayjs(props.row.start_at, 'YYYY-MM-DDTHH:mm:ss').format('YYYY-MM-DD') }}
         </q-td>
         <q-td key="end_at" :props="props">
           {{ dayjs(props.row.end_at, 'YYYY-MM-DDTHH:mm:ss').format('YYYY-MM-DD') }}

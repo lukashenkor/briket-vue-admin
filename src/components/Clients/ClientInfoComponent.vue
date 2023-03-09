@@ -321,18 +321,6 @@ const clientObject = useObject({
     },
     input: true,
   },
-  number: {
-    value: '',
-    prevValue: '',
-    validators: { required },
-    blurred: false,
-    attributes: {
-      name: "number",
-      label: "Number",
-      type: "number",
-    },
-    input: true,
-  },
   power: {
     value: '',
     prevValue: '',
@@ -343,6 +331,18 @@ const clientObject = useObject({
       label: "Мощность",
       type: "number",
       step: "0.01",
+    },
+    input: true,
+  },
+  number: {
+    value: '',
+    prevValue: '',
+    validators: { required },
+    blurred: false,
+    attributes: {
+      name: "number",
+      label: "Number",
+      type: "number",
     },
     input: true,
   },

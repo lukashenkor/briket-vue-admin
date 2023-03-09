@@ -25,10 +25,10 @@
           {{ props.row.id }}
         </q-td>
         <q-td key="start_at" :props="props">
-          {{ props.row.start_at }}
+         {{ dayjs(props.row.start_at, 'YYYY-MM-DDTHH:mm:ss').format('YYYY-MM-DD') }}
         </q-td>
         <q-td key="end_at" :props="props">
-          {{ props.row.end_at }}
+          {{ dayjs(props.row.end_at, 'YYYY-MM-DDTHH:mm:ss').format('YYYY-MM-DD') }}
         </q-td>
         <q-td key="goal" :props="props">
           {{ props.row.goal }}
@@ -89,7 +89,7 @@ import { refreshFields, blurred, setFields } from "src/utils/object";
 import { required } from "src/utils/validators";
 import EditIconComponent from "components/EditIconComponent";
 import DeleteIconComponent from "components/DeleteIconComponent";
-
+import dayjs from "dayjs";
 
 const props = defineProps([ "tab", "client", "modelValue" ]);
 

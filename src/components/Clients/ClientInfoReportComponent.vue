@@ -28,7 +28,7 @@
           {{ props.row.id }}
         </q-td>
         <q-td key="date" :props="props">
-          {{ props.row.date }}
+         {{ dayjs(props.row.date, 'YYYY-MM-DDTHH:mm:ss').format('YYYY-MM-DD') }}
         </q-td>
         <q-td key="summ" :props="props">
           {{ props.row.summ }}
