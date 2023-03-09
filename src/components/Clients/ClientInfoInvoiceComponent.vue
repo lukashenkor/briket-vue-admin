@@ -16,7 +16,7 @@
       />
     </template>
     <template v-slot:body="props">
-      <q-tr :props="props">
+      <q-tr q-tr :props="props" :class="invoiceRowClassSpecifier(props.row)">
         <q-td key="actions" :props="props" class="table-actions">
           <EditIconComponent @click="showEditDialog(props.row)" />
           <DeleteIconComponent @click="showDeleteDialog(props.row)" />
@@ -25,13 +25,13 @@
           {{ props.row.id }}
         </q-td>
         <q-td key="date_at" :props="props">
-          {{ props.row.date_at }}
+          {{ dayjs(props.row.date_at, 'YYYY-MM-DDTHH:mm:ss').format('YYYY-MM-DD') }}
         </q-td>
         <q-td key="start_at" :props="props">
           {{ props.row.start_at }}
         </q-td>
         <q-td key="end_at" :props="props">
-          {{ props.row.end_at }}
+          {{ dayjs(props.row.end_at, 'YYYY-MM-DDTHH:mm:ss').format('YYYY-MM-DD') }}
         </q-td>
         <q-td key="amount" :props="props">
           {{ props.row.amount }}
@@ -41,9 +41,6 @@
         </q-td>
         <q-td key="number" :props="props">
           {{ props.row.number }}
-        </q-td>
-        <q-td key="type" :props="props">
-          {{ props.row.type }}
         </q-td>
         <q-td key="file" :props="props">
           <q-chip
@@ -83,6 +80,17 @@
           :field="field"
           @blur="field.blurred = true"
         />
+        <q-select
+          v-if="editMode"
+          v-model="invoice.type.value"
+          v-bind="invoice.type.attributes"
+          class="dialog-input"
+          :options="invoiceTypeOptions"
+          option-label="label"
+          option-value="value"
+          map-options
+          emit-value
+        />
         <q-file
           v-model="invoice.file.value"
           v-bind="invoice.file.attributes"
@@ -111,7 +119,6 @@
       </div>
     </q-form>
   </DraggableDialog>
-
 </template>
 
 <script setup>
@@ -126,11 +133,12 @@ import { refreshFields, blurred, setFields } from "src/utils/object";
 import { required } from "src/utils/validators";
 import EditIconComponent from "components/EditIconComponent";
 import DeleteIconComponent from "components/DeleteIconComponent";
+import dayjs from "dayjs";
 
 
 const props = defineProps(['tab', 'client', 'modelValue']);
 
-const emits = defineEmits([ "update:modelValue" ]);/*  */
+const emits = defineEmits(["update:modelValue"]);/*  */
 
 const items = computed({
   get: () => props.modelValue,
@@ -146,8 +154,13 @@ const invoiceColumns = [
   { name: 'amount', label: 'Сумма', field: 'amount', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'paid', label: 'Выплачено', field: 'paid', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'type', label: 'Тип', field: 'type', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'file', label: 'Файл', field: 'file', sortable: false, align: "center", editable: false, readonly: true, },
+];
+
+const invoiceTypeOptions = [
+  { value: 0, label: 'Неоплачен ❌' },
+  { value: 1, label: 'Частично оплачен 🟡' },
+  { value: 2, label: 'Оплачен ✅' },
 ];
 
 const utilsStore = useUtilsStore();
@@ -271,7 +284,6 @@ const invoice = useObject({
       required,
     },
     blurred: false,
-    input: true,
     attributes: {
       name: "type",
       label: "Тип",
@@ -303,12 +315,12 @@ const submitHandler = evt => {
 const editInvoice = async () => {
   const formData = new FormData();
   formData.append("corner_id", props.client.id);
-  for (const [ key, innerObject ] of Object.entries(invoice)) {
+  for (const [key, innerObject] of Object.entries(invoice)) {
     if (innerObject.edited) {
       formData.append(key, innerObject.value);
     }
   }
-  const url = `${ apiRoutes.invoice }/${ invoice.id.value }`;
+  const url = `${apiRoutes.invoice}/${invoice.id.value}`;
   try {
     const response = await requestForm({
       url,
@@ -317,7 +329,7 @@ const editInvoice = async () => {
     });
     if (response.success) {
       const invoiceIndex = items.value.findIndex(item => item.id === invoice.id.value);
-      items.value[invoiceIndex] = {...response.data};
+      items.value[invoiceIndex] = { ...response.data };
     }
   } finally {
     dialog.value = false;
@@ -325,7 +337,7 @@ const editInvoice = async () => {
 };
 
 const deleteInvoice = async () => {
-  const url = `${ apiRoutes.invoice }/${ invoice.id.value }`;
+  const url = `${apiRoutes.invoice}/${invoice.id.value}`;
   try {
     const response = await requestJson({
       url,
@@ -377,12 +389,34 @@ const fileClickHandler = (file) => {
 
 const filterInvoiceInputs = item => {
   if (createMode.value) {
-    return item.input && item.attributes.name !== "paid" && item.attributes.name !== "type";
+    return item.input && item.attributes.name !== "paid";
   }
   return item.input;
-}
+};
+
+const invoiceRowClassSpecifier = (row) => {
+  switch (row.type) {
+    case 0:
+      return 'invoice-row-unpaid';
+    case 1:
+      return 'invoice-row-partially-paid';
+    case 2:
+      return 'invoice-row-paid';
+  }
+};
 </script>
 
 <style scoped>
+.invoice-row-unpaid {
+  background-color: rgb(249, 206, 211);
+}
+
+.invoice-row-partially-paid {
+  background-color: rgb(253, 255, 216);
+}
+
+.invoice-row-paid {
+  background-color: rgb(192, 255, 228);
+}
 
 </style>
