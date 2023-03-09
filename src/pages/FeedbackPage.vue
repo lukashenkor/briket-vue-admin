@@ -1,13 +1,24 @@
 <template>
   <FetchSpinnerComponent :fetching="fetching"/>
-  <CardTabsComponent v-if="!fetching" :items="items" v-model="tab" @listItemClick="listItemClick" :parent-name="'feedback'" />
+  <div class="feedback-container">
+    <CardTabsComponent v-if="!fetching" :items="items" v-model="tab" @listItemClick="listItemClick" :parent-name="'feedback'" />
+  </div>
 
   <DraggableDialog v-model="dialog" :title="selectedItem?.value?.title" @onHide="onHideDialog">
     <h6>{{ selectedItem.value.title }}</h6>
+
+    <q-spinner-dots size="50" color="primary" v-if="waitingResponse"/>
+    <div class="text-left feedback-corner-info" v-if="!waitingResponse">
+      <p>corner_id: {{selectedFeedbackClient.corner_id}}</p>
+      <p>Наименование: {{selectedFeedbackClient.label}}</p>
+      <p>Площадь: {{selectedFeedbackClient.area_size}}</p>
+      <p>Number: {{selectedFeedbackClient.number}}</p>
+      <p>Мощность: {{selectedFeedbackClient.power}}</p>
+    </div>
     <p class="paragraph-text">{{ selectedItem.value.text }}</p>
     <q-input
       type="textarea"
-      v-model="selectedItem.value.answerText"
+      v-model="selectedItem.value.answer"
       filled
       label="Ответ"
       class="fit"
@@ -21,7 +32,7 @@
         label="Отправить"
         color="positive"
         @click="sendAnswer"
-        :disable="!selectedItem.value.answerText?.length || waitingResponse"
+        :disable="!selectedItem.value.answer?.length || waitingResponse"
         v-if="selectedItem.value.status === 0"
       />
       <q-btn
@@ -91,10 +102,23 @@ onMounted( async () => {
   }
 });
 
+const selectedFeedbackClient = ref({});
 const selectedItem = reactive({});
-const listItemClick = (item) => {
+const listItemClick = async (item) => {
+  utilsStore.updateWaitingResponse(true)
   selectedItem.value = item;
   dialog.value = true;
+  try {
+    const feedbackClient = await requestJson({
+      url: `${apiRoutes.corners}/${item.corner_id}`
+    });
+
+    if (feedbackClient.success) {
+      selectedFeedbackClient.value = feedbackClient.data;
+    }
+  } finally {
+    utilsStore.updateWaitingResponse(false)
+  }
 };
 
 const onHideDialog = () => {
@@ -102,18 +126,19 @@ const onHideDialog = () => {
 };
 
 const sendAnswer = async () => {
+  const body = {
+    status: 1,
+    answer: selectedItem.value.answer
+  }
+
   try {
     const response = await requestJson({
       url: `${apiRoutes.feedback}/${selectedItem.value.id}`,
       method: "PUT",
-      body: {
-        status: 1,
-      }
+      body
     });
-    console.log('response', response);
 
     if (response.success) {
-      notifySuccess("Редактирование успешно");
       selectedItem.value.status = 1;
     }
   } finally {
@@ -130,5 +155,13 @@ const dialogButtonsStyle = computed(() => selectedItem?.value.status === 0
 .paragraph-text {
   max-width: 100%;
   overflow-wrap: break-word;
+}
+
+.feedback-corner-info {
+  width: 100%;
+}
+
+.feedback-corner-info > p {
+  margin: 0;
 }
 </style>

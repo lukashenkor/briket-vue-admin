@@ -159,7 +159,6 @@ onBeforeMount( async () => {
         rows.value = groupsResponse.data;
       }
       if (rolesResponse.success) {
-        console.log('rolesResponse', rolesResponse);
         roles.data = rolesResponse.data;
       }
       fetching.value = false;
@@ -250,7 +249,6 @@ const showEditDialog = (row) => {
 
 const confirmEdit = async () => {
   // TODO: Отправлять запрос на изменение с массивом ролей
-  console.log('selectedGroup', selectedGroup);
   const body = {
     group: selectedGroup.id.value,
     roles: selectedGroup.roles.value.reduce((acc, role) => [...acc, role.id], [])

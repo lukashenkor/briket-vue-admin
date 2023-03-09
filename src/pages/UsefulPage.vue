@@ -282,7 +282,6 @@ const addNewItem = async (evt) => {
       url: apiRoutes[tab.value],
       formData: formData,
     });
-    console.log('response', response);
     if (response.success) {
       items[tab.value].data = [response.data, ...items[tab.value].data];
       items[tab.value].requestOffset += 1;
@@ -294,7 +293,6 @@ const addNewItem = async (evt) => {
 
 
 const editItemClick = item => {
-  console.log('editItemClick', item);
   selectedItem.value = Object.assign({}, item);
   if (item.hasOwnProperty('img')) {
     selectedItem.value.img = null;
@@ -305,7 +303,6 @@ const editItemClick = item => {
 };
 
 const editConfirm = async (evt) => {
-  console.log('editConfirm');
   const formData = new FormData(evt.target);
   const fileObjectKey = selectedItem.value.hasOwnProperty("img")
     ? "img"
@@ -331,7 +328,6 @@ const editConfirm = async (evt) => {
 
 
 const deleteItemClick = item => {
-  console.log('deleteItemClick - item', item);
   selectedItem.value = item;
   deleteItemDialog.value = true;
 };

@@ -44,11 +44,6 @@
           :field="field"
           @blur="field.blurred = true"
         />
-        <q-slider
-          v-bind="client.rating.attributes"
-          v-model="client.rating.value"
-          :label-value="`Рейтинг: ${client.rating.value}`"
-        />
         <ClientContactsComponent
           v-model="client.contacts.value"
         />
@@ -85,7 +80,7 @@ import { apiRoutes, requestJson } from "src/api";
 import DraggableDialog from "components/DraggableDialog";
 import { useUserStore } from "stores/user";
 import { useObject } from "src/hooks/useObject";
-import { required, requiredOfArray } from "src/utils/validators";
+import { minLength, required } from 'src/utils/validators';
 import { useUtilsStore } from "stores/utils";
 import { refreshFields } from "src/utils/object";
 
@@ -94,15 +89,17 @@ const utilsStore = useUtilsStore();
 const waitingResponse = computed(() => utilsStore.waitingResponse);
 const userStore = useUserStore();
 const userRoles = computed(() => userStore.data.roles);
-const props = defineProps([ "isRatingPage" ]);
+const props = defineProps([ "isRatingPage", "corner_id" ]);
 const fetching = ref(false);
 const columns = [
   { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'label', label: 'Наименование', field: 'label', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'area', label: 'Площадь (кв.м.)', field: 'area', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'login', label: 'Логин', field: 'login', sortable: false, align: "left", editable: false, readonly: true, },
+  { name: 'area_size', label: 'Площадь (кв.м.)', field: 'area_size', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'power', label: 'Мощность (кВт)', field: 'power', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'rating', label: 'Рейтинг', field: 'rating', sortable: true, align: "left", editable: true, readonly: false, },
+
 ];
 
 const rows = reactive({});
@@ -115,6 +112,12 @@ onBeforeMount(async () => {
       url: apiRoutes.corners
     });
     rows.clients = response.data.corners;
+    if (props.corner_id) {
+      const client = rows.clients.find(row => row.id === Number(props.corner_id))
+      if (client) {
+        selectClient(undefined, client);
+      }
+    }
   } finally {
     fetching.value = false;
   }
@@ -122,7 +125,35 @@ onBeforeMount(async () => {
 
 const selectedClient = ref([]);
 
+const passwordMinLength = 8;
+const passwordMaxLength = 36;
+
 const client = useObject({
+   login: {
+    value: "",
+    prevValue: "",
+    validators: { required },
+    blurred: false,
+    input: true,
+    attributes: {
+      name: "login",
+      label: "Логин клиента",
+      type: "text",
+    },
+  },
+  password: {
+    value: "",
+    prevValue: "",
+    validators: { required, minLength: minLength(passwordMinLength) },
+    blurred: false,
+    input: true,
+    attributes: {
+      name: "password",
+      label: "Пароль клиента",
+      type: "password",
+      maxlength: passwordMaxLength
+    },
+  },
   label: {
     value: "",
     prevValue: "",
@@ -135,16 +166,21 @@ const client = useObject({
       type: "text",
     },
   },
-  area: {
+  area_size: {
     value: "",
     prevValue: "",
     validators: { required },
     blurred: false,
     input: true,
     attributes: {
-      name: "area",
+      name: "area_size",
       label: "Площадь",
       type: "number",
+      "min": 0.0,
+      "max": 10.0,
+      step: 0.1,
+      markers: 1,
+      markerLabels: true,
     },
   },
   power: {
@@ -157,6 +193,11 @@ const client = useObject({
       name: "power",
       label: "Мощность",
       type: "number",
+      "min": 0.0,
+      "max": 10.0,
+      step: 0.1,
+      markers: 1,
+      markerLabels: true,
     },
   },
   number: {
@@ -169,21 +210,6 @@ const client = useObject({
       name: "number",
       label: "Номер",
       type: "number",
-    },
-  },
-  rating: {
-    value: 1,
-    prevValue: '',
-    blurred: false,
-    attributes: {
-      "label": true,
-      "label-always": true,
-      "name": "rating",
-      "min": 1.0,
-      "max": 10.0,
-      step: 0.1,
-      markers: 1,
-      markerLabels: true,
     },
   },
   contacts: {
@@ -217,7 +243,6 @@ const submitHandler = async () => {
       method: "POST",
       body,
     });
-    console.log('new client response', response);
     if (response.success) {
       rows.clients = [ ...rows.clients, response.data ];
     }

@@ -1,12 +1,12 @@
 import { getFileFromUrl } from "src/utils/file";
 
 
-export const refreshFields = (object) => {
+export const refreshFields = (object, isValid = true) => {
   for (const key of Object.keys(object)) {
     object[key].value = null;
     object[key].prevValue = null;
     object[key].blurred = false;
-    object[key].valid = true;
+    object[key].valid = isValid;
   }
 };
 
@@ -30,3 +30,14 @@ export const setFields = async (row, object) => {
     }
   }
 };
+
+
+export const hasInvalidFields = (object) => {
+  for (const value of Object.values(object)) {
+    if (value.hasOwnProperty("hidden") && value.hidden) continue;
+    if (value.hasOwnProperty("valid") && !value.valid) {
+      return true;
+    }
+  }
+  return false;
+}

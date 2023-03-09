@@ -15,7 +15,10 @@ export default async function useRequest({ promise, message, notif }) {
 
     if (response.status >= 200 && response.status < 300) {
       const data = response.data;
-      if (data?.status?.toLowerCase() == "error") {
+      if (
+        typeof data?.status === "string" &&
+        data?.status?.toLowerCase() == "error"
+      ) {
         console.error("Request failed. Error: ", data.message);
         result.success = false;
         result.error = data.message;
@@ -24,7 +27,7 @@ export default async function useRequest({ promise, message, notif }) {
     }
   } catch (error) {
     console.error('Request fails with error: ', error);
-    const status = error.response.status;
+    const status = error?.response?.status;
     if (status === 401) {
       const userStore = useUserStore();
       const router = routerInstance;

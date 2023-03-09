@@ -42,7 +42,6 @@ const logout = async () => {
   });
   store.$reset();
   await router.push('/login')
-  console.log('Logout');
 };
 </script>
 

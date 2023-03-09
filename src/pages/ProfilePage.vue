@@ -116,11 +116,9 @@ const user = useObject({
 
 const submitHandler = async evt => {
   if (errorMessage.value) return;
-  console.log('submits');
   const body = {};
   for (const [ key, value ] of new FormData(evt.target)) {
     if (key === 'password_confirm') continue
-    console.log(`${key}: ${value}`);
     body[key] = value;
   }
   const url = `${apiRoutes.admins}/${userData.value.id}`

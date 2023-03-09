@@ -17,29 +17,33 @@
     </template>
     <template v-slot:body="props">
       <q-tr :props="props">
+        <q-td key="actions" :props="props" class="table-actions">
+          <EditIconComponent @click="showEditDialog(props.row)" />
+          <DeleteIconComponent @click="showDeleteDialog(props.row)" />
+        </q-td>
         <q-td key="id" :props="props">
           {{ props.row.id }}
         </q-td>
-        <q-td key="date" :props="props">
-          {{ props.row.date }}
+        <q-td key="date_at" :props="props">
+          {{ props.row.date_at }}
         </q-td>
-        <q-td key="date_start" :props="props">
-          {{ props.row.date_start }}
+        <q-td key="start_at" :props="props">
+          {{ props.row.start_at }}
         </q-td>
-        <q-td key="date_end" :props="props">
-          {{ props.row.date_end }}
+        <q-td key="end_at" :props="props">
+          {{ props.row.end_at }}
         </q-td>
-        <q-td key="summ" :props="props">
-          {{ props.row.summ }}
+        <q-td key="amount" :props="props">
+          {{ props.row.amount }}
         </q-td>
-        <q-td key="payed" :props="props">
-          {{ props.row.payed }}
+        <q-td key="paid" :props="props">
+          {{ props.row.paid }}
         </q-td>
         <q-td key="number" :props="props">
           {{ props.row.number }}
         </q-td>
-        <q-td key="itype" :props="props">
-          {{ props.row.itype }}
+        <q-td key="type" :props="props">
+          {{ props.row.type }}
         </q-td>
         <q-td key="file" :props="props">
           <q-chip
@@ -51,125 +55,9 @@
             {{ props.row.file.name }}
           </q-chip>
         </q-td>
-        <q-td key="actions" :props="props" class="table-actions">
-          <EditIconComponent @click="showEditDialog(props.row)" />
-          <DeleteIconComponent @click="showDeleteDialog(props.row)" />
-        </q-td>
       </q-tr>
     </template>
   </q-table>
-
-<!--  <DraggableDialog v-model="createDialog" min-height="300" title="Создание счёта" @onHide="onHideDialog(invoice)">
-    <q-form @submit.prevent="createInvoice" style="width: 80%;">
-      <DateTimePicker
-        v-for="field in Object.values(invoice).filter(item => item.isDate)"
-        :key="field.attributes.name"
-        v-model="field.value"
-        v-bind="field.attributes"
-        @blur="blurred(invoice, field.attributes.name)"
-        class="dialog-input"
-        :without-time="true"
-      />
-      <FieldInput
-        v-for="field in Object.values(invoice).filter(item => item.input)"
-        :key="field.attributes.name"
-        v-model="field.value"
-        :field="field"
-        @blur="field.blurred = true"
-      />
-&lt;!&ndash;      <q-input
-        v-for="field in Object.values(invoice).filter(item => item.input)"
-        :key="field.attributes.name"
-        v-model="field.value"
-        v-bind="field.attributes"
-        class="dialog-input"
-        @blur="blurred(invoice, field.attributes.name)"
-        :error="!field.valid && field.blurred"
-        error-message="Поле не может быть пустым"
-        :rules="[...Object.values(field.validators)]"
-      />&ndash;&gt;
-      <q-file
-        v-model="invoice.file.value"
-        v-bind="invoice.file.attributes"
-        :rules="[...Object.values(invoice.file.validators)]"
-        error-message="Поле не может быть пустым"
-      >
-        <template v-slot:prepend>
-          <q-icon name="attach_file" />
-        </template>
-      </q-file>
-
-      <div class="dialog-buttons">
-        <q-btn
-          label="Создать"
-          color="positive"
-          type="submit"
-          :disable="waitingResponse"
-        />
-        <q-btn
-          label="Отмена"
-          color="primary"
-          v-close-popup
-        />
-      </div>
-    </q-form>
-  </DraggableDialog>-->
-
-<!--  <DraggableDialog v-model="editDialog" min-height="300" title="Редактирование счёта" @onHide="onHideDialog(invoice)">
-    <q-form @submit.prevent="editInvoice" style="width: 80%;">
-      <DateTimePicker
-        v-for="field in Object.values(invoice).filter(item => item.isDate)"
-        :key="field.attributes.name"
-        v-model="field.value"
-        v-bind="field.attributes"
-        @blur="blurred(invoice, field.attributes.name)"
-        class="dialog-input"
-        :without-time="true"
-      />
-      <FieldInput
-        v-for="field in Object.values(invoice).filter(item => item.input)"
-        :key="field.attributes.name"
-        v-model="field.value"
-        :field="field"
-        @blur="field.blurred = true"
-      />
-&lt;!&ndash;      <q-input
-        v-for="field in Object.values(invoice).filter(item => item.input)"
-        :key="field.attributes.name"
-        v-model="field.value"
-        v-bind="field.attributes"
-        class="dialog-input"
-        @blur="blurred(invoice, field.attributes.name)"
-        :error="!field.valid && field.blurred"
-        error-message="Поле не может быть пустым"
-        :rules="[...Object.values(field.validators)]"
-      />&ndash;&gt;
-      <q-file
-        v-model="invoice.file.value"
-        v-bind="invoice.file.attributes"
-        :rules="[...Object.values(invoice.file.validators)]"
-        error-message="Поле не может быть пустым"
-      >
-        <template v-slot:prepend>
-          <q-icon name="attach_file" />
-        </template>
-      </q-file>
-
-      <div class="dialog-buttons">
-        <q-btn
-          label="Сохранить"
-          color="positive"
-          type="submit"
-          :disable="waitingResponse"
-        />
-        <q-btn
-          label="Отмена"
-          color="primary"
-          v-close-popup
-        />
-      </div>
-    </q-form>
-  </DraggableDialog>-->
 
   <DraggableDialog v-model="dialog" :title="dialogTitle" @onHide="onHideDialog(invoice)">
     <q-form @submit.prevent="submitHandler" style="width: 80%;">
@@ -250,16 +138,16 @@ const items = computed({
 });
 
 const invoiceColumns = [
-  { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'date', label: 'Дата', field: 'date', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'date_start', label: 'Дата начала', field: 'date_start', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'date_end', label: 'Дата окончания', field: 'date_end', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'summ', label: 'Сумма', field: 'summ', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'payed', label: 'Выплачено', field: 'payed', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'itype', label: 'Тип', field: 'itype', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'file', label: 'Файл', field: 'file', sortable: false, align: "center", editable: false, readonly: true, },
   { name: 'actions', label: 'Действия', field: 'actions', sortable: false, align: "left", editable: false, readonly: true, },
+  { name: 'id', label: 'ID', field: 'id', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'date_at', label: 'Дата', field: 'date_at', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'start_at', label: 'Дата начала', field: 'start_at', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'end_at', label: 'Дата окончания', field: 'end_at', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'amount', label: 'Сумма', field: 'amount', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'paid', label: 'Выплачено', field: 'paid', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'type', label: 'Тип', field: 'type', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'file', label: 'Файл', field: 'file', sortable: false, align: "center", editable: false, readonly: true, },
 ];
 
 const utilsStore = useUtilsStore();
@@ -295,7 +183,7 @@ const invoice = useObject({
   id: {
     value: '',
   },
-  date: {
+  date_at: {
     value: '',
     prevValue: '',
     validators: {
@@ -304,11 +192,11 @@ const invoice = useObject({
     blurred: false,
     isDate: true,
     attributes: {
-      name: "date",
+      name: "date_at",
       label: "Дата",
     },
   },
-  date_start: {
+  start_at: {
     value: '',
     prevValue: '',
     validators: {
@@ -317,11 +205,11 @@ const invoice = useObject({
     blurred: false,
     isDate: true,
     attributes: {
-      name: "date_start",
+      name: "start_at",
       label: "Дата начала",
     },
   },
-  date_end: {
+  end_at: {
     value: '',
     prevValue: '',
     validators: {
@@ -330,11 +218,11 @@ const invoice = useObject({
     blurred: false,
     isDate: true,
     attributes: {
-      name: "date_end",
+      name: "end_at",
       label: "Дата окончания",
     },
   },
-  summ: {
+  amount: {
     value: '',
     prevValue: '',
     validators: {
@@ -343,12 +231,12 @@ const invoice = useObject({
     blurred: false,
     input: true,
     attributes: {
-      name: "summ",
+      name: "amount",
       label: "Сумма",
       type: "number",
     },
   },
-  payed: {
+  paid: {
     value: '',
     prevValue: '',
     validators: {
@@ -357,7 +245,7 @@ const invoice = useObject({
     blurred: false,
     input: true,
     attributes: {
-      name: "payed",
+      name: "paid",
       label: "Выплачено",
       type: "number",
     },
@@ -376,7 +264,7 @@ const invoice = useObject({
       type: "number",
     },
   },
-  itype: {
+  type: {
     value: '',
     prevValue: '',
     validators: {
@@ -385,7 +273,7 @@ const invoice = useObject({
     blurred: false,
     input: true,
     attributes: {
-      name: "itype",
+      name: "type",
       label: "Тип",
       type: "number",
     },
@@ -414,7 +302,7 @@ const submitHandler = evt => {
 
 const editInvoice = async () => {
   const formData = new FormData();
-  formData.append("corner", props.client.id);
+  formData.append("corner_id", props.client.id);
   for (const [ key, innerObject ] of Object.entries(invoice)) {
     if (innerObject.edited) {
       formData.append(key, innerObject.value);
@@ -454,7 +342,8 @@ const deleteInvoice = async () => {
 
 const createInvoice = async (evt) => {
   const formData = new FormData(evt.target);
-  formData.append("corner", props.client.id);
+  formData.append("corner_id", props.client.id);
+  formData.append("type", '0');
   try {
     const response = await requestForm({
       url: apiRoutes.invoice,
@@ -488,7 +377,7 @@ const fileClickHandler = (file) => {
 
 const filterInvoiceInputs = item => {
   if (createMode.value) {
-    return item.input && item.attributes.name !== "payed";
+    return item.input && item.attributes.name !== "paid" && item.attributes.name !== "type";
   }
   return item.input;
 }
