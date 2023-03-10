@@ -47,7 +47,7 @@
         </tbody>
       </q-markup-table>
     </div>
-    <div class="feedback-corner-info">
+    <div class="feedback-corner-info" style="width: 100%;">
       <h6>Текст обращения:</h6>
       <p class="paragraph-text">{{ selectedItem.value.text }}</p>
     </div>
@@ -188,7 +188,7 @@ const dialogButtonsStyle = computed(() => selectedItem?.value.status === 0
 
 <style scoped>
 .paragraph-text {
-  max-width: 100%;
+  width: 100%;
   overflow-wrap: break-word;
 }
 

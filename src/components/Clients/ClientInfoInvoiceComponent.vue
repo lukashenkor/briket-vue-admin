@@ -70,7 +70,7 @@
         <DateTimePicker
           v-for="field in Object.values(invoice).filter(item => item.isDate)"
           :key="field.attributes.name"
-          :modelValue="field.value"
+          v-model="field.value"
           v-bind="field.attributes"
           @blur="blurred(invoice, field.attributes.name)"
           class="dialog-input"
@@ -162,7 +162,7 @@ const invoiceColumns = [
 ];
 
 const invoiceTypeOptions = [
-  { value: 0, label: 'Неоплачен ❌' },
+  { value: 0, label: 'Не оплачен ❌' },
   { value: 1, label: 'Частично оплачен 🟡' },
   { value: 2, label: 'Оплачен ✅' },
 ];

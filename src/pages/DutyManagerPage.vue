@@ -42,7 +42,7 @@
                     {{ props.row.name }}
                   </q-td>
                   <q-td key="phone" :props="props">
-                    +7{{ props.row.phone }}
+                    {{ props.row.phone }}
                   </q-td>
                   <q-td key="actions" :props="props">
                     <EditIconComponent size="sm" @click="showEditDialog(props.row)" />
@@ -181,9 +181,8 @@
       :error="selectedManager.phone.blurred && !selectedManager.phone.valid"
       :error-message="getErrorMessage(selectedManager.phone.errors)"
       mask="+7-(###)-###-##-##"
-      :rules="[val => val.length === 10 || 'Введите номер телефона']"
+      :rules="[val => val.length === 18 || 'Введите номер телефона']"
       lazy-rules
-      unmasked-value
       class="dialog-input"
       @blur="blurred(selectedManager, 'phone')"
     />

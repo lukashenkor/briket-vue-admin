@@ -390,10 +390,10 @@ const newPassword = useObject({
 });
 const dialog = computed({
   get: () => editMode.value || deleteMode.value || changePasswordMode.value,
-  set: (val) => {
-    editMode.value = val;
-    deleteMode.value = val;
-    changePasswordMode.value = val;
+  set: () => {
+    editMode.value = false;
+    deleteMode.value = false;
+    changePasswordMode.value = false;
   }
 });
 const dialogTitle = computed(() => {
