@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-none">
-    <q-input :disable="waitingResponse" dense v-model="value" :label="label" :rules="[val => !!val || 'Введите дату и время']" :name="name">
+    <q-input :disable="waitingResponse" dense v-model="value" :label="label" :rules="[val => !!val || errorResponse]" :name="name">
       <template v-slot:prepend>
         <q-icon name="event" class="cursor-pointer">
           <q-popup-proxy
@@ -58,6 +58,10 @@ const props = defineProps([ "modelValue", "label", "withoutTime", "name" ]);
 const emits = defineEmits([ "update:modelValue" ]);
 const utilsStore = useUtilsStore();
 const waitingResponse = computed(() => utilsStore.waitingResponse);
+
+const errorResponse = props.withoutTime
+  ? 'Введите дату'
+  : 'Введите дату и время'
 
 const value = computed({
   get() {
