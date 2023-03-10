@@ -6,24 +6,50 @@
         <q-table
           title="Список клиентов"
           :columns="columns"
-          :rows="rows.clients"
+          :rows="filteredClients"
           row-key="label"
           no-data-label="Список клиентов пуст"
           :rows-per-page-options="[10, 20, 0]"
           v-model:selected="selectedClient"
-          @row-click="selectClient"
           :pagination="{
             sortBy: isRatingPage ? 'rating' : 'id',
             descending: isRatingPage,
           }"
         >
           <template v-slot:top-right>
+            <div style="border: 1px solid; border-radius: 8px; padding: 0 10px;">
+              <p class="text-center" style="border-bottom: 1px solid;">Фильтрация клиентов:</p>
+              <div class="q-gutter-sm">
+                <q-radio keep-color v-model="filter" val="available" label="Активные" color="teal" />
+                <q-radio keep-color v-model="filter" val="disabled" label="Удаленные" color="red" />
+                <q-radio keep-color v-model="filter" val="All" label="Все" color="black" />
+              </div>
+            </div>
+            <q-separator
+              vertical
+              inset
+              spaced
+              style="margin: 0 20px;"
+            />
             <q-btn
               label="Добавить"
               color="positive"
               @click="dialog = true"
               v-if="userRoles.includes('corners-create')"
             />
+          </template>
+          <template v-slot:body="props">
+            <q-tr
+              :props="props"
+              :class="props.row.disabled ? 'client-disabled' : ''"
+              @click="selectClient(props.row)"
+              class="client-row"
+            >
+              <q-td v-for="item in columns.map(column => column.name)" :key="item">
+                {{ props.row[item] }}
+              </q-td>
+            </q-tr>
+
           </template>
         </q-table>
       </div>
@@ -34,6 +60,7 @@
         <ClientInfoComponent v-model="selectedClient[0]" @goBackClick="goBackClickHandler" @onClientDelete="onClientDelete" @editClient="editClient"/>
       </div>
     </q-slide-transition>
+    <QSelect />
 
     <DraggableDialog v-model="dialog" title="Добавление клиента" min-width="700" :onHide="onHideDialog">
       <q-form @submit.prevent="submitHandler" style="width: 80%;">
@@ -104,6 +131,7 @@ const columns = [
 
 const rows = reactive({});
 const dialog = ref(false);
+const filter = ref('available')
 
 onBeforeMount(async () => {
   fetching.value = true;
@@ -112,16 +140,27 @@ onBeforeMount(async () => {
       url: apiRoutes.corners
     });
     rows.clients = response.data.corners;
+
     if (props.corner_id) {
       const client = rows.clients.find(row => row.id === Number(props.corner_id))
       if (client) {
-        selectClient(undefined, client);
+        selectClient(client);
       }
     }
   } finally {
     fetching.value = false;
   }
 });
+
+const filteredClients = computed(() => {
+  switch (filter.value) {
+    case 'available':
+      return rows.clients.filter(client => !client.disabled)
+    case 'disabled':
+      return rows.clients.filter(client => client.disabled)
+  }
+  return rows.clients;
+})
 
 const selectedClient = ref([]);
 
@@ -251,14 +290,14 @@ const submitHandler = async () => {
   }
 };
 
-const selectClient = (evt, row) => {
+const selectClient = (row) => {
   if (!selectedClient.value || !selectedClient.value.length) {
     selectedClient.value = [ row ];
   }
 };
 
 const onClientDelete = id => {
-  rows.clients = rows.clients.filter(client => client.id !== id);
+  rows.clients.find(client => client.id === id).disabled = true;
   selectedClient.value = [];
 };
 
@@ -270,3 +309,13 @@ const onHideDialog = () => {
   refreshFields(client);
 };
 </script>
+
+<style>
+.client-disabled {
+  background-color: antiquewhite;
+}
+
+.client-row {
+  cursor: pointer;
+}
+</style>

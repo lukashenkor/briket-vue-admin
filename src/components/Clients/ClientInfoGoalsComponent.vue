@@ -204,7 +204,7 @@ const createGoal = async () => {
 };
 
 const showEditDialog = item => {
-  setFields(item, goal);
+  setFields(item, goal, 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD');
   editMode.value = true;
 };
 

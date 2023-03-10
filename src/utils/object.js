@@ -1,4 +1,5 @@
 import { getFileFromUrl } from "src/utils/file";
+import dayjs from "dayjs";
 
 
 export const refreshFields = (object, isValid = true) => {
@@ -14,17 +15,22 @@ export const blurred = (object, field) => {
   object[field].blurred = true;
 };
 
-export const setFields = async (row, object) => {
-  for (const entry of Object.entries(row)) {
-    const [ key, value ] = entry;
+export const setFields = async (row, object, dateInputFormat, dateOutputFormat) => {
+  for (const [ key, value ] of Object.entries(row)) {
     if (object.hasOwnProperty(key)) {
       if (key === 'file') {
         const file = await getFileFromUrl(value.url, value.name);
         object[key].value = file;
         object[key].prevValue = file;
       } else {
-        object[key].value = value;
-        object[key].prevValue = value;
+        if (dateInputFormat && dateOutputFormat && object[key].isDate) {
+          const date = dayjs(value, dateInputFormat).format(dateOutputFormat);
+          object[key].value = date;
+          object[key].prevValue = date;
+        } else {
+          object[key].value = value;
+          object[key].prevValue = value;
+        }
       }
       object[key].blurred = false;
     }

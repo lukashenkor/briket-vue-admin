@@ -16,7 +16,7 @@
       />
     </template>
     <template v-slot:body="props">
-      <q-tr q-tr :props="props" :class="invoiceRowClassSpecifier(props.row)">
+      <q-tr :props="props" :class="invoiceRowClassSpecifier(props.row)">
         <q-td key="actions" :props="props" class="table-actions">
           <EditIconComponent @click="showEditDialog(props.row)" />
           <DeleteIconComponent @click="showDeleteDialog(props.row)" />
@@ -41,6 +41,9 @@
         </q-td>
         <q-td key="number" :props="props">
           {{ props.row.number }}
+        </q-td>
+        <q-td key="type" :props="props">
+          {{ invoiceTypeOptions[props.row.type].label }}
         </q-td>
         <q-td key="file" :props="props">
           <q-chip
@@ -67,7 +70,7 @@
         <DateTimePicker
           v-for="field in Object.values(invoice).filter(item => item.isDate)"
           :key="field.attributes.name"
-          v-model="field.value"
+          :modelValue="field.value"
           v-bind="field.attributes"
           @blur="blurred(invoice, field.attributes.name)"
           class="dialog-input"
@@ -153,7 +156,8 @@ const invoiceColumns = [
   { name: 'end_at', label: 'Дата окончания', field: 'end_at', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'amount', label: 'Сумма', field: 'amount', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'paid', label: 'Выплачено', field: 'paid', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'number', label: 'Number', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
+  { name: 'type', label: 'Тип', field: 'type', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'file', label: 'Файл', field: 'file', sortable: false, align: "center", editable: false, readonly: true, },
 ];
 
@@ -370,7 +374,7 @@ const createInvoice = async (evt) => {
 };
 
 const showEditDialog = item => {
-  setFields(item, invoice);
+  setFields(item, invoice, 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD');
   editMode.value = true;
 };
 

@@ -23,10 +23,10 @@
         <q-item-section side top>
           <q-item-label
             caption
-            v-if="item.date"
+            v-if="item.date || item.publish_at"
             class="date-caption"
-            :class="parentName !== 'feedback' && dayjs(item.date).isBefore(dayjs()) ? 'list-item__date-old' : ''"
-          >{{ dayjs(item.date).format(dateDisplayFormat) }}</q-item-label>
+            :class="parentName !== 'feedback' && dayjs(item.date || item.publish_at).isBefore(dayjs()) ? 'list-item__date-old' : ''"
+          >{{ dayjs(item.date || item.publish_at).format(dateDisplayFormat) }}</q-item-label>
           <q-item-label caption v-if="item.priority" style="color: #374bc9">Приоритет:{{ item.priority }}</q-item-label>
         </q-item-section>
       </q-item>

@@ -1,6 +1,6 @@
 <template>
-  <q-dialog ref="myDialog" no-backdrop-dismiss no-esc-dismiss @show="onShow" @hide="onHide">
-    <q-card :style="{minWidth: minWidth + 'px', minHeight: minHeight ? minHeight + 'px' : ''}">
+  <q-dialog ref="myDialog" no-backdrop-dismiss no-esc-dismiss @show="onShow" @hide="onHide" style="max-width: initial;">
+    <q-card :style="{minWidth: minWidth ? minWidth + 'px' : '', minHeight: minHeight ? minHeight + 'px' : ''}">
       <q-bar
         class="bg-primary text-white"
         :class="draggable ? 'cursor-move' : ''"
@@ -102,8 +102,12 @@ const onGrab = () => {
   min-height: inherit;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+}
+
+.q-card {
+  max-width: initial;
 }
 
 .dialog-body > h1,

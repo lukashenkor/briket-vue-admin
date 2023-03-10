@@ -35,7 +35,6 @@
               v-model="value"
               mask="YYYY-MM-DD HH:mm:ss"
               format24h
-              @update:model-value="() => $refs.qTimeProxy.hide()"
               @input="$emit('input', $event.target.value)"
             >
               <div class="row items-center justify-end">
@@ -52,6 +51,7 @@
 <script setup>
 import { computed } from "vue";
 import { useUtilsStore } from "stores/utils";
+import { qDateLocale } from "src/utils/date";
 
 
 const props = defineProps([ "modelValue", "label", "withoutTime", "name" ]);

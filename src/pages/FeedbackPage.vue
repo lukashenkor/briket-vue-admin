@@ -1,33 +1,71 @@
 <template>
-  <FetchSpinnerComponent :fetching="fetching"/>
+  <FetchSpinnerComponent :fetching="fetching" />
   <div class="feedback-container">
-    <CardTabsComponent v-if="!fetching" :items="items" v-model="tab" @listItemClick="listItemClick" :parent-name="'feedback'" />
+    <CardTabsComponent
+      v-if="!fetching"
+      :items="items"
+      v-model="tab"
+      @listItemClick="listItemClick"
+      :parent-name="'feedback'"
+    />
   </div>
 
-  <DraggableDialog v-model="dialog" :title="selectedItem?.value?.title" @onHide="onHideDialog">
-    <h6>{{ selectedItem.value.title }}</h6>
-
-    <q-spinner-dots size="50" color="primary" v-if="waitingResponse"/>
-    <div class="text-left feedback-corner-info" v-if="!waitingResponse">
-      <p @click="cornerIdClickHandler(selectedFeedbackClient.corner_id)">Corner_id: {{ selectedFeedbackClient.corner_id }}</p>
-      <p>User_id: {{selectedFeedbackClient.user_id}}</p>
-      <p>Login: {{selectedFeedbackClient.login}}</p>
-      <p>Наименование: {{selectedFeedbackClient.label}}</p>
-      <p>Number: {{selectedFeedbackClient.number}}</p>
+  <DraggableDialog
+    v-model="dialog"
+    :title="selectedItem?.value?.title"
+    @onHide="onHideDialog"
+    minWidth="800"
+  >
+    <q-spinner-dots
+      size="50"
+      color="primary"
+      v-if="waitingResponse"
+    />
+    <div
+      class="feedback-corner-info"
+      v-if="!waitingResponse"
+    >
+      <h6>Информация об авторе обращения</h6>
+      <q-markup-table separator="cell">
+        <thead>
+          <tr>
+            <th>Corner_id</th>
+            <th>User_id</th>
+            <th>Login</th>
+            <th>Наименование</th>
+            <th>Number</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ selectedFeedbackClient.corner_id }}</td>
+            <td>{{ selectedFeedbackClient.user_id }}</td>
+            <td>{{ selectedFeedbackClient.login }}</td>
+            <td>{{ selectedFeedbackClient.label }}</td>
+            <td>{{ selectedFeedbackClient.number }}</td>
+          </tr>
+        </tbody>
+      </q-markup-table>
     </div>
-    <p class="paragraph-text">{{ selectedItem.value.text }}</p>
+    <div class="feedback-corner-info">
+      <h6>Текст обращения:</h6>
+      <p class="paragraph-text">{{ selectedItem.value.text }}</p>
+    </div>
     <q-input
       type="textarea"
       v-model="selectedItem.value.answer"
       filled
       label="Ответ"
-      class="fit"
       no-error-icon
+      class="full-width"
       hide-hint
       hide-bottom-space
       :disable="selectedItem.value.status === 1"
     />
-    <div class="dialog-buttons" :style="{justifyContent: dialogButtonsStyle}">
+    <div
+      class="dialog-buttons"
+      :style="{ justifyContent: dialogButtonsStyle }"
+    >
       <q-btn
         label="Отправить"
         color="positive"
@@ -51,8 +89,6 @@ import CardTabsComponent from "components/CardTabsComponent";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import { apiRoutes, requestJson } from "src/api";
 import { useUtilsStore } from "stores/utils";
-import { useRouter } from "vue-router";
-
 
 const utilsStore = useUtilsStore();
 const waitingResponse = computed(() => utilsStore.waitingResponse);
@@ -63,36 +99,35 @@ const tab = ref("new");
 const feedbacks = reactive({});
 const items = reactive({
   "new": {
-    label: 'Новые',
+    label: 'Без ответа',
     name: 'new',
-    lines: 1,
+    lines: 2,
     icon: "format_list_bulleted",
+    data: [],
   },
   "closed": {
     label: 'Выполненные',
     name: 'closed',
-    lines: 1,
+    lines: 2,
     icon: "checklist",
+    data: [],
   }
 });
 
-const openedFeedbacks = computed(() => {
-  return feedbacks?.data?.filter(item => item?.status === 0);
-});
-
-const closedFeedbacks = computed(() => {
-  return feedbacks?.data?.filter(item => item.status === 1);
-});
-
-onMounted( async () => {
+onMounted(async () => {
   try {
     const response = await requestJson({ url: apiRoutes.feedback });
 
     if (response.success) {
-      feedbacks.data = response.data;
-
-      items.new.data = openedFeedbacks;
-      items.closed.data = closedFeedbacks;
+      response.data.forEach(item => {
+        if (item.status === 0) {
+          item.date = item.created_at;
+          items.new.data.push(item);
+        } else {
+          item.date = item.updated_at;
+          items.closed.data.push(item);
+        }
+      });
     } else {
       console.error('request failed. Error: ', response.error);
     }
@@ -105,7 +140,7 @@ onMounted( async () => {
 const selectedFeedbackClient = ref({});
 const selectedItem = reactive({});
 const listItemClick = async (item) => {
-  utilsStore.updateWaitingResponse(true)
+  utilsStore.updateWaitingResponse(true);
   selectedItem.value = item;
   dialog.value = true;
   try {
@@ -117,7 +152,7 @@ const listItemClick = async (item) => {
       selectedFeedbackClient.value = feedbackClient.data;
     }
   } finally {
-    utilsStore.updateWaitingResponse(false)
+    utilsStore.updateWaitingResponse(false);
   }
 };
 
@@ -129,7 +164,7 @@ const sendAnswer = async () => {
   const body = {
     status: 1,
     answer: selectedItem.value.answer
-  }
+  };
 
   try {
     const response = await requestJson({
@@ -158,10 +193,11 @@ const dialogButtonsStyle = computed(() => selectedItem?.value.status === 0
 }
 
 .feedback-corner-info {
-  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
-.feedback-corner-info > p {
+.feedback-corner-info>p {
   margin: 0;
 }
 </style>
