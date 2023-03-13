@@ -33,7 +33,7 @@ export const apiRoutes = {
   users: "/api/users",
 };
 
-export const requestJson = async ({ url, method = "GET", body, params, message }) => {
+export const requestJson = async ({ url, method = "GET", body, params, message, name }) => {
   const options = {
     method,
     headers: {
@@ -51,6 +51,7 @@ export const requestJson = async ({ url, method = "GET", body, params, message }
     promise: axios(options),
     message: message || methodToMessage[method],
     notif,
+    name
   });
 };
 

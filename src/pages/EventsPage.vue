@@ -108,14 +108,17 @@ import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import { apiRoutes, requestForm, requestJson } from "src/api";
 import dayjs from "dayjs";
 import { useUtilsStore } from "stores/utils";
+import { useUserStore } from "stores/user";
 import { required } from "src/utils/validators";
 import DateTimePicker from "components/DateTimePicker";
 
 
 const utilsStore = useUtilsStore();
+const userStore = useUserStore();
+const userRoles = computed(() => userStore.data.roles);
 const waitingResponse = computed(() => utilsStore.waitingResponse);
 const fetching = ref(true);
-const tab = ref('news');
+const tab = ref();
 const items = reactive({
   "news": {
     name: 'news',
@@ -145,6 +148,8 @@ const items = reactive({
       dateTimePicker: {label: "Укажите дату", withoutTime: false, name: "publish_at"}
     },
     role: "news",
+    url: apiRoutes.news,
+    params: {},
   },
   "alerts": {
     name: 'alerts',
@@ -182,6 +187,11 @@ const items = reactive({
       dateTimePicker: {label: "Укажите дату", withoutTime: true, name: "publish_at"}
     },
     role: "alerts",
+    url: apiRoutes.alerts,
+    params: {
+      offset: 0,
+      limit: 500,
+    },
   },
   "events": {
     name: 'events',
@@ -211,34 +221,40 @@ const items = reactive({
       dateTimePicker: {label: "Укажите дату", withoutTime: true, name: "publish_at"}
     },
     role: "events",
+    url: apiRoutes.events,
+    params: {
+      start: "2020-01-01",
+      end: dayjs().add(1, 'year').format("YYYY-MM-DD")
+    }
   }
 });
 
 onMounted( () => {
-  const todayPlusYear = dayjs().add(1, 'year').format("YYYY-MM-DD");
-  Promise.all([
-    requestJson({
-      url: apiRoutes.events,
-      params: {
-        start: "2020-01-01",
-        end: todayPlusYear,
+  const requests = [];
+  for (const [ key, inner ] of Object.entries(items)) {
+    if (userRoles.value.includes(inner.role)) {
+      if (!tab.value) {
+        tab.value = key;
       }
-    }),
-    requestJson({
-      url: apiRoutes.news,
-    }),
-    requestJson({
-      url: apiRoutes.alerts,
-      params: {
-        offset: 0,
-        limit: 500,
-      }
-    }),
-  ])
-    .then(([eventsResponse, newsResponse, alertsResponse]) => {
-      items.news.data = newsResponse.data.news.sort(sortByDate);
-      items.events.data = eventsResponse.data.sort(sortByDate);
-      items.alerts.data = alertsResponse.data.sort(sortByDate);
+
+      requests.push((requestJson({
+        url: inner.url,
+        params: inner.params,
+        name: key
+      })))
+    }
+  }
+  Promise.all(requests)
+    .then((responses) => {
+      responses.forEach(response => {
+        if (!response.success) return
+
+        if (response.name === 'news') {
+          items[response.name].data = response?.data?.news?.sort(sortByDate)
+        } else {
+          items[response.name].data = response?.data?.sort(sortByDate)
+        }
+      })
     })
     .finally(() => fetching.value = false);
 });

@@ -1,7 +1,7 @@
 <template>
   <FetchSpinnerComponent :fetching="fetching"/>
   <CardTabsComponent
-    v-if="!fetching"
+    v-if="!fetching && tab"
     :items="items"
     :fetching="virtualPagination"
     v-model="tab"
@@ -97,13 +97,16 @@ import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 import DraggableDialog from "components/DraggableDialog";
 import { apiRoutes, requestForm, requestJson } from "src/api";
 import { useUtilsStore } from "stores/utils";
+import { useUserStore } from "stores/user";
 
 
 const utilsStore = useUtilsStore();
 const waitingResponse = computed(() => utilsStore.waitingResponse);
 const fetching = ref(true);
-const tab = ref('promo');
+const tab = ref();
 const virtualPagination = ref(false);
+const userStore = useUserStore();
+const userRoles = computed(() => userStore.data.roles);
 
 
 const fetchLimit = 10;
@@ -134,6 +137,11 @@ const onIntersection = async (entry) => {
   }
 };
 
+const initParams = {
+  offset: 0,
+  limit: fetchLimit,
+}
+
 const items = reactive({
   "promo": {
     name: 'promo',
@@ -153,6 +161,8 @@ const items = reactive({
     },
     role: "additional_promo",
     requestOffset: 0,
+    url: apiRoutes.promo,
+    params: initParams,
   },
   "guides": {
     name: 'guides',
@@ -170,6 +180,8 @@ const items = reactive({
     },
     role: "additional_guides",
     requestOffset: 0,
+    url: apiRoutes.guides,
+    params: initParams,
   },
   "knowledge": {
     name: 'knowledge',
@@ -188,6 +200,8 @@ const items = reactive({
     },
     role: "additional_knowledge",
     requestOffset: 0,
+    url: apiRoutes.knowledge,
+    params: initParams,
   },
   "additionalReports": {
     name: 'additionalReports',
@@ -205,6 +219,8 @@ const items = reactive({
     },
     role: "additional_reports",
     requestOffset: 0,
+    url: apiRoutes.additionalReports,
+    params: initParams,
   },
 });
 
@@ -216,32 +232,33 @@ const tabTitles = {
 };
 
 onMounted(() => {
-  const initParams = {
-    offset: 0,
-    limit: fetchLimit,
+  const requests = [];
+  for (const [ key, inner ] of Object.entries(items)) {
+    if (userRoles.value.includes(inner.role)) {
+      if (!tab.value) {
+        tab.value = key;
+      }
+
+      requests.push((requestJson({
+        url: inner.url,
+        params: inner.params,
+        name: key
+      })))
+    }
   }
-  Promise.all([
-    requestJson({
-      url: apiRoutes.promo,
-      params: initParams,
-    }),
-    requestJson({
-      url: apiRoutes.guides,
-      params: initParams,
-    }),
-    requestJson({
-      url: apiRoutes.knowledge,
-      params: initParams,
-    }),
-    requestJson({
-      url: apiRoutes.additionalReports,
-      params: initParams,
-    }),
-  ])
-    .then(([promoResponse, guidesResponse, knowledgeResponse, reportsResponse]) => {
+
+  Promise.all(requests)
+    .then((responses) => {
+      responses.forEach(response => {
+        if (!response.success) return
+
+        items[response.name].data = response.data;
+        items[response.name].requestOffset = response.data?.length < fetchLimit ? null : items[response.name].requestOffset + fetchLimit;
+      })
       fetching.value = false;
 
-      if (promoResponse.success) {
+
+      /* if (promoResponse.success) {
         items.promo.data = promoResponse.data;
         items.promo.requestOffset = promoResponse.data?.length < fetchLimit ? null : items.promo.requestOffset + fetchLimit;
       }
@@ -258,7 +275,7 @@ onMounted(() => {
       if (reportsResponse.success) {
         items.additionalReports.data = reportsResponse.data;
         items.additionalReports.requestOffset = reportsResponse.data?.length < fetchLimit ? null : items.additionalReports.requestOffset + fetchLimit;
-      }
+      } */
     });
 });
 

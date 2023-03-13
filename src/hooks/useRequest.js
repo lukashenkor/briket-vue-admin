@@ -4,10 +4,11 @@ import { useUserStore } from "stores/user";
 import { routerInstance } from "boot/axios";
 
 
-export default async function useRequest({ promise, message, notif }) {
+export default async function useRequest({ promise, message, notif, name }) {
   const utilsStore = useUtilsStore();
   const result = {
-    success: true
+    success: true,
+    name
   };
   try {
     utilsStore.updateWaitingResponse(true);
