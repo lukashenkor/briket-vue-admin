@@ -289,6 +289,11 @@ const editItemClick = (item) => {
 
 const editConfirm = async (evt) => {
   const formData = new FormData(evt.target);
+  for (const [key, value] of formData) {
+    if (typeof value === 'string' && !value) {
+      formData.delete(key)
+    }
+  }
   if (!formData.get("img")?.__key) {
     formData.delete("img");
   }
