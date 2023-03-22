@@ -26,7 +26,7 @@
             v-bind="items[tab].fields.slider"
           />
 
-          <DateTimePicker v-bind="items[tab].fields.dateTimePicker" v-model="selectedItem.value.publish_at"/>
+          <DateTimePicker v-for="datePicker in items[tab].fields.dateTimePicker" :key="datePicker.name" v-bind="datePicker" v-model="selectedItem.value[datePicker.name]"/>
         </div>
 
         <div class="dialog-buttons">
@@ -78,7 +78,7 @@
           </q-file>
 
           <q-slider v-if="items[tab].fields.slider" v-bind="items[tab].fields.slider" v-model="newItem[items[tab].fields.slider.name]"/>
-          <DateTimePicker v-bind="items[tab].fields.dateTimePicker" v-model="newItem.publish_at"/>
+          <DateTimePicker v-for="datePicker in items[tab].fields.dateTimePicker" :key="datePicker.name" v-bind="datePicker" v-model="newItem[datePicker.name]"/>
         </div>
 
         <div class="dialog-buttons">
@@ -136,16 +136,18 @@ const items = reactive({
           "name": "title",
           "type": "text",
           "rules": [required],
+          "error-message": "Введите заголовок новости",
         },
         {
           "label": "Текст",
           "name": "text",
           "type": "textarea",
           "rules": [required],
+          "error-message": "Введите текст новости",
         },
       ],
       uploader: {label: "Выберите изображение", accept: ".jpg, .jpeg, .png", name: "img", outlined: true, clearable: true},
-      dateTimePicker: {label: "Укажите дату", withoutTime: false, name: "publish_at"}
+      dateTimePicker: [{label: "Укажите дату", withoutTime: false, name: "publish_at"}]
     },
     role: "news",
     url: apiRoutes.news,
@@ -167,12 +169,14 @@ const items = reactive({
           "name": "title",
           "type": "text",
           "rules": [required],
+          "error-message": "Введите заголовок события",
         },
         {
           "label": "Текст",
           "name": "text",
           "type": "textarea",
           "rules": [required],
+          "error-message": "Введите текст события",
         },
       ],
       slider: {
@@ -184,7 +188,10 @@ const items = reactive({
         markers: true,
         "marker-labels": true,
       },
-      dateTimePicker: {label: "Укажите дату", withoutTime: true, name: "publish_at"}
+      dateTimePicker: [
+        {label: "Укажите дату публикации", withoutTime: true, name: "publish_at"},
+        {label: "Укажите дату окончания", withoutTime: true, name: "expire_at", rules: []},
+      ]
     },
     role: "alerts",
     url: apiRoutes.alerts,
@@ -209,16 +216,22 @@ const items = reactive({
           "name": "title",
           "type": "text",
           "rules": [required],
+          "error-message": "Введите заголовок события",
         },
         {
           "label": "Текст",
           "name": "text",
           "type": "textarea",
           "rules": [required],
+          "error-message": "Введите текст события",
         },
       ],
       uploader: {label: "Выберите изображение", accept: ".jpg, .jpeg, .png", name: "img", outlined: true, clearable: true},
-      dateTimePicker: {label: "Укажите дату", withoutTime: true, name: "publish_at"}
+      dateTimePicker: [
+        { label: "Укажите дату публикации", withoutTime: true, name: "publish_at" },
+        { label: "Укажите дату окончания", withoutTime: true, name: "expire_at" }
+      ],
+      // dateTimePicker: {label: "Укажите дату", withoutTime: true, name: "expire_at"}
     },
     role: "events",
     url: apiRoutes.events,
@@ -267,6 +280,9 @@ const listItemClick = (item) => {
 const editItemClick = (item) => {
   selectedItem.value = Object.assign({}, item);
   selectedItem.value.publish_at = dayjs(selectedItem.value.publish_at, 'YYYY-MM-DDTHH:mm:ss').format(items[tab.value].dateDisplayFormat)
+  if (selectedItem.value.expire_at) {
+    selectedItem.value.expire_at = dayjs(selectedItem.value.expire_at, 'YYYY-MM-DDTHH:mm:ss').format(items[tab.value].dateDisplayFormat)
+  }
   delete selectedItem.value.img;
   editItemDialog.value = true;
 };

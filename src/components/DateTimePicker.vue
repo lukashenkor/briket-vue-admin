@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-none">
-    <q-input :disable="waitingResponse" dense v-model="value" :label="label" :rules="[val => !!val || errorResponse]" :name="name">
+    <q-input :disable="waitingResponse" dense v-model="value" :label="label" :rules="rules || [val => !!val || errorResponse]" :name="name">
       <template v-slot:prepend>
         <q-icon name="event" class="cursor-pointer">
           <q-popup-proxy
@@ -54,7 +54,7 @@ import { useUtilsStore } from "stores/utils";
 import { qDateLocale } from "src/utils/date";
 
 
-const props = defineProps([ "modelValue", "label", "withoutTime", "name" ]);
+const props = defineProps([ "modelValue", "label", "withoutTime", "name", "rules" ]);
 const emits = defineEmits([ "update:modelValue" ]);
 const utilsStore = useUtilsStore();
 const waitingResponse = computed(() => utilsStore.waitingResponse);

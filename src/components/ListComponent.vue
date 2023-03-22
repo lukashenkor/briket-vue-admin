@@ -5,7 +5,7 @@
       :key="item.id"
       @click="listItemClickHandler(item)"
       class="list-item__wrapper"
-      :class="parentName !== 'feedback' && dayjs(item.date).isBefore(dayjs()) ? 'list-item__old' : parentName"
+      :class="parentName !== 'feedback' && dayjs(item.expire_at)?.isBefore(dayjs()) ? 'list-item__old' : parentName"
     >
 
       <q-item>
@@ -17,25 +17,48 @@
             @click.stop.exact="cornerIdClickHandler(item.corner_id)"
           >corner_id: {{ item.corner_id }}
           </q-item-label>
-          <q-item-label caption :lines="lines">{{ item.text }}</q-item-label>
+          <q-item-label
+            caption
+            :lines="lines"
+          >{{ item.text }}</q-item-label>
         </q-item-section>
 
-        <q-item-section side top>
+        <q-item-section
+          side
+          top
+        >
           <q-item-label
             caption
             v-if="item.date || item.publish_at"
             class="date-caption"
-            :class="parentName !== 'feedback' && dayjs(item.date || item.publish_at).isBefore(dayjs()) ? 'list-item__date-old' : ''"
-          >{{ dayjs(item.date || item.publish_at).format(dateDisplayFormat) }}</q-item-label>
-          <q-item-label caption v-if="item.priority" style="color: #374bc9">Приоритет:{{ item.priority }}</q-item-label>
+          >Дата публикации: {{ dayjs(item.date || item.publish_at).format(dateDisplayFormat) }}</q-item-label>
+          <q-item-label
+            caption
+            v-if="item.expire_at"
+            class="date-caption"
+          >Дата окончания: {{ dayjs(item.expire_at).format(dateDisplayFormat) }}</q-item-label>
+          <q-item-label
+            caption
+            v-if="item.priority"
+            style="color: #374bc9"
+          >Приоритет:{{ item.priority }}</q-item-label>
         </q-item-section>
       </q-item>
       <div class="list-item__bottom">
-        <div class="list-item__actions" >
-          <EditIconComponent v-if="editable" @click.stop="editItemClick(item)"/>
-          <DeleteIconComponent v-if="deletable" @click.stop="deleteItemClick(item)"/>
+        <div class="list-item__actions">
+          <EditIconComponent
+            v-if="editable"
+            @click.stop="editItemClick(item)"
+          />
+          <DeleteIconComponent
+            v-if="deletable"
+            @click.stop="deleteItemClick(item)"
+          />
         </div>
-        <q-separator vertical spaced />
+        <q-separator
+          vertical
+          spaced
+        />
 
         <q-img
           :img-style="{maxHeight: '200px'}"
@@ -55,7 +78,10 @@
           </template>
         </q-img>
 
-        <div class="list-item__files flex column" v-if="item.files?.length">
+        <div
+          class="list-item__files flex column"
+          v-if="item.files?.length"
+        >
           <q-chip
             v-for="file in item.files"
             :key="file.name"
@@ -69,7 +95,10 @@
         </div>
       </div>
 
-      <q-separator spaced v-if="index !== items.length - 1" />
+      <q-separator
+        spaced
+        v-if="index !== items.length - 1"
+      />
 
       <slot></slot>
     </div>
@@ -131,7 +160,7 @@ const imgClickHandler = item => {
 
 const fileClickHandler = file => {
   window.open(file.url, "_blank");
-}
+};
 
 const cornerIdClickHandler = (corner_id) => {
   router.push({
@@ -157,7 +186,7 @@ const cornerIdClickHandler = (corner_id) => {
   cursor: pointer;
 }
 
-.list-item__actions > *:hover {
+.list-item__actions>*:hover {
   transform: scale(1.3);
 }
 
@@ -172,11 +201,6 @@ const cornerIdClickHandler = (corner_id) => {
 
 .list-item__old {
   opacity: .3;
-  transition: .3s;
-}
-
-.list-item__old:hover {
-  opacity: 1;
 }
 
 .list-item__date-old {
@@ -194,13 +218,12 @@ const cornerIdClickHandler = (corner_id) => {
 
 .feedback-corner-id {
   width: 100px;
-  color:#027bc7;
-  cursor:pointer;
+  color: #027bc7;
+  cursor: pointer;
   transition: all .2s;
 }
 
 .feedback-corner-id:hover {
   color: #4cb0f5;
   transform: scale(1.1);
-}
-</style>
+}</style>
