@@ -125,7 +125,7 @@ const columns = [
   { name: 'area_size', label: 'Площадь (кв.м.)', field: 'area_size', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'power', label: 'Мощность (кВт)', field: 'power', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'number', label: 'Номер', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'rating', label: 'Рейтинг', field: 'rating', sortable: true, align: "left", editable: true, readonly: false, },
+  // { name: 'rating', label: 'Рейтинг', field: 'rating', sortable: true, align: "left", editable: true, readonly: false, },
 
 ];
 

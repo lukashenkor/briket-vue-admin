@@ -39,9 +39,6 @@
         <q-td key="paid" :props="props">
           {{ props.row.paid }}
         </q-td>
-        <q-td key="number" :props="props">
-          {{ props.row.number }}
-        </q-td>
         <q-td key="type" :props="props">
           {{ invoiceTypeOptions[props.row.type].label }}
         </q-td>
@@ -156,7 +153,6 @@ const invoiceColumns = [
   { name: 'end_at', label: 'Дата окончания', field: 'end_at', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'amount', label: 'Сумма', field: 'amount', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'paid', label: 'Выплачено', field: 'paid', sortable: true, align: "left", editable: true, readonly: false, },
-  { name: 'number', label: 'Number', field: 'number', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'type', label: 'Тип', field: 'type', sortable: true, align: "left", editable: true, readonly: false, },
   { name: 'file', label: 'Файл', field: 'file', sortable: false, align: "center", editable: false, readonly: true, },
 ];
@@ -264,20 +260,6 @@ const invoice = useObject({
     attributes: {
       name: "paid",
       label: "Выплачено",
-      type: "number",
-    },
-  },
-  number: {
-    value: '',
-    prevValue: '',
-    validators: {
-      required,
-    },
-    blurred: false,
-    input: true,
-    attributes: {
-      name: "number",
-      label: "Номер",
       type: "number",
     },
   },

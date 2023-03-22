@@ -31,9 +31,9 @@
           <p class="info-block__item">
             <span>Мощность (кВт):</span> {{ client.power }}
           </p>
-          <p class="info-block__item">
-            <span>Рейтинг:</span> {{ client.rating }}
-          </p>
+<!--          <p class="info-block__item">-->
+<!--            <span>Рейтинг:</span> {{ client.rating }}-->
+<!--          </p>-->
           <div class="info-block__item" v-if="client.contacts?.length">
             <q-table
               :columns="contactsColumns"
@@ -120,11 +120,11 @@
             v-model="field.value"
             :field="field"
           />
-          <q-slider
-            v-bind="clientObject.rating.attributes"
-            v-model="clientObject.rating.value"
-            :label-value="`Рейтинг: ${clientObject.rating.value}`"
-          />
+<!--          <q-slider-->
+<!--            v-bind="clientObject.rating.attributes"-->
+<!--            v-model="clientObject.rating.value"-->
+<!--            :label-value="`Рейтинг: ${clientObject.rating.value}`"-->
+<!--          />-->
           <ClientContactsComponent v-model="clientObject.contacts.value"/>
           <q-btn
             class="q-mt-md"
@@ -346,22 +346,22 @@ const clientObject = useObject({
     },
     input: true,
   },
-  rating: {
-    value: '',
-    prevValue: '',
-    validators: { required },
-    blurred: false,
-    attributes: {
-      "label": true,
-      "label-always": true,
-      "name": "rating",
-      "min": 0.0,
-      "max": 10.0,
-      step: 0.1,
-      markers: 1,
-      markerLabels: true,
-    },
-  },
+  // rating: {
+  //   value: '',
+  //   prevValue: '',
+  //   validators: { required },
+  //   blurred: false,
+  //   attributes: {
+  //     "label": true,
+  //     "label-always": true,
+  //     "name": "rating",
+  //     "min": 0.0,
+  //     "max": 10.0,
+  //     step: 0.1,
+  //     markers: 1,
+  //     markerLabels: true,
+  //   },
+  // },
   contacts: {
     value: null,
     validators: { requiredOfArray },
