@@ -123,7 +123,7 @@ const items = reactive({
   "news": {
     name: 'news',
     label: 'Новости',
-    lines: 0,
+    lines: 2,
     icon: 'newspaper',
     editable: true,
     deletable: true,
@@ -156,7 +156,7 @@ const items = reactive({
   "alerts": {
     name: 'alerts',
     label: 'Важные события',
-    lines: 0,
+    lines: 2,
     icon: 'notification_important',
     editable: true,
     deletable: true,
@@ -203,7 +203,7 @@ const items = reactive({
   "events": {
     name: 'events',
     label: 'События',
-    lines: 0,
+    lines: 2,
     icon: 'event',
     editable: true,
     deletable: true,

@@ -146,7 +146,7 @@ const items = reactive({
   "promo": {
     name: 'promo',
     label: 'Акции',
-    lines: 0,
+    lines: 2,
     icon: 'campaign',
     editable: true,
     deletable: true,
@@ -167,7 +167,7 @@ const items = reactive({
   "guides": {
     name: 'guides',
     label: 'Гайды',
-    lines: 0,
+    lines: 2,
     icon: 'menu_book',
     editable: true,
     deletable: true,
@@ -186,7 +186,7 @@ const items = reactive({
   "knowledge": {
     name: 'knowledge',
     label: 'База знаний',
-    lines: 0,
+    lines: 2,
     icon: 'school',
     editable: true,
     deletable: true,
@@ -206,7 +206,7 @@ const items = reactive({
   "additionalReports": {
     name: 'additionalReports',
     label: 'Отчёты',
-    lines: 0,
+    lines: 2,
     icon: 'receipt_long',
     editable: true,
     deletable: true,

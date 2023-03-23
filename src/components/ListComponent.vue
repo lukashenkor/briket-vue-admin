@@ -5,7 +5,7 @@
       :key="item.id"
       @click="listItemClickHandler(item)"
       class="list-item__wrapper"
-      :class="parentName !== 'feedback' && dayjs(item.expire_at)?.isBefore(dayjs()) ? 'list-item__old' : parentName"
+      :class="parentName !== 'feedback' && dayjs(item.expire_at)?.isBefore(dayjs(), 'date') ? 'list-item__old' : parentName"
     >
 
       <q-item>
@@ -18,8 +18,10 @@
           >corner_id: {{ item.corner_id }}
           </q-item-label>
           <q-item-label
+            @click="textClick(item)"
             caption
-            :lines="lines"
+            :lines="item?.expanded ? 0 : lines"
+            :class="item?.expanded ? '' : 'list-item-text'"
           >{{ item.text }}</q-item-label>
         </q-item-section>
 
@@ -171,6 +173,10 @@ const cornerIdClickHandler = (corner_id) => {
   });
 }
 
+const textClick = (item) => {
+  item.expanded = true
+}
+
 </script>
 
 <style scoped>
@@ -226,4 +232,15 @@ const cornerIdClickHandler = (corner_id) => {
 .feedback-corner-id:hover {
   color: #4cb0f5;
   transform: scale(1.1);
-}</style>
+}
+
+.list-item-text {
+  cursor: pointer;
+  transition: .2 all;
+  color: rgba(0, 0, 0, 0.54)
+}
+
+.list-item-text:hover {
+  color: rgba(0, 0, 0, 0.8)
+}
+</style>
