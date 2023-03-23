@@ -393,16 +393,5 @@ const invoiceRowClassSpecifier = (row) => {
 </script>
 
 <style scoped>
-.invoice-row-unpaid {
-  background-color: rgb(249, 206, 211);
-}
-
-.invoice-row-partially-paid {
-  background-color: rgb(253, 255, 216);
-}
-
-.invoice-row-paid {
-  background-color: rgb(192, 255, 228);
-}
 
 </style>

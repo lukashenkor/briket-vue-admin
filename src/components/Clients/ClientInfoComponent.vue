@@ -106,6 +106,10 @@
         @onMonthPickerInput="reportMonthChange"
         v-if="userRoles.includes('finance_report')"
       />
+      <ClientInfoGoalHistoryComponent 
+        v-model="items.goalHistory.data"
+        :tab="tab"
+      />
     </q-card>
   </div>
 
@@ -178,6 +182,7 @@ import ClientInfoReportComponent
 import dayjs from "dayjs";
 import { minLength } from "src/utils/validators";
 import { isEqual } from 'lodash';
+import ClientInfoGoalHistoryComponent from "./ClientInfoGoalHistoryComponent.vue";
 
 
 const userStore = useUserStore();
@@ -237,6 +242,16 @@ const items = reactive({
     addable: false,
     role: "finance_report",
   },
+  goalHistory: {
+    name: "goalHistory",
+    label: "История целей",
+    icon: "history",
+    lines: 0,
+    editable: false,
+    deletable: false,
+    addable: false,
+    role: "corners-read",
+  },
   // Нет понимания, что такое отклонения
   /* deviation: {
     name: "deviation",
@@ -272,9 +287,12 @@ onMounted(() => {
         end: date.endOf("month").format("YYYY-MM-DD"),
         corner_id: client.value.id,
       },
+    }),
+    requestJson({
+      url: apiRoutes.goalsHistory.replace('[id]', client.value.id)
     })
   ])
-    .then(([invoiceResponse, goalsResponse, reportsResponse]) => {
+    .then(([invoiceResponse, goalsResponse, reportsResponse, goalsHistoryResponse]) => {
       items.invoice.data = invoiceResponse?.success ?
         invoiceResponse?.data?.filter(item => item.corner_id === client.value.id) || []
         : [];
@@ -284,6 +302,9 @@ onMounted(() => {
       // items.deviation.data = [];
       items.report.data = reportsResponse?.success
         ? reportsResponse.data || []
+        : [];
+      items.goalHistory.data = goalsHistoryResponse?.success
+        ? goalsHistoryResponse.data
         : [];
     })
     .finally(() => {

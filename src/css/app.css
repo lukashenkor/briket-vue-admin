@@ -1,4 +1,11 @@
 /* app global css */
+
+:root {
+  --expired: #ffcece;
+  --completed: #c8ffdb;
+  --partially-completed: #fdffd8;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -75,4 +82,18 @@
 .feedback:hover {
   background-color: #eaeaea;
 
+}
+
+.goal-history-completed,
+.invoice-row-paid {
+  background-color: var(--completed);
+}
+
+.goal-history-expired, 
+.invoice-row-unpaid {
+  background-color: var(--expired);
+}
+
+.invoice-row-partially-paid {
+  background-color: var(--partially-completed);
 }
