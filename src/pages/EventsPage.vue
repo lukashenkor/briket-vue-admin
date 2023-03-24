@@ -8,6 +8,7 @@
     @listItemClick="listItemClick"
     @editItemClick="editItemClick"
     @deleteItemClick="deleteItemClick"
+    @intersection="onIntersection"
   />
     <DraggableDialog v-model="editItemDialog" title="Редактирование">
       <q-form @submit.prevent="editConfirm" class="q-gutter-md fit">
@@ -119,6 +120,41 @@ const userRoles = computed(() => userStore.data.roles);
 const waitingResponse = computed(() => utilsStore.waitingResponse);
 const fetching = ref(true);
 const tab = ref();
+const virtualPagination = ref(false);
+
+const fetchLimit = 10;
+const onIntersection = async (entry) => {
+  if (!entry.isIntersecting) return;
+  const tabName = tab.value;
+  if (!items[tabName].requestOffset) return;
+
+  try {
+    virtualPagination.value = true;
+    const response = await requestJson({
+      url: apiRoutes[tabName],
+      params: {
+        offset: items[tabName].requestOffset,
+        limit: fetchLimit,
+      }
+    });
+    if (response.success) {
+      if (response.data?.length === fetchLimit) {
+        items[tabName].requestOffset += fetchLimit;
+      } else {
+        items[tabName].requestOffset = null;
+      }
+      items[tabName].data = [...items[tabName].data, ...response.data];
+    }
+  } finally {
+    virtualPagination.value = false;
+  }
+};
+
+const initParams = {
+  offset: 0,
+  limit: fetchLimit,
+}
+
 const items = reactive({
   "news": {
     name: 'news',
@@ -151,7 +187,7 @@ const items = reactive({
     },
     role: "news",
     url: apiRoutes.news,
-    params: {},
+    params: initParams,
   },
   "alerts": {
     name: 'alerts',
@@ -195,10 +231,7 @@ const items = reactive({
     },
     role: "alerts",
     url: apiRoutes.alerts,
-    params: {
-      offset: 0,
-      limit: 500,
-    },
+    params: initParams,
   },
   "events": {
     name: 'events',
@@ -235,10 +268,7 @@ const items = reactive({
     },
     role: "events",
     url: apiRoutes.events,
-    params: {
-      start: "2020-01-01",
-      end: dayjs().add(1, 'year').format("YYYY-MM-DD")
-    }
+    params: initParams
   }
 });
 
@@ -261,12 +291,9 @@ onMounted( () => {
     .then((responses) => {
       responses.forEach(response => {
         if (!response.success) return
-
-        if (response.name === 'news') {
-          items[response.name].data = response?.data?.news?.sort(sortByDate)
-        } else {
-          items[response.name].data = response?.data?.sort(sortByDate)
-        }
+        items[response.name].data = response?.data?.data?.sort(sortByDate)
+        items[response.name].requestOffset = response.data?.length < fetchLimit ? null : items[response.name].requestOffset + fetchLimit;
+        items[response.name].count = response.data.count;
       })
     })
     .finally(() => fetching.value = false);

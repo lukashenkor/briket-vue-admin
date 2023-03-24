@@ -10,7 +10,7 @@
         @update:model-value="(value) => { emits('update:modelValue', value) }"
       >
         <q-tab v-for="item in Object.values(items).filter(i => !i.role || userRoles.includes(i.role))" :key="item.name" :name="item.name" :icon="item.icon" :label="item.label">
-          <q-badge color="blue-7" text-color="white" floating v-if="item?.data?.length">{{ item?.data?.length }}</q-badge>
+          <q-badge color="blue-7" text-color="white" floating v-if="item?.count || item?.data?.length">{{ item?.count || item?.data?.length }}</q-badge>
         </q-tab>
       </q-tabs>
     </q-card-section>
@@ -48,9 +48,8 @@
 
 <script setup>
 import ListComponent from "components/ListComponent";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useUserStore } from "stores/user";
-import { useUtilsStore } from "stores/utils";
 import FetchSpinnerComponent from "components/FetchSpinnerComponent";
 
 const props = defineProps({
