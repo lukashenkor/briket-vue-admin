@@ -76,8 +76,7 @@
         v-bind="selectedGroup.roles.attributes"
         class="dialog-input"
         :options="roles.data"
-        menu-self="center middle"
-        options-dense
+        :option-label="opt => Object(opt) === opt && 'name' in opt ? opt.name : 'asd'"
         :loading="loadingRoles"
       >
         <template v-slot:option="{ itemProps, opt, selected, toggleOption }">
@@ -206,9 +205,10 @@ const selectedGroup = useObject({
       name: "roles",
       label: "Выберите роли",
       multiple: true,
-      "stack-label": false,
-      "hide-selected": true,
       "use-chips": true,
+      "options-dense": true,
+      "map-options": true,
+      "emit-value": true,
     },
   },
 });
