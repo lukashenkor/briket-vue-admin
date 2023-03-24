@@ -13,6 +13,7 @@ const routes = [
       { path: "/useful", component: () => import("pages/UsefulPage.vue"), title: "Полезное", name: "Useful", meta: {role: ["additional_guides", "additional_knowledge", "additional_promo"]} },
       { path: "/duty-manager", component: () => import("pages/DutyManagerPage.vue"), title: "Дежурный менеджер", name: "Duty manager", meta: {role: "dutymanagers"} },
       { path: "/feedback", component: () => import("pages/FeedbackPage.vue"), title: "Обратная связь", name: "Feedback", meta: {role: "feedback"} },
+      { path: "/documents", component: () => import("pages/DocumentsPage.vue"), title: "Документы", name: "Documents" },
       { path: "/profile", component: () => import("pages/ProfilePage.vue"), title: "Профиль", name: "Profile", hidden: true },
     ]
   },
