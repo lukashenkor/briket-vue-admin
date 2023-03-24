@@ -31,9 +31,6 @@
           <p class="info-block__item">
             <span>Мощность (кВт):</span> {{ client.power }}
           </p>
-<!--          <p class="info-block__item">-->
-<!--            <span>Рейтинг:</span> {{ client.rating }}-->
-<!--          </p>-->
           <div class="info-block__item" v-if="client.contacts?.length">
             <q-table
               :columns="contactsColumns"
@@ -97,6 +94,7 @@
         :tab="tab"
         :client="client"
         v-if="userRoles.includes('corners-goal')"
+        @triggerChangeGoals="goalsChangedHandler"
       />
       <ClientInfoReportComponent
         v-model="items.report.data"
@@ -129,11 +127,6 @@
             v-model="field.value"
             :field="field"
           />
-<!--          <q-slider-->
-<!--            v-bind="clientObject.rating.attributes"-->
-<!--            v-model="clientObject.rating.value"-->
-<!--            :label-value="`Рейтинг: ${clientObject.rating.value}`"-->
-<!--          />-->
           <ClientContactsComponent v-model="clientObject.contacts.value"/>
           <q-btn
             class="q-mt-md"
@@ -560,6 +553,15 @@ const addContact = () => {
     clientObject.contacts.value = [...clientObject.contacts.value, {"name": '', "phone": '', "position": ''}];
   } else {
     clientObject.contacts.value = [{"name": '', "phone": '', "position": ''}];
+  }
+};
+
+const goalsChangedHandler = async () => {
+  const response = await requestJson({
+    url: apiRoutes.goalsHistory.replace('[id]', client.value.id)
+  });
+  if (response?.success) {
+    items.goalHistory.data = response.data;
   }
 };
 
