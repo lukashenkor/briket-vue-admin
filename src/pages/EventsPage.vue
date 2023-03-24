@@ -317,8 +317,10 @@ const editItemClick = (item) => {
 const editConfirm = async (evt) => {
   const formData = new FormData(evt.target);
   for (const [key, value] of formData) {
-    if (typeof value === 'string' && !value) {
+    if ((selectedItem.value[key] === null || selectedItem.value[key] === undefined) && !value) {
       formData.delete(key)
+    } else if (typeof value === 'string' && !value && selectedItem.value[key] !== undefined) {
+      formData.set(key, '1900-01-01')
     }
   }
   if (!formData.get("img")?.__key) {
@@ -356,6 +358,7 @@ const deleteConfirm = async () => {
   deleteItemDialog.value = false;
   if (response.success) {
     items[tab.value].data = items[tab.value].data.filter(item => item.id !== selectedItem.value.id);
+    items[tab.value].count -= 1;
   }
 };
 
@@ -387,6 +390,7 @@ const addNewItem = async (evt) => {
         ...items[tab.value].data,
         response.data
       ].sort(sortByDate);
+      items[tab.value].count += 1;
     }
 
   } finally {

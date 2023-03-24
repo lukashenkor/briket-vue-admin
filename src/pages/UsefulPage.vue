@@ -266,26 +266,6 @@ onMounted(() => {
         items[response.name].count = response.data.count;
       })
       fetching.value = false;
-
-
-      /* if (promoResponse.success) {
-        items.promo.data = promoResponse.data;
-        items.promo.requestOffset = promoResponse.data?.length < fetchLimit ? null : items.promo.requestOffset + fetchLimit;
-      }
-      if (guidesResponse.success) {
-        items.guides.data = guidesResponse.data;
-        items.guides.requestOffset = guidesResponse.data?.length < fetchLimit ? null : items.guides.requestOffset + fetchLimit;
-      }
-
-      if (knowledgeResponse.success) {
-        items.knowledge.data = knowledgeResponse.data;
-        items.knowledge.requestOffset = knowledgeResponse.data?.length < fetchLimit ? null : items.knowledge.requestOffset + fetchLimit;
-      }
-
-      if (reportsResponse.success) {
-        items.additionalReports.data = reportsResponse.data;
-        items.additionalReports.requestOffset = reportsResponse.data?.length < fetchLimit ? null : items.additionalReports.requestOffset + fetchLimit;
-      } */
     });
 });
 
@@ -315,6 +295,7 @@ const addNewItem = async (evt) => {
     if (response.success) {
       items[tab.value].data = [response.data, ...items[tab.value].data];
       items[tab.value].requestOffset += 1;
+      items[tab.value].count += 1;
     }
   } finally {
     addItemDialog.value = false;
@@ -371,6 +352,7 @@ const deleteConfirm = async () => {
     });
     if (response.success) {
       items[tab.value].data = items[tab.value].data.filter(item => item.id !== selectedItem.value.id);
+      items[tab.value].count -= 1;
     }
   } finally {
     deleteItemDialog.value = false;
