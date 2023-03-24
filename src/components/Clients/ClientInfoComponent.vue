@@ -110,6 +110,11 @@
         v-model="items.goalHistory.data"
         :tab="tab"
       />
+      <ClientInfoDocumentsComponent
+        v-model="items.documents.data"
+        :tab="tab"
+        :client="client"
+      />
     </q-card>
   </div>
 
@@ -183,6 +188,7 @@ import dayjs from "dayjs";
 import { minLength } from "src/utils/validators";
 import { isEqual } from 'lodash';
 import ClientInfoGoalHistoryComponent from "./ClientInfoGoalHistoryComponent.vue";
+import ClientInfoDocumentsComponent from "./ClientInfoDocumentsComponent.vue";
 
 
 const userStore = useUserStore();
@@ -252,6 +258,16 @@ const items = reactive({
     addable: false,
     role: "corners-read",
   },
+  documents: {
+    name: "documents",
+    label: "Документы",
+    icon: "description",
+    lines: 0,
+    editable: false,
+    deletable: false,
+    addable: false,
+    role: "corners-read",
+  },
   // Нет понимания, что такое отклонения
   /* deviation: {
     name: "deviation",
@@ -290,9 +306,12 @@ onMounted(() => {
     }),
     requestJson({
       url: apiRoutes.goalsHistory.replace('[id]', client.value.id)
-    })
+    }),
+    requestJson({
+      url: apiRoutes.cornerDocument.replace('[id]', client.value.id)
+    }),
   ])
-    .then(([invoiceResponse, goalsResponse, reportsResponse, goalsHistoryResponse]) => {
+    .then(([invoiceResponse, goalsResponse, reportsResponse, goalsHistoryResponse, documentsResponse]) => {
       items.invoice.data = invoiceResponse?.success ?
         invoiceResponse?.data?.filter(item => item.corner_id === client.value.id) || []
         : [];
@@ -305,6 +324,9 @@ onMounted(() => {
         : [];
       items.goalHistory.data = goalsHistoryResponse?.success
         ? goalsHistoryResponse.data
+        : [];
+      items.documents.data = documentsResponse?.success
+        ? documentsResponse.data
         : [];
     })
     .finally(() => {

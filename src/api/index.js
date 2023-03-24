@@ -25,6 +25,7 @@ export const apiRoutes = {
   invoice: "/api/finance/invoices",
   goals: "/api/corners/[id]/goal", // must replace [id] with corner's id when set request options
   goalsHistory: "/api/corners/[id]/goals/history", // must replace [id] with corner's id when set request options
+  cornerDocument: "/api/corners/[id]/documents", // must replace [id] with corner's id when set request options
   report: "/api/finance/report",
   corners: "/api/corners",
   admins: "/api/admins",
