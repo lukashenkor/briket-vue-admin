@@ -24,7 +24,7 @@
          {{ props.row.name }}
         </q-td>
         <q-td key="status" :props="props">
-          {{ props.row.status ? '✅ Сдан' : '❌ Не сдан' }}
+          {{ props.row.status ? '✅' : '⭕️' }}
         </q-td>
       </q-tr>
     </template>
