@@ -98,6 +98,7 @@ import DraggableDialog from "components/DraggableDialog";
 import { apiRoutes, requestForm, requestJson } from "src/api";
 import { useUtilsStore } from "stores/utils";
 import { useUserStore } from "stores/user";
+import { required } from "src/utils/validators";
 
 
 const utilsStore = useUtilsStore();
@@ -157,7 +158,15 @@ const items = reactive({
         {"label": "Превью", "name": "preview", "type": "text"},
         {"label": "Текст", "name": "text", "type": "textarea"},
       ],
-      uploader: {label: "Выберите изображение", name: "img", outlined: true, clearable: true, accept: ".jpg, .jpeg, .png"},
+      uploader: { 
+        label: "Выберите изображение", 
+        name: "img", 
+        outlined: true, 
+        clearable: true, 
+        accept: ".jpg, .jpeg, .png",
+        rules: [required],
+        "error-message": "Изображение не выбрано",
+      },
     },
     role: "additional_promo",
     requestOffset: 0,
@@ -295,6 +304,9 @@ const addItemClick = () => {
 const newItem = reactive({});
 const addNewItem = async (evt) => {
   const formData = new FormData(evt.target);
+  if (formData.has('files') && (!formData.getAll('files')[0].size && !formData.getAll('files')[0].name)) {
+    formData.delete('files')
+  }
   try {
     const response = await requestForm({
       url: apiRoutes[tab.value],
