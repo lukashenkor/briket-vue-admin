@@ -5,7 +5,6 @@
     :items="items"
     v-model="tab"
     @addItemClick="addItemClick"
-    @listItemClick="listItemClick"
     @editItemClick="editItemClick"
     @deleteItemClick="deleteItemClick"
     @intersection="onIntersection"
@@ -301,8 +300,6 @@ onMounted( () => {
 
 
 const selectedItem = reactive({});
-const listItemClick = (item) => {
-};
 
 const editItemClick = (item) => {
   selectedItem.value = Object.assign({}, item);

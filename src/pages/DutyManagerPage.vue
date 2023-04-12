@@ -153,7 +153,7 @@
         label="Подтвердить"
         color="positive"
         @click="confirmShiftRequest"
-        :disable="isShiftInvalid || waitingResponse"
+        :disable="waitingResponse"
       />
       <q-btn
         label="Отмена"
@@ -167,81 +167,88 @@
 
 
   <DraggableDialog v-model="addDialog" title="Добавление нового менеджера" @onHide="onHideDialog(selectedManager)">
-    <q-input
-      v-model="selectedManager.name.value"
-      label="Имя"
-      :error="selectedManager.name.blurred && !selectedManager.name.valid"
-      :error-message="getErrorMessage(selectedManager.name.errors)"
-      class="dialog-input"
-      @blur="blurred(selectedManager, 'name')"
-    />
-    <q-input
-      v-model="selectedManager.phone.value"
-      label="Номер телефона"
-      :error="selectedManager.phone.blurred && !selectedManager.phone.valid"
-      :error-message="getErrorMessage(selectedManager.phone.errors)"
-      mask="+7-(###)-###-##-##"
-      :rules="[val => val.length === 18 || 'Введите номер телефона']"
-      lazy-rules
-      class="dialog-input"
-      @blur="blurred(selectedManager, 'phone')"
-    />
-    <div class="dialog-buttons">
-      <q-btn
-        label="Сохранить"
-        color="positive"
-        @click="confirmAdd"
-        :disable="isInvalidEditing || waitingResponse"
+    <q-form @submit.prevent="confirmAdd" class="q-gutter-md fit">
+      <q-input
+        v-model="selectedManager.name.value"
+        label="Имя"
+        :error="selectedManager.name.blurred && !selectedManager.name.valid"
+        :error-message="getErrorMessage(selectedManager.name.errors)"
+        :rules="[required]"
+        class="dialog-input"
+        @blur="blurred(selectedManager, 'name')"
       />
-      <q-btn
-        label="Отмена"
-        color="primary"
-        v-close-popup
+      <q-input
+        v-model="selectedManager.phone.value"
+        label="Номер телефона"
+        :error="selectedManager.phone.blurred && !selectedManager.phone.valid"
+        :error-message="getErrorMessage(selectedManager.phone.errors)"
+        mask="+7-(###)-###-##-##"
+        :rules="[val => val.length === 18 || 'Введите номер телефона']"
+        lazy-rules
+        class="dialog-input"
+        @blur="blurred(selectedManager, 'phone')"
       />
-    </div>
-    <p
-      class="q-mt-lg text-negative text-weight-bold text-subtitle1"
-      v-show="editingError"
-    >
-      {{ editingError }}</p>
+      <div class="dialog-buttons">
+        <q-btn
+          label="Сохранить"
+          color="positive"
+          type="submit"
+          :disable="waitingResponse"
+        />
+        <q-btn
+          label="Отмена"
+          color="primary"
+          v-close-popup
+        />
+      </div>
+      <p
+        class="q-mt-lg text-negative text-weight-bold text-subtitle1"
+        v-show="editingError"
+      >
+        {{ editingError }}</p>
+    </q-form>
   </DraggableDialog>
 
   <DraggableDialog v-model="editDialog" title="Редактирование менеджера" @onHide="onHideDialog(selectedManager)">
-    <q-input
-      v-model="selectedManager.name.value"
-      label="Имя"
-      :error="selectedManager.name.blurred && !selectedManager.name.valid"
-      :error-message="getErrorMessage(selectedManager.name.errors)"
-      class="dialog-input"
-      @blur="blurred(selectedManager, 'name')"
-    />
-    <q-input
-      v-model="selectedManager.phone.value"
-      label="Номер телефона"
-      :error="selectedManager.phone.blurred && !selectedManager.phone.valid"
-      :error-message="getErrorMessage(selectedManager.phone.errors)"
-      mask="+7-(###)-###-##-##"
-      class="dialog-input"
-      @blur="blurred(selectedManager, 'phone')"
-    />
-    <div class="dialog-buttons">
-      <q-btn
-        label="Сохранить"
-        color="positive"
-        @click="confirmEdit"
-        :disable="isInvalidEditing || waitingResponse"
+    <q-form @submit.prevent="confirmEdit" class="q-gutter-md fit">
+      <q-input
+        v-model="selectedManager.name.value"
+        label="Имя"
+        :error="selectedManager.name.blurred && !selectedManager.name.valid"
+        :error-message="getErrorMessage(selectedManager.name.errors)"
+        :rules="[required]"
+        class="dialog-input"
+        @blur="blurred(selectedManager, 'name')"
       />
-      <q-btn
-        label="Отмена"
-        color="primary"
-        v-close-popup
+      <q-input
+        v-model="selectedManager.phone.value"
+        label="Номер телефона"
+        :error="selectedManager.phone.blurred && !selectedManager.phone.valid"
+        error-message="Введите номер телефона"
+        :rules="[required, val => val.length === 18 || 'Введите номер телефона']"
+        mask="+7-(###)-###-##-##"
+        class="dialog-input"
+        @blur="blurred(selectedManager, 'phone')"
       />
-    </div>
-    <p
-      class="q-mt-lg text-negative text-weight-bold text-subtitle1"
-      v-show="editingError"
-    >
-      {{ editingError }}</p>
+      <div class="dialog-buttons">
+        <q-btn
+          label="Сохранить"
+          color="positive"
+          type="submit"
+          :disable="waitingResponse"
+        />
+        <q-btn
+          label="Отмена"
+          color="primary"
+          v-close-popup
+        />
+      </div>
+      <p
+        class="q-mt-lg text-negative text-weight-bold text-subtitle1"
+        v-show="editingError"
+      >
+        {{ editingError }}</p>
+    </q-form>
   </DraggableDialog>
 
   <DraggableDialog v-model="deleteDialog" title="Удаление менеджера" @onHide="onHideDialog(selectedManager)">
@@ -456,6 +463,9 @@ const confirmEdit = async () => {
     if (inner.edited) {
       body[key] = inner.value;
     }
+  }
+  if (!Object.keys(body).length) {
+    return editDialog.value = false;
   }
   const url = `${apiRoutes.dutymanager}/${selectedManager.id.value}`;
   const response = await requestJson({

@@ -93,7 +93,7 @@ import dayjs from "dayjs";
 
 const props = defineProps([ "tab", "client", "modelValue" ]);
 
-const emits = defineEmits([ "update:modelValue" ]);
+const emits = defineEmits([ "update:modelValue", "triggerChangeGoals" ]);
 
 const items = computed({
   get: () => props.modelValue,
@@ -197,6 +197,7 @@ const createGoal = async () => {
     });
     if (response.success) {
       items.value = [...items.value, response.data];
+      emits("triggerChangeGoals");
     }
   } finally {
     dialog.value = false;
@@ -227,6 +228,7 @@ const editGoal = async () => {
         if (inner.hidden || !inner.edited) continue
         updatedGoal[key] = inner.value;
       }
+      emits("triggerChangeGoals");
     }
   } finally {
     dialog.value = false;
@@ -248,6 +250,7 @@ const deleteGoal = async () => {
 
     if (response.success) {
       items.value = items.value.filter(item => item.id !== goal.id.value);
+      emits("triggerChangeGoals");
     }
   } finally {
     dialog.value = false;
