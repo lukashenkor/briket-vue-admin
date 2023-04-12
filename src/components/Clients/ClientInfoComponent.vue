@@ -106,7 +106,7 @@
         @onMonthPickerInput="reportMonthChange"
         v-if="userRoles.includes('finance_report')"
       />
-      <ClientInfoGoalHistoryComponent 
+      <ClientInfoGoalHistoryComponent
         v-model="items.goalHistory.data"
         :tab="tab"
       />
@@ -226,7 +226,7 @@ const items = reactive({
     editable: false,
     deletable: false,
     addable: false,
-    role: "finance_invoices"
+    role: "finance-invoices"
   },
   goals: {
     name: "goals",
@@ -246,7 +246,7 @@ const items = reactive({
     editable: false,
     deletable: false,
     addable: false,
-    role: "finance_report",
+    role: "finance-report",
   },
   goalHistory: {
     name: "goalHistory",
