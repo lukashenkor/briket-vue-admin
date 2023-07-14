@@ -87,7 +87,7 @@
         v-model="items.invoice.data"
         :tab="tab"
         :client="client"
-        v-if="userRoles.includes('finance_invoices')"
+        v-if="userRoles.includes('finance-invoices')"
       />
       <ClientInfoGoalsComponent
         v-model="items.goals.data"
@@ -102,7 +102,7 @@
         :client="client"
         :loading="reportLoading"
         @onMonthPickerInput="reportMonthChange"
-        v-if="userRoles.includes('finance_report')"
+        v-if="userRoles.includes('finance-report')"
       />
       <ClientInfoGoalHistoryComponent
         v-model="items.goalHistory.data"
