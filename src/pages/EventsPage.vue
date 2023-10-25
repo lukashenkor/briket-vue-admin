@@ -142,7 +142,7 @@ const onIntersection = async (entry) => {
       } else {
         items[tabName].requestOffset = null;
       }
-      items[tabName].data = [...items[tabName].data, ...response.data];
+      items[tabName].data = [...items[tabName].data, ...(response?.data?.data || [])];
     }
   } finally {
     virtualPagination.value = false;
@@ -291,7 +291,7 @@ onMounted( () => {
       responses.forEach(response => {
         if (!response.success) return
         items[response.name].data = response?.data?.data?.sort(sortByDate)
-        items[response.name].requestOffset = response.data?.length < fetchLimit ? null : items[response.name].requestOffset + fetchLimit;
+        items[response.name].requestOffset = response.data?.length < fetchLimit ? null : items[response?.name]?.requestOffset || 0 + fetchLimit;
         items[response.name].count = response.data.count;
       })
     })
